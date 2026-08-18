@@ -16,6 +16,16 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 - Ingen auto-commit med mindre bruker ber eksplisitt om det.
 - Nye avhengigheter er kun lov når det er eksplisitt godkjent i plan/brief.
 - Ingen kryssrepo-endringer i samme sesjon (sandbox-policy).
+- Fail-closed: hvis brief mangler felt eller scope er uklart, stopp og be om avklaring.
+
+## Status-kontrakt mellom agenter
+
+Orkestrator skal tolke og returnere én av disse statusene fra `koder`:
+- `DONE`: alt i brief er levert
+- `DONE_WITH_CONCERNS`: levert, men med tydelige bekymringer
+- `NEEDS_CONTEXT`: mangler informasjon i brief/scope
+- `NEEDS_DECISION`: krever eksplisitt valg fra bruker
+- `BLOCKED`: stoppet av ekstern blokkering
 
 ## To stier
 
@@ -39,6 +49,15 @@ Kjør planreview kun når minst én er sann:
 - `Risiko=middels` eller `høy`
 - `Berørte filer > 3`
 - `Nye avhengigheter != ingen`
+
+## Sikkerhetstriggere (alltid planreview)
+
+Kjør alltid planreview når oppgaven berører:
+- autentisering/autorisasjon
+- persondata/sensitive data
+- nye eksterne API-kall eller integrasjoner
+- infrastruktur, secrets eller deploy-konfigurasjon
+- nye dependencies
 
 ## Obligatorisk briefformat
 

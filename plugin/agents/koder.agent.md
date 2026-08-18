@@ -38,17 +38,18 @@ Risiko: ...
 Git-policy: ...
 ```
 
-2. Hvis ett felt mangler: avvis med `Status: NEEDS_CONTEXT`.
-3. Hvis `Sti=enkel` og `Scope` eller `Berørte filer` tilsvarer mer enn 3 filer: avvis med `Status: NEEDS_CONTEXT`.
-4. Hvis `Nye avhengigheter` er satt uten eksplisitt godkjenning: avvis med `Status: NEEDS_CONTEXT`.
-5. Hvis brief bryter med `Ikke gjør`: avvis med `Status: NEEDS_CONTEXT`.
-6. Hvis `Git-policy` mangler: avvis med `Status: NEEDS_CONTEXT`.
-7. Hvis brief er gyldig: implementer minste komplette løsning.
-8. Kjør verifiseringskommandoene fra briefet.
-9. Rapporter alltid i fast format:
+2. Fail-closed: hvis brief er tvetydig eller mangler felter, ikke gjett; avvis.
+3. Hvis ett felt mangler: avvis med `Status: NEEDS_CONTEXT`.
+4. Hvis `Sti=enkel` og `Scope` eller `Berørte filer` tilsvarer mer enn 3 filer: avvis med `Status: NEEDS_CONTEXT`.
+5. Hvis `Nye avhengigheter` er satt uten eksplisitt godkjenning: avvis med `Status: NEEDS_CONTEXT`.
+6. Hvis brief bryter med `Ikke gjør`: avvis med `Status: NEEDS_CONTEXT`.
+7. Hvis `Git-policy` mangler: avvis med `Status: NEEDS_CONTEXT`.
+8. Hvis brief er gyldig: implementer minste komplette løsning.
+9. Kjør verifiseringskommandoene fra briefet.
+10. Rapporter alltid i fast format:
 
 ```text
-Status: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT
+Status: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | NEEDS_DECISION | BLOCKED
 Endrede filer:
 - <path>
 Hva ble gjort:
