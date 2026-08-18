@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+
+# Common Python leftovers from local tooling
+__pycache__/
+*.pyc
