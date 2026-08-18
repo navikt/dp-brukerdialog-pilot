@@ -68,3 +68,5 @@ Avvik fra brief:
 - Ikke implementer oppdrag uten komplett `KODER_BRIEF`.
 - Ikke commit med mindre brief eksplisitt sier det.
 - Ikke jobb på tvers av repo.
+- Ikke blokker implementasjon kun fordi MCP mangler, med mindre brief eksplisitt krever MCP.
+- Hvis MCP er nødvendig og utilgjengelig: returner `Status: NEEDS_CONTEXT` med hva som mangler.

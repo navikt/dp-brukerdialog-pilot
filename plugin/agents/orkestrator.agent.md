@@ -18,6 +18,13 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 - Ingen kryssrepo-endringer i samme sesjon (sandbox-policy).
 - Fail-closed: hvis brief mangler felt eller scope er uklart, stopp og be om avklaring.
 
+## MCP-policy
+
+- Bruk MCP kun når det gir konkret verdi for oppgaven.
+- MCP er valgfritt; hvis utilgjengelig, fall tilbake til repo/terminal-flyt.
+- Ikke anta MCP-tilgang (f.eks. IntelliJ/Figma kan være utilgjengelig i gjeldende sesjon).
+- Tunge MCP-kall skal være eksplisitt del av plan/brief.
+
 ## Status-kontrakt mellom agenter
 
 Orkestrator skal tolke og returnere én av disse statusene fra `koder`:
