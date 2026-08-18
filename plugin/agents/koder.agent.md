@@ -1,8 +1,9 @@
 ---
 name: koder
-description: "Velg koder for målrettet implementasjon av avgrensede kodeoppgaver."
+description: "Intern implementasjonsagent for avgrensede kodeoppgaver delegert av orkestrator."
 model: "gpt-5.4"
-user-invocable: true
+user-invocable: false
+disable-model-invocation: false
 ---
 
 # Koder

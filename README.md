@@ -1,8 +1,8 @@
 # dp-brukerdialog-pilot
 
 En enkel AI-pilot/orkestrator som **ren Copilot-plugin** med to agenter:
-- `orkestrator`
-- `koder`
+- `orkestrator` (synlig for bruker)
+- `koder` (intern, delegert av orkestrator)
 
 ## Copilot-plugin-struktur
 
