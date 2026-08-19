@@ -76,3 +76,7 @@ Avvik fra brief:
 - Hvis endringen tydelig berører et eksisterende skill-område, nevn det kort i rapporten.
 - Foreslå ny skill bare når mønsteret virker stabilt eller kommer igjen i flere oppgaver.
 - Ikke gjør full gjennomgang av alle skills for hver oppgave.
+
+## Sluttoppsummering
+
+Følg orkestrators sluttoppsummering og nevn eventuelle skill- eller implementeringsusikkerheter kort i rapporten.

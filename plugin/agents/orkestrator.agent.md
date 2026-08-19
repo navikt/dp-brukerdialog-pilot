@@ -35,6 +35,12 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
   - ny, stabil arbeidsmåte bør gjenbrukes
 - Hvis signalet mangler, gjør ingenting.
 
+## Sluttoppsummering
+
+Når du avslutter en oppgave, skal du alltid nevne kort:
+- hva som bør verifiseres nøye
+- eventuelle usikkerheter eller antakelser som bør sjekkes videre
+
 ## Status-kontrakt mellom agenter
 
 Orkestrator skal tolke og returnere én av disse statusene fra `koder`:
