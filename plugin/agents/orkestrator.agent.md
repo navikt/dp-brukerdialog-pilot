@@ -25,6 +25,16 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 - Ikke anta MCP-tilgang (f.eks. IntelliJ/Figma kan være utilgjengelig i gjeldende sesjon).
 - Tunge MCP-kall skal være eksplisitt del av plan/brief.
 
+## Skills-policy
+
+- Ikke les alle skills automatisk for hver oppgave.
+- Etter koding: vurder kort om endringen berører en eksisterende skill eller et område som bør få en ny skill.
+- Foreslå skill-oppdatering bare når minst ett signal er til stede:
+  - endringen treffer et område som allerede har en skill
+  - samme mønster har dukket opp flere ganger
+  - ny, stabil arbeidsmåte bør gjenbrukes
+- Hvis signalet mangler, gjør ingenting.
+
 ## Status-kontrakt mellom agenter
 
 Orkestrator skal tolke og returnere én av disse statusene fra `koder`:

@@ -70,3 +70,9 @@ Avvik fra brief:
 - Ikke jobb på tvers av repo.
 - Ikke blokker implementasjon kun fordi MCP mangler, med mindre brief eksplisitt krever MCP.
 - Hvis MCP er nødvendig og utilgjengelig: returner `Status: NEEDS_CONTEXT` med hva som mangler.
+
+## Skills-etterarbeid
+
+- Hvis endringen tydelig berører et eksisterende skill-område, nevn det kort i rapporten.
+- Foreslå ny skill bare når mønsteret virker stabilt eller kommer igjen i flere oppgaver.
+- Ikke gjør full gjennomgang av alle skills for hver oppgave.
