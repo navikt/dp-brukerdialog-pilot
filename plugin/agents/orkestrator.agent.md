@@ -18,6 +18,13 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 - Ingen kryssrepo-endringer i samme sesjon (sandbox-policy).
 - Fail-closed: hvis brief mangler felt eller scope er uklart, stopp og be om avklaring.
 
+## Logg-policy
+
+- Fødselsnummer, aktør-id, navn, adresse og tokens skal aldri i vanlig logg.
+- Bruk sikkerlogg/persondata-logg hvis det finnes.
+- Ikke logg request bodies, headers eller feilmeldinger som kan inneholde sensitivt innhold.
+- Masker verdier du er usikker på; logg kontekst, ikke rådata.
+
 ## MCP-policy
 
 - Bruk MCP kun når det gir konkret verdi for oppgaven.

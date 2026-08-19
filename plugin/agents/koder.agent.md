@@ -80,3 +80,7 @@ Avvik fra brief:
 ## Sluttoppsummering
 
 Følg orkestrators sluttoppsummering og nevn eventuelle skill- eller implementeringsusikkerheter kort i rapporten.
+
+## Logg-policy
+
+Følg orkestrators logg-policy: aldri logg fødselsnummer, aktør-id, navn, adresse, tokens eller andre sensitive data i vanlig logg.
