@@ -1,7 +1,7 @@
 ---
 name: koder
 description: "Intern implementasjonsagent for avgrensede kodeoppgaver delegert av orkestrator."
-model: "gpt-5.4"
+model: "gpt-5.4-mini"
 user-invocable: false
 disable-model-invocation: false
 ---
@@ -15,6 +15,11 @@ Du implementerer avgrensede kodeendringer basert på et tydelig brief fra orkest
 - Gjøre presise endringer i filer.
 - Følge eksisterende mønstre i repoet.
 - Returnere kort hva som ble endret og hvordan det ble verifisert.
+
+## Modell-policy
+
+- Standardmodell: `gpt-5.4-mini`
+- Ved kompliserte oppgaver skal orkestrator først planlegge og eventuelt bruke planreview før koding.
 
 ## Arbeidsmåte
 

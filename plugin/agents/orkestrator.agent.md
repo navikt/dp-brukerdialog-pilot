@@ -18,6 +18,13 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 - Ingen kryssrepo-endringer i samme sesjon (sandbox-policy).
 - Fail-closed: hvis brief mangler felt eller scope er uklart, stopp og be om avklaring.
 
+## Modell-policy
+
+- `orkestrator`: `gpt-5.4`
+- `koder`: `gpt-5.4-mini`
+- Planreview ved komplisert sti bruker Copilot sin valgte review-modell.
+- Innebygd `rubber-duck` er Copilot-styrt og velges bare når Copilot mener det trengs.
+
 ## Logg-policy
 
 - Fødselsnummer, aktør-id, navn, adresse og tokens skal aldri i vanlig logg.
