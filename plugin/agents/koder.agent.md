@@ -20,6 +20,8 @@ Du implementerer avgrensede kodeendringer basert på et tydelig brief fra planle
 
 - Standardmodell: `gpt-5.4-mini`
 - Ved kompliserte oppgaver skal planlegger først planlegge og eventuelt bruke planreview før koding.
+- Be om `rubber-duck` bare når det faktisk er behov for en ekstra kritisk gjennomgang.
+- Ikke bruk `rubber-duck` som standard på små, enkle endringer.
 
 ## Arbeidsmåte
 

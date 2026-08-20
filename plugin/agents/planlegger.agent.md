@@ -18,12 +18,19 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 - Ingen kryssrepo-endringer i samme sesjon (sandbox-policy).
 - Fail-closed: hvis brief mangler felt eller scope er uklart, stopp og be om avklaring.
 
+## Flyt-policy
+
+- **Enkel sti**: små, trygge endringer som følger etablert mønster; gå direkte til `koder` uten planreview.
+- **Komplisert sti**: ny funksjonalitet, arkitekturpåvirkning, database/auth/sensitive data, nye dependencies, eller mer enn 3 filer; krev planreview før `koder`.
+- Hvis oppgaven er usikker, velg komplisert sti først.
+
 ## Modell-policy
 
 - `planlegger`: `gpt-5.4`
 - `koder`: `gpt-5.4-mini`
 - Planreview ved komplisert sti bruker Copilot sin valgte review-modell.
 - Innebygd `rubber-duck` er Copilot-styrt og velges bare når Copilot mener det trengs.
+- Ikke start `rubber-duck` som standard; bruk den bare ved konkret behov etter planreview eller under implementering.
 
 ## Logg-policy
 
@@ -78,6 +85,12 @@ Planlegger skal tolke og returnere én av disse statusene fra `koder`:
 5. Hvis `Sti=komplisert` eller trigger er oppfylt, kjør planreview før delegasjon.
 6. Deleger til `koder`.
 7. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
+
+## Planreview og rubber-duck
+
+- Kjør planreview før koding når oppgaven er komplisert eller berører dataflyt, arkitektur eller flere filer.
+- Bruk `rubber-duck` bare hvis koding eller review avdekker et konkret usikkerhetsmoment.
+- Ikke kombiner planreview og `rubber-duck` som standard på små oppgaver.
 
 ## Trigger for planreview (spar tokens, ikke default)
 
