@@ -63,3 +63,23 @@ copilot plugin install ./plugin
 ```
 
 Dette er bevisst for å holde pluginen liten og enkel å bygge videre på.
+
+## Eval-harness
+
+Kjør faste prompts mot `planlegger` og score beslutningene automatisk:
+
+```bash
+python3 scripts/eval_planlegger.py --run
+```
+
+For å bare skrive ut promptene:
+
+```bash
+python3 scripts/eval_planlegger.py --emit-prompts
+```
+
+Harnessen forventer at `planlegger` svarer med kort JSON i eval-modus, og sjekker
+om sti, planreview, koder og spørsmål matcher forventet resultat.
+
+> Harnessen bruker `copilot -p` i programmatisk modus, så du må ha Copilot CLI
+> installert og tilgjengelig i PATH lokalt.
