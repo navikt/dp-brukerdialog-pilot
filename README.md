@@ -41,7 +41,11 @@ Start en ny Copilot-sesjon og velg agent med:
 ```
 
 Du skal kun se `planlegger` som bruker-valg.
-Du skal kun se `planlegger` som bruker-valg.
+
+## Når du bør vente eller avbryte
+
+- Vent når statusen viser tydelig fremdrift i en kompleks oppgave.
+- Avbryt eller sjekk hvis en liten oppgave bruker lang tid uten synlig fremdrift, eller hvis tester feiler tidlig og ikke blir håndtert.
 
 ## Oppdatere lokal installasjon etter endringer
 
