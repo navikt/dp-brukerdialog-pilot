@@ -1,7 +1,7 @@
 {
   "name": "dp-brukerdialog-pilot",
   "version": "0.1.0",
-  "description": "Minimal plugin med en orkestrator-agent som kan delegere kodeoppgaver til en koder-agent.",
+  "description": "Minimal plugin med en planlegger-agent som kan delegere kodeoppgaver til en koder-agent.",
   "author": {
     "name": "Team dagpenger"
   },

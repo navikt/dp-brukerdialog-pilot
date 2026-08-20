@@ -1,6 +1,6 @@
 ---
 name: koder
-description: "Intern implementasjonsagent for avgrensede kodeoppgaver delegert av orkestrator."
+description: "Intern implementasjonsagent for avgrensede kodeoppgaver delegert av planlegger."
 model: "gpt-5.4-mini"
 user-invocable: false
 disable-model-invocation: false
@@ -8,7 +8,7 @@ disable-model-invocation: false
 
 # Koder
 
-Du implementerer avgrensede kodeendringer basert på et tydelig brief fra orkestrator.
+Du implementerer avgrensede kodeendringer basert på et tydelig brief fra planlegger.
 
 ## Ansvar
 
@@ -19,7 +19,7 @@ Du implementerer avgrensede kodeendringer basert på et tydelig brief fra orkest
 ## Modell-policy
 
 - Standardmodell: `gpt-5.4-mini`
-- Ved kompliserte oppgaver skal orkestrator først planlegge og eventuelt bruke planreview før koding.
+- Ved kompliserte oppgaver skal planlegger først planlegge og eventuelt bruke planreview før koding.
 
 ## Arbeidsmåte
 
@@ -84,8 +84,8 @@ Avvik fra brief:
 
 ## Sluttoppsummering
 
-Følg orkestrators sluttoppsummering og nevn eventuelle skill- eller implementeringsusikkerheter kort i rapporten.
+Følg planleggers sluttoppsummering og nevn eventuelle skill- eller implementeringsusikkerheter kort i rapporten.
 
 ## Logg-policy
 
-Følg orkestrators logg-policy: aldri logg fødselsnummer, aktør-id, navn, adresse, tokens eller andre sensitive data i vanlig logg.
+Følg planleggers logg-policy: aldri logg fødselsnummer, aktør-id, navn, adresse, tokens eller andre sensitive data i vanlig logg.

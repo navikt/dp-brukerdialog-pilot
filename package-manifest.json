@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "marketplace": {
     "name": "dp-brukerdialog-pilot",
-    "description": "Minimal Copilot-plugin med orkestrator-agent og koder-agent.",
+    "description": "Minimal Copilot-plugin med planlegger-agent og koder-agent.",
     "owner": "Team dagpenger"
   },
   "packages": [
