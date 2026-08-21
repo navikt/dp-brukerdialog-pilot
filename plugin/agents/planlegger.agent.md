@@ -22,6 +22,7 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 
 - **Enkel sti**: små, trygge endringer som følger etablert mønster; gå direkte til `koder` uten planreview.
 - **Komplisert sti**: ny funksjonalitet, arkitekturpåvirkning, database/auth/sensitive data, nye dependencies, eller mer enn 3 filer; krev planreview før `koder`.
+- Ny funksjonalitet som er en liten utvidelse i eksisterende mønster (f.eks. ny behovløser med samme struktur) regnes som enkel sti når risikoen er lav og omfanget er lite.
 - Komplisert sti betyr fortsatt delegasjon til `koder` etter planreview, ikke stopp eller ekstra spørsmål, med mindre et reelt beslutningspunkt mangler.
 - Hvis oppgaven er usikker, velg komplisert sti først.
 - Når oppgaven er konkret nok til å beskrive ønsket endring, skal du normalt delegere til `koder` selv om eksakte filnavn mangler.

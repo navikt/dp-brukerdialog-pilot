@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import shutil
 import re
@@ -118,6 +119,38 @@ def score(expected: dict[str, str], actual: dict[str, str] | None) -> tuple[str,
     return "pass", "matched expected decision"
 
 
+def aggregate_actuals(actuals: list[dict[str, str] | None], repeats: int) -> tuple[dict[str, str] | None, str, bool]:
+    normalized: list[tuple[str, str, str, str, str]] = []
+    for actual in actuals:
+        if actual is None:
+            continue
+        normalized.append(
+            (
+                actual.get("sti", ""),
+                actual.get("planreview", ""),
+                actual.get("koder", ""),
+                actual.get("spørsmål", ""),
+                actual.get("notat", ""),
+            )
+        )
+
+    if not normalized:
+        return None, "could not parse JSON in any run", False
+
+    counts = Counter(normalized)
+    winner, winner_count = counts.most_common(1)[0]
+    total_valid = len(normalized)
+    has_majority = winner_count > (repeats / 2)
+    aggregated = {
+        "sti": winner[0],
+        "planreview": winner[1],
+        "koder": winner[2],
+        "spørsmål": winner[3],
+        "notat": winner[4],
+    }
+    return aggregated, f"majority {winner_count}/{total_valid}", has_majority
+
+
 def main() -> int:
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent
@@ -130,6 +163,7 @@ def main() -> int:
     parser.add_argument("--run", action="store_true", help="Run the tests instead of printing prompts")
     parser.add_argument("--emit-prompts", action="store_true", help="Print prompts with ids")
     parser.add_argument("--json", action="store_true", help="Output JSON summary")
+    parser.add_argument("--repeats", type=int, default=1, help="How many runs per test (majority vote)")
     args = parser.parse_args()
 
     tests_path = Path(args.tests)
@@ -151,6 +185,8 @@ def main() -> int:
 
     if not args.run:
         parser.error("choose --run or --emit-prompts")
+    if args.repeats < 1:
+        parser.error("--repeats must be >= 1")
 
     agent = args.agent if ":" in args.agent else f"{plugin_name}:{args.agent}"
 
@@ -164,9 +200,21 @@ def main() -> int:
         prompt = str(test["prompt"])
         expected = {k: str(v) for k, v in test["expected"].items()}
         try:
-            raw_output = run_copilot(args.copilot_bin, agent, prompt)
-            actual = extract_json(raw_output)
-            status, notes = score(expected, actual)
+            run_outputs: list[str] = []
+            run_actuals: list[dict[str, str] | None] = []
+            for _ in range(args.repeats):
+                run_output = run_copilot(args.copilot_bin, agent, prompt)
+                run_outputs.append(run_output)
+                run_actuals.append(extract_json(run_output))
+
+            actual, majority_note, has_majority = aggregate_actuals(run_actuals, args.repeats)
+            if not has_majority:
+                status = "fail"
+                notes = f"inconclusive: {majority_note}"
+            else:
+                status, notes = score(expected, actual)
+                notes = f"{notes} ({majority_note})"
+            raw_output = "\n---\n".join(run_outputs)
         except Exception as error:  # noqa: BLE001
             raw_output = ""
             actual = None

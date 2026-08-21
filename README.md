@@ -72,6 +72,14 @@ Kjør faste prompts mot `planlegger` og score beslutningene automatisk:
 python3 scripts/eval_planlegger.py --run
 ```
 
+For mer stabil måling (mindre tilfeldig variasjon mellom kjøringer), kjør med flertallsavgjørelse:
+
+```bash
+python3 scripts/eval_planlegger.py --run --repeats 3
+```
+
+Merk: Hvis ingen svarvariant får faktisk flertall (>50%), markeres testen som `inconclusive` og feiler.
+
 For å bare skrive ut promptene:
 
 ```bash

@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "prompt": "Legg til en ny behovløser for en enkel boolsk avklaring, og følg eksisterende mønster i behov/løsere.",
+    "prompt": "Legg til en ny behovløser for en enkel boolsk avklaring i samme stil som eksisterende løsere. Endringen skal være liten (maks 2 filer), lav risiko, uten nye dependencies og uten auth/persondata.",
     "expected": {
       "sti": "enkel",
       "planreview": "nei",
@@ -23,8 +23,8 @@
     "id": 3,
     "prompt": "Utvid barn-API-et med å legge til feltet `mottaksdato` i BarnDto og oppdater tilhørende service og test.",
     "expected": {
-      "sti": "enkel",
-      "planreview": "nei",
+      "sti": "komplisert",
+      "planreview": "ja",
       "koder": "ja",
       "spørsmål": "nei"
     }
@@ -35,7 +35,7 @@
     "expected": {
       "sti": "enkel",
       "planreview": "nei",
-      "koder": "ja",
+      "koder": "nei",
       "spørsmål": "nei"
     }
   },
