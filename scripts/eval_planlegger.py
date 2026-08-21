@@ -48,6 +48,12 @@ def load_tests(path: Path) -> list[dict[str, Any]]:
         return json.load(file)
 
 
+def select_tests(tests: list[dict[str, Any]], suite: str) -> list[dict[str, Any]]:
+    if suite == "all":
+        return tests
+    return [test for test in tests if str(test.get("suite", "policy")) == suite]
+
+
 def load_plugin_name(repo_root: Path) -> str:
     plugin_manifest = repo_root / "plugin" / "plugin.json"
     with plugin_manifest.open("r", encoding="utf-8") as file:
@@ -164,6 +170,7 @@ def main() -> int:
     parser.add_argument("--emit-prompts", action="store_true", help="Print prompts with ids")
     parser.add_argument("--json", action="store_true", help="Output JSON summary")
     parser.add_argument("--repeats", type=int, default=1, help="How many runs per test (majority vote)")
+    parser.add_argument("--suite", choices=("all", "smoke", "policy"), default="all", help="Test suite selector")
     args = parser.parse_args()
 
     tests_path = Path(args.tests)
@@ -174,7 +181,10 @@ def main() -> int:
         else:
             tests_path = tests_path.resolve()
 
-    tests = load_tests(tests_path)
+    tests = select_tests(load_tests(tests_path), args.suite)
+    if not tests:
+        print(f"error: no tests found for suite={args.suite!r}", file=sys.stderr)
+        return 2
 
     if args.emit_prompts and not args.run:
         for test in tests:

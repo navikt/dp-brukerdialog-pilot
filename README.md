@@ -80,6 +80,18 @@ python3 scripts/eval_planlegger.py --run --repeats 3
 
 Merk: Hvis ingen svarvariant får faktisk flertall (>50%), markeres testen som `inconclusive` og feiler.
 
+Kjør bare rask suite:
+
+```bash
+python3 scripts/eval_planlegger.py --run --suite smoke --repeats 3
+```
+
+Kjør policy-suite:
+
+```bash
+python3 scripts/eval_planlegger.py --run --suite policy --repeats 3
+```
+
 For å bare skrive ut promptene:
 
 ```bash
@@ -91,3 +103,24 @@ om sti, planreview, koder og spørsmål matcher forventet resultat.
 
 > Harnessen bruker `copilot -p` i programmatisk modus, så du må ha Copilot CLI
 > installert og tilgjengelig i PATH lokalt.
+
+## KODER_BRIEF-harness
+
+Valider at `planlegger` produserer en komplett `KODER_BRIEF` med riktige nøkkelfelt:
+
+```bash
+python3 scripts/eval_koder_brief.py --run --repeats 3
+```
+
+Dette sjekker:
+- at alle obligatoriske `KODER_BRIEF`-felter finnes
+- at `Sti` og `Krever planreview` matcher forventningen
+- at resultatet har faktisk flertall
+
+## CI-gate
+
+Workflowen `.github/workflows/eval-harness.yml` kjører:
+- alltid: statiske sjekker av scripts + eval-filer
+- valgfritt: live eval-gate når repo-variable `RUN_LIVE_EVAL=true`
+
+Live gate forutsetter at runneren har `copilot`-CLI tilgjengelig og autentisert.

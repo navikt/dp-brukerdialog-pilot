@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "suite": "smoke",
+    "prompt": "Legg til en test som verifiserer at SAF-klienten håndterer 404 korrekt, uten å endre produksjonskode.",
+    "expected": {
+      "sti": "enkel",
+      "planreview": "nei"
+    }
+  },
+  {
+    "id": 2,
+    "suite": "policy",
+    "prompt": "Legg til feltet `gyldigFra` i søknad, database og PDF-flyt. Ingen nye dependencies.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja"
+    }
+  },
+  {
+    "id": 3,
+    "suite": "policy",
+    "prompt": "Oppdater personalia-flyt slik at adresse normaliseres før lagring, uten auth-endringer.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja"
+    }
+  }
+]

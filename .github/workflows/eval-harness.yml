@@ -1,0 +1,47 @@
+name: Eval harness
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Validate scripts
+        run: |
+          python3 -m py_compile scripts/eval_planlegger.py scripts/eval_koder_brief.py
+      - name: Validate eval matrices
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          for rel in ("eval/planlegger-tests.json", "eval/koder-brief-tests.json"):
+              path = Path(rel)
+              data = json.loads(path.read_text(encoding="utf-8"))
+              assert isinstance(data, list) and data, f"{rel} must be a non-empty list"
+          PY
+
+  live-eval-gate:
+    if: ${{ vars.RUN_LIVE_EVAL == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [static-checks]
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Check copilot CLI
+        run: copilot --version
+      - name: Planlegger smoke gate
+        run: python3 scripts/eval_planlegger.py --run --suite smoke --repeats 3
+      - name: Planlegger policy gate
+        run: python3 scripts/eval_planlegger.py --run --suite policy --repeats 3
+      - name: Koder brief gate
+        run: python3 scripts/eval_koder_brief.py --run --repeats 3
