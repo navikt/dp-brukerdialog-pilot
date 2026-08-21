@@ -250,6 +250,8 @@ def main() -> int:
         print(
             json.dumps(
                 {
+                    "suite": args.suite,
+                    "repeats": args.repeats,
                     "passed": passed,
                     "failed": failed,
                     "results": [

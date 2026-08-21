@@ -89,7 +89,7 @@ python3 scripts/eval_planlegger.py --run --suite smoke --repeats 3
 Kjør policy-suite:
 
 ```bash
-python3 scripts/eval_planlegger.py --run --suite policy --repeats 3
+python3 scripts/eval_planlegger.py --run --suite policy --repeats 5
 ```
 
 For å bare skrive ut promptene:
@@ -137,5 +137,7 @@ Workflowen `.github/workflows/eval-harness.yml` kjører:
 - alltid: statiske sjekker av scripts + eval-filer
 - valgfritt: live eval-gate når repo-variable `RUN_LIVE_EVAL=true`
 - live gate inkluderer `planlegger`, `koder brief` og `golden trace`
+- gate-policy: `smoke` med `--repeats 3`, `policy` med `--repeats 5`
+- lagrer JSON-resultater som CI-artefakt (`eval-results`)
 
 Live gate forutsetter at runneren har `copilot`-CLI tilgjengelig og autentisert.

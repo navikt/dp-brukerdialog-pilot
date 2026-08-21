@@ -85,6 +85,8 @@ class TraceResult:
     test_id: int
     status: str
     notes: str
+    expected: dict[str, Any]
+    actual: dict[str, str] | None
 
 
 def load_tests(path: Path) -> list[dict[str, Any]]:
@@ -252,6 +254,7 @@ def main() -> int:
     parser.add_argument("--suite", choices=("all", "smoke", "policy"), default="all", help="Test suite selector")
     parser.add_argument("--repeats", type=int, default=1, help="How many runs per test (majority vote)")
     parser.add_argument("--run", action="store_true", help="Run tests")
+    parser.add_argument("--json", action="store_true", help="Output JSON summary")
     args = parser.parse_args()
 
     if not args.run:
@@ -303,15 +306,40 @@ def main() -> int:
         except Exception as error:  # noqa: BLE001
             status = "error"
             notes = str(error)
+            actual = None
 
-        results.append(TraceResult(test_id=test_id, status=status, notes=notes))
+        results.append(TraceResult(test_id=test_id, status=status, notes=notes, expected=expected, actual=actual))
 
     passed = sum(1 for result in results if result.status == "pass")
     failed = len(results) - passed
 
-    for result in results:
-        print(f"[{result.status.upper():5}] {result.test_id}: {result.notes}")
-    print(f"\nSummary: {passed} passed, {failed} failed")
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "suite": args.suite,
+                    "repeats": args.repeats,
+                    "passed": passed,
+                    "failed": failed,
+                    "results": [
+                        {
+                            "id": result.test_id,
+                            "status": result.status,
+                            "notes": result.notes,
+                            "expected": result.expected,
+                            "actual": result.actual,
+                        }
+                        for result in results
+                    ],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    else:
+        for result in results:
+            print(f"[{result.status.upper():5}] {result.test_id}: {result.notes}")
+        print(f"\nSummary: {passed} passed, {failed} failed")
 
     return 0 if failed == 0 else 1
 

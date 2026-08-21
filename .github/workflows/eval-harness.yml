@@ -33,17 +33,30 @@ jobs:
   live-eval-gate:
     if: ${{ vars.RUN_LIVE_EVAL == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     needs: [static-checks]
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Check copilot CLI
         run: copilot --version
+      - name: Prepare eval output directory
+        run: mkdir -p eval-results
       - name: Planlegger smoke gate
-        run: python3 scripts/eval_planlegger.py --run --suite smoke --repeats 3
+        run: python3 scripts/eval_planlegger.py --run --suite smoke --repeats 3 --json > eval-results/planlegger-smoke.json
       - name: Planlegger policy gate
-        run: python3 scripts/eval_planlegger.py --run --suite policy --repeats 3
-      - name: Koder brief gate
-        run: python3 scripts/eval_koder_brief.py --run --repeats 3
-      - name: Golden trace gate
-        run: python3 scripts/eval_golden_trace.py --run --repeats 3
+        run: python3 scripts/eval_planlegger.py --run --suite policy --repeats 5 --json > eval-results/planlegger-policy.json
+      - name: Koder brief smoke gate
+        run: python3 scripts/eval_koder_brief.py --run --suite smoke --repeats 3 --json > eval-results/koder-brief-smoke.json
+      - name: Koder brief policy gate
+        run: python3 scripts/eval_koder_brief.py --run --suite policy --repeats 5 --json > eval-results/koder-brief-policy.json
+      - name: Golden trace smoke gate
+        run: python3 scripts/eval_golden_trace.py --run --suite smoke --repeats 3 --json > eval-results/golden-trace-smoke.json
+      - name: Golden trace policy gate
+        run: python3 scripts/eval_golden_trace.py --run --suite policy --repeats 5 --json > eval-results/golden-trace-policy.json
+      - name: Upload eval artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb467d484f8c6150e158aa2e2dab457ee9a79 # v4.3.1
+        with:
+          name: eval-results
+          path: eval-results/*.json
+          if-no-files-found: error
