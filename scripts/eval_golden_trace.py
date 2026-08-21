@@ -40,7 +40,11 @@ Oppgave:
 KODER_WRAPPER = """Du er koder-agenten i en eval-harness.
 Ikke bruk verktøy.
 Ikke gjør filendringer.
-Behandle briefen som gyldig input og returner kun statusrapport i dette faste formatet:
+Dette er en simulert kontrakttest: anta at briefen er gyldig, at filer finnes, og at verifisering kan kjøres.
+I denne testen skal du ikke returnere BLOCKED kun fordi verktøy/kjøring er slått av.
+Hvis briefen er komplett, bruk DONE eller DONE_WITH_CONCERNS.
+Hvis briefen faktisk mangler nødvendig informasjon, bruk NEEDS_CONTEXT.
+Returner kun statusrapport i dette faste formatet:
 Status: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | NEEDS_DECISION | BLOCKED
 Endrede filer:
 - <path>
