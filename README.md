@@ -56,6 +56,16 @@ Planlegger bruker faste progresjonsetiketter i dialogen:
 
 Ved database/auth/persondata/secrets ber planlegger om eksplisitt bekreftelse før den går videre.
 
+Planlegger støtter også operasjonsmoduser:
+- `hurtig` (tempo)
+- `standard` (default)
+- `trygg` (strengere review/stopp)
+
+Og den bruker domain-presets for Nav-typiske oppgaver:
+- `API+Kafka`
+- `DB+migrasjon`
+- `Persondata`
+
 ## Oppdatere lokal installasjon etter endringer
 
 Hvis du endrer agentfiler/manifest, installer på nytt:
