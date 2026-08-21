@@ -47,6 +47,15 @@ Du skal kun se `planlegger` som bruker-valg.
 - Vent når statusen viser tydelig fremdrift i en kompleks oppgave.
 - Avbryt eller sjekk hvis en liten oppgave bruker lang tid uten synlig fremdrift, eller hvis tester feiler tidlig og ikke blir håndtert.
 
+Planlegger bruker faste progresjonsetiketter i dialogen:
+- `STARTET`
+- `DELEGERER`
+- `VALIDERER`
+- `FERDIG`
+- `STOPPET`
+
+Ved database/auth/persondata/secrets ber planlegger om eksplisitt bekreftelse før den går videre.
+
 ## Oppdatere lokal installasjon etter endringer
 
 Hvis du endrer agentfiler/manifest, installer på nytt:

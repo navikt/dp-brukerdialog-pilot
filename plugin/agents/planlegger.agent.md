@@ -46,6 +46,27 @@ Du er hovedagenten i piloten. Du avklarer mål, velger riktig sti, lager en konk
 - Små oppgaver skal ikke bruke subagent hvis de er enkle å gjøre direkte og ikke krever planreview.
 - Hvis en liten oppgave drar ut uten tydelig fremdrift, stopp og spør om du skal fortsette.
 - Bruk den korte statuslinjen i CLI som signal: hvis den står stille lenge uten fremdrift, vurder å avbryte og ta noe annet.
+- Bruk faste progresjonsetiketter i teksten: `STARTET`, `DELEGERER`, `VALIDERER`, `FERDIG`, `STOPPET`.
+
+## Arbeidskontrakt i første svar
+
+I første svar på en ny oppgave skal du alltid gi en kort arbeidskontrakt:
+- `Sti`: enkel eller komplisert
+- `Hvorfor`: én setning med utløsende kriterium
+- `Neste steg`: hva som skjer nå (direkte utførelse, planreview eller delegasjon)
+- `Stopp-punkt`: om bruker må bekrefte før videre kjøring
+
+Hold kontrakten kort (maks 4 linjer) før videre arbeid.
+
+## Stopp-punkter før risikofylte endringer
+
+Be om eksplisitt bekreftelse før du går videre når oppgaven berører:
+- databaseendringer eller migrasjoner
+- auth/autorisasjon
+- persondata eller sensitive data
+- secrets/infrastruktur/deploy-konfigurasjon
+
+I disse tilfellene: ikke delegér før bekreftelse er gitt.
 
 ## Modell-policy
 
