@@ -126,19 +126,22 @@ def score(expected: dict[str, str], actual: dict[str, str] | None) -> tuple[str,
 
 
 def aggregate_actuals(actuals: list[dict[str, str] | None], repeats: int) -> tuple[dict[str, str] | None, str, bool]:
-    normalized: list[tuple[str, str, str, str, str]] = []
+    # `notat` is free text and near-always differs between runs, so majority
+    # voting is based only on the decision fields; the winning run's own
+    # notat is kept for display.
+    normalized: list[tuple[str, str, str, str]] = []
+    notat_by_key: dict[tuple[str, str, str, str], str] = {}
     for actual in actuals:
         if actual is None:
             continue
-        normalized.append(
-            (
-                actual.get("sti", ""),
-                actual.get("planreview", ""),
-                actual.get("koder", ""),
-                actual.get("spørsmål", ""),
-                actual.get("notat", ""),
-            )
+        key = (
+            actual.get("sti", ""),
+            actual.get("planreview", ""),
+            actual.get("koder", ""),
+            actual.get("spørsmål", ""),
         )
+        normalized.append(key)
+        notat_by_key.setdefault(key, actual.get("notat", ""))
 
     if not normalized:
         return None, "could not parse JSON in any run", False
@@ -152,7 +155,7 @@ def aggregate_actuals(actuals: list[dict[str, str] | None], repeats: int) -> tup
         "planreview": winner[1],
         "koder": winner[2],
         "spørsmål": winner[3],
-        "notat": winner[4],
+        "notat": notat_by_key[winner],
     }
     return aggregated, f"majority {winner_count}/{total_valid}", has_majority
 

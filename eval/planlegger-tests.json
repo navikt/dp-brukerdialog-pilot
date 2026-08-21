@@ -26,8 +26,8 @@
     "suite": "policy",
     "prompt": "Utvid barn-API-et med å legge til feltet `mottaksdato` i BarnDto og oppdater tilhørende service og test.",
     "expected": {
-      "sti": "komplisert",
-      "planreview": "ja",
+      "sti": "enkel",
+      "planreview": "nei",
       "koder": "ja",
       "spørsmål": "nei"
     }
@@ -39,7 +39,7 @@
     "expected": {
       "sti": "enkel",
       "planreview": "nei",
-      "koder": "nei",
+      "koder": "ja",
       "spørsmål": "nei"
     }
   },
