@@ -21,7 +21,7 @@
   },
   {
     "id": 3,
-    "prompt": "Utvid barn-API-et med en liten justering i DTO eller service.",
+    "prompt": "Utvid barn-API-et med å legge til feltet `mottaksdato` i BarnDto og oppdater tilhørende service og test.",
     "expected": {
       "sti": "enkel",
       "planreview": "nei",
@@ -41,7 +41,7 @@
   },
   {
     "id": 5,
-    "prompt": "Endre søknad-flyten slik at den journalfører et nytt felt i PDF-payloaden.",
+    "prompt": "Endre søknad-flyten slik at `gyldigFra` legges inn i PDF-payloaden og mappes videre til journalføring.",
     "expected": {
       "sti": "komplisert",
       "planreview": "ja",
@@ -51,17 +51,17 @@
   },
   {
     "id": 6,
-    "prompt": "Legg til støtte for et nytt opplysningsbehov som påvirker flere seksjoner.",
+    "prompt": "Legg til støtte for et nytt opplysningsbehov som krever endring i skjema, lagring og PDF-kjede.",
     "expected": {
       "sti": "komplisert",
       "planreview": "ja",
       "koder": "ja",
-      "spørsmål": "ja"
+      "spørsmål": "nei"
     }
   },
   {
     "id": 7,
-    "prompt": "Endre quizOpplysning-repositoriet og verifiser at data fortsatt lagres riktig.",
+    "prompt": "Endre quizOpplysning-repositoriet, migrasjonen og tilhørende testdata slik at et nytt felt lagres riktig.",
     "expected": {
       "sti": "komplisert",
       "planreview": "ja",
@@ -71,17 +71,17 @@
   },
   {
     "id": 8,
-    "prompt": "Gjør en endring i 4–5 filer på tvers av søknad og opplysning.",
+    "prompt": "Legg til et nytt felt i søknad og opplysning, og oppdater DTO, mapper, service og test på tvers av begge områdene.",
     "expected": {
       "sti": "komplisert",
       "planreview": "ja",
       "koder": "ja",
-      "spørsmål": "ja"
+      "spørsmål": "nei"
     }
   },
   {
     "id": 9,
-    "prompt": "Oppdater personalia så adresse håndteres litt annerledes, men ikke endre auth.",
+    "prompt": "Oppdater personalia så adresse normaliseres før lagring, men ikke endre auth.",
     "expected": {
       "sti": "komplisert",
       "planreview": "ja",
