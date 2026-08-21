@@ -117,10 +117,25 @@ Dette sjekker:
 - at `Sti` og `Krever planreview` matcher forventningen
 - at resultatet har faktisk flertall
 
+## Golden trace (ende-til-ende)
+
+Valider hele kjeden fra brukerprompt til koder-statusformat:
+
+```bash
+python3 scripts/eval_golden_trace.py --run --repeats 3
+```
+
+Dette sjekker:
+- at `planlegger` returnerer komplett `KODER_BRIEF`
+- at `koder` svarer i riktig statusformat
+- at `Sti` og `Krever planreview` matcher forventet golden-trace
+- at `koder`-status er innenfor forventet statussett per test
+
 ## CI-gate
 
 Workflowen `.github/workflows/eval-harness.yml` kjører:
 - alltid: statiske sjekker av scripts + eval-filer
 - valgfritt: live eval-gate når repo-variable `RUN_LIVE_EVAL=true`
+- live gate inkluderer `planlegger`, `koder brief` og `golden trace`
 
 Live gate forutsetter at runneren har `copilot`-CLI tilgjengelig og autentisert.

@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "suite": "smoke",
+    "prompt": "Legg til en test for at SAF-klienten håndterer 404 riktig, uten nye dependencies og uten endring i produksjonskode.",
+    "expected": {
+      "sti": "enkel",
+      "planreview": "nei",
+      "koder_statuses": ["done", "done_with_concerns"]
+    }
+  },
+  {
+    "id": 2,
+    "suite": "policy",
+    "prompt": "Legg til feltet `gyldigFra` i søknadsflyt, repository og PDF-kjede. Ingen nye dependencies.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder_statuses": ["done", "done_with_concerns"]
+    }
+  }
+]
