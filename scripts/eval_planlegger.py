@@ -160,6 +160,14 @@ def aggregate_actuals(actuals: list[dict[str, str] | None], repeats: int) -> tup
     return aggregated, f"majority {winner_count}/{total_valid}", has_majority
 
 
+def build_prompt(test: dict[str, Any]) -> str:
+    modus = test.get("modus")
+    prompt = str(test["prompt"])
+    if modus:
+        return f"Modus: {modus}.\n\n{prompt}"
+    return prompt
+
+
 def main() -> int:
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent
@@ -192,7 +200,7 @@ def main() -> int:
     if args.emit_prompts and not args.run:
         for test in tests:
             print(f"## {test['id']}")
-            print(test["prompt"])
+            print(build_prompt(test))
             print()
         return 0
 
@@ -210,7 +218,7 @@ def main() -> int:
     results: list[Result] = []
     for test in tests:
         test_id = int(test["id"])
-        prompt = str(test["prompt"])
+        prompt = build_prompt(test)
         expected = {k: str(v) for k, v in test["expected"].items()}
         try:
             run_outputs: list[str] = []

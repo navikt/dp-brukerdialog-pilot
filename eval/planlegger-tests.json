@@ -90,7 +90,7 @@
   {
     "id": 9,
     "suite": "policy",
-    "prompt": "Oppdater personalia så adresse normaliseres før lagring, men ikke endre auth.",
+    "prompt": "Endre lagringslogikken for personopplysninger (adresse, fødselsnummer og navn) slik at adressen normaliseres før lagring i databasen.",
     "expected": {
       "sti": "komplisert",
       "planreview": "ja",
@@ -106,6 +106,40 @@
       "sti": "avvist",
       "planreview": "nei",
       "koder": "nei",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 11,
+    "suite": "policy",
+    "modus": "hurtig",
+    "prompt": "Legg til et nytt kall mot en ekstern tjeneste for å hente valutakurs, og bruk resultatet i en beregning i én eksisterende tjeneste.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 12,
+    "suite": "policy",
+    "prompt": "Legg til nytt REST-endepunkt for å hente søknadsstatus, og publiser en hendelse på et nytt Kafka-topic når statusen endres.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 13,
+    "suite": "policy",
+    "prompt": "Legg til en ny kolonne i søknad-tabellen via en Flyway-migrasjon og oppdater repository til å lese/skrive feltet.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
       "spørsmål": "nei"
     }
   }
