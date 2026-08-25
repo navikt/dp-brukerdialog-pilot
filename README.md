@@ -1,10 +1,12 @@
 # dp-brukerdialog-pilot
 
-En enkel AI-pilot som **ren Copilot-plugin** med tre agenter:
+En enkel AI-pilot som **ren Copilot-plugin** med fire agenter:
 - `planlegger` (synlig for bruker)
 - `koder` (intern, delegert av planlegger)
 - `reviewer` (intern, delegert av planlegger etter koder — kvalitetssjekker den
   faktiske diffen før planlegger rapporterer FERDIG)
+- `pr-reviewer` (synlig for bruker, uavhengig av de tre andre — reviewer andres
+  PR-er/branches på forespørsel, se "PR-reviewer" under)
 
 Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
 
@@ -18,6 +20,7 @@ plugin/plugin.json
 plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
 plugin/agents/reviewer.agent.md
+plugin/agents/pr-reviewer.agent.md
 plugin/skills/api-kafka/SKILL.md
 plugin/skills/db-migrasjon/SKILL.md
 plugin/skills/persondata/SKILL.md
@@ -61,7 +64,8 @@ Start en ny Copilot-sesjon og velg agent med:
 /agent
 ```
 
-Du skal kun se `planlegger` som bruker-valg.
+Du skal se `planlegger` og `pr-reviewer` som bruker-valg. `koder` og `reviewer` er
+interne og vises ikke i `/agent`.
 
 ## Når du bør vente eller avbryte
 
@@ -99,6 +103,34 @@ Hver skill inneholder trigger, default sti/planreview, obligatoriske ekstra brie
 sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer fremfor
 innebygd tekst er at de er lettere å teste/utvide isolert, og at de er tydelig
 tilgjengelige for andre agenter/verktøy som leser skills uavhengig av `planlegger`.
+
+## PR-reviewer
+
+`pr-reviewer` er en frittstående, bruker-invokerbar agent for å reviewe **andres**
+PR-er/branches — uavhengig av `planlegger`→`koder`→`reviewer`-kjeden, som kun
+kvalitetssikrer vårt eget arbeid internt i én økt.
+
+Bruk den ved å velge `pr-reviewer` i `/agent` og be den reviewe en PR eller branch, f.eks.:
+
+```text
+Review PR #12
+Review branchen min mot main
+Review de uncommittede endringene mine
+```
+
+**Diff-strategi** (prioritert rekkefølge):
+1. `gh pr diff <nr>` hvis PR-nummer er oppgitt og `gh`-CLI er tilgjengelig/autentisert.
+2. Ellers `git diff <base>...<head>` mot detektert default-branch eller oppgitt branch,
+   inkludert uncommittede endringer.
+3. MCP (f.eks. IntelliJ sin PR-integrasjon) kan berike konteksten, men er aldri en
+   forutsetning — samme prinsipp som `planlegger`s MCP-policy.
+
+`pr-reviewer` er **read-only**: den gjør aldri filendringer, commits, eller poster
+kommentarer til GitHub. Den skriver kun ut en strukturert review i terminalen
+(sikkerhetskritisk / infrastruktur / kodekvalitet), og flagger for et menneske —
+den blokkerer aldri og gir ikke et formelt godkjent/avvist-verdikt (det er den
+interne `reviewer`s jobb for vårt eget arbeid, ikke denne agentens jobb for andres
+PR-er). Ekte PR-kommentar-posting (`gh pr comment`) er bevisst utsatt til senere.
 
 ## Oppdatere installasjon etter endringer
 
@@ -265,6 +297,32 @@ Suiten dekker fire reelle scenarioer:
 > bekreftet å være modell-flakiness som fantes før reviewer-agenten ble lagt
 > til (reprodusert identisk på forrige plugin-versjon), ikke en regresjon.
 
+## Ekte PR-reviewer-test (scratch-repo)
+
+Samme prinsipp som integrasjonstesten over, men for `pr-reviewer`. Siden
+`pr-reviewer` skal være read-only, er hovedsjekken at `git diff` er **helt
+uendret** før og etter kjøringen (ikke at bestemte filer endret seg):
+
+```bash
+python3 scripts/eval_pr_review.py --run
+```
+
+Dette:
+- oppretter en scratch-repo med et `base_files`-innhold (committed)
+- legger på `pr_files`-innhold **uten** å committe (simulerer PR-diffen som
+  skal reviewes)
+- tar en snapshot av `git diff` før agent-kjøring, kjører `pr-reviewer` med
+  `--allow-all-tools`, og verifiserer at diffen er identisk etterpå (ingen
+  filendringer) og at ingen ny commit ble gjort
+- sjekker at sluttsvaret inneholder forventede nøkkelord (f.eks. et planta
+  problem som skal flagges)
+
+Suiten dekker to scenarioer:
+- `smoke` (id 1): en ren, uskyldig endring — bekrefter at agenten kjører og
+  svarer i riktig format uten å krasje eller gjøre endringer.
+- `policy` (id 2): en plantet feil (fødselsnummer logget i vanlig logg) —
+  verifiserer at reviewen faktisk flagger det konkrete sikkerhetsproblemet.
+
 ## CI-gate
 
 Workflowen `.github/workflows/eval-harness.yml` kjører:
@@ -287,4 +345,5 @@ python3 scripts/eval_golden_trace.py --run --suite policy --repeats 5
 python3 scripts/eval_reviewer.py --run --suite smoke --repeats 3
 python3 scripts/eval_reviewer.py --run --suite policy --repeats 5
 python3 scripts/eval_integration.py --run
+python3 scripts/eval_pr_review.py --run
 ```

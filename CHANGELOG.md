@@ -3,6 +3,27 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.4.0]
+
+### Lagt til
+- Ny bruker-invokerbar agent `pr-reviewer` (`plugin/agents/pr-reviewer.agent.md`,
+  modell `gpt-5.4`) — frittstående fra `planlegger`→`koder`→`reviewer`-kjeden.
+  Brukes til å reviewe **andres** PR-er/branches på forespørsel, i motsetning
+  til den interne `reviewer` som kun sjekker vårt eget arbeid i én økt.
+- Diff-strategi: `gh pr diff <nr>` hvis PR-nummer oppgis og `gh`-CLI er
+  tilgjengelig/autentisert, ellers `git diff` mot detektert default-branch
+  eller oppgitt branch (inkl. uncommittede endringer). MCP (f.eks. IntelliJ
+  sin PR-integrasjon) kan berike konteksten, men er aldri en forutsetning —
+  samme prinsipp som `planlegger`s eksisterende MCP-policy.
+- `pr-reviewer` er read-only: gjør aldri filendringer/commits, og poster ikke
+  PR-kommentarer (bevisst utsatt til senere). Skriver kun ut en strukturert
+  review i terminalen (sikkerhetskritisk / infrastruktur / kodekvalitet) og
+  flagger for et menneske — blokkerer aldri.
+- Ny eval `scripts/eval_pr_review.py` + `eval/pr-reviewer-tests.json` (2
+  scenarier: ren endring, og et plantet sikkerhetsproblem som må flagges).
+  Kjerneassertion: `git diff` er identisk før/etter kjøring (read-only-kravet
+  verifisert direkte, ikke bare antatt).
+
 ## [0.3.0]
 
 ### Lagt til
