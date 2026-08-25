@@ -13,12 +13,18 @@ package-manifest.json
 plugin/plugin.json
 plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
+plugin/skills/api-kafka/SKILL.md
+plugin/skills/db-migrasjon/SKILL.md
+plugin/skills/persondata/SKILL.md
 ```
 
-Målet i første versjon er en bevisst liten plugin med:
+Målet i første versjon var en bevisst liten plugin med:
 - 1 planlegger-agent som delegerer
 - 1 koder-agent som implementerer
 - 0 skills
+
+Vi har siden lagt til 3 domain-preset-skills (se "Domain-preset-skills" under) for å gjøre
+`KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse opp agent-promptet.
 
 ## Installer lokalt
 
@@ -65,6 +71,19 @@ Og den bruker domain-presets for Nav-typiske oppgaver:
 - `API+Kafka`
 - `DB+migrasjon`
 - `Persondata`
+
+## Domain-preset-skills
+
+Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
+
+- `plugin/skills/api-kafka/SKILL.md`
+- `plugin/skills/db-migrasjon/SKILL.md`
+- `plugin/skills/persondata/SKILL.md`
+
+Hver skill inneholder trigger, default sti/planreview, obligatoriske ekstra brief-felt,
+sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer fremfor
+innebygd tekst er at de er lettere å teste/utvide isolert, og at de er tydelig
+tilgjengelige for andre agenter/verktøy som leser skills uavhengig av `planlegger`.
 
 ## Oppdatere lokal installasjon etter endringer
 

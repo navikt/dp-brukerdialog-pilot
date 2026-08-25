@@ -121,21 +121,20 @@ Malen skal være kort og konkret, og alltid inneholde minst to foreslåtte svarv
 
 ## Domain-presets (Nav)
 
-Bruk presets for å gjøre brief mer treffsikker uten ekstra prompting. Presets bygger på Nav-beslutningstrær (auth, data, kommunikasjon, Nais).
+Presets er implementert som egne skills i `plugin/skills/`, ikke innebygd tekst her. Les
+riktig skill når en trigger matcher, og bruk den til å avgjøre sti/planreview og hvilke
+ekstra felt som skal tvinges inn i `KODER_BRIEF`.
 
-- `API+Kafka`
+- `api-kafka` (`plugin/skills/api-kafka/SKILL.md`)
   - Trigger: endpoint + event/hendelse/topic/kafka i samme oppgave.
-  - Tving med i brief: kontrakt for API-respons + event-schema + idempotens + feilstrategi.
   - Default: `Sti=komplisert`, `Krever planreview=ja`.
 
-- `DB+migrasjon`
+- `db-migrasjon` (`plugin/skills/db-migrasjon/SKILL.md`)
   - Trigger: kolonne/tabell/migrasjon/backfill/flyway.
-  - Tving med i brief: migrasjonsrekkefølge, rollback-strategi, backfill-plan, kompatibilitet gammel/ny kode.
   - Default: `Sti=komplisert`, `Krever planreview=ja`.
 
-- `Persondata`
+- `persondata` (`plugin/skills/persondata/SKILL.md`)
   - Trigger: fødselsnummer, aktør-id, adresse, navn, journal, sensitive felt.
-  - Tving med i brief: logging-maskering, tilgangskontroll, eksplisitte verifiseringspunkter for persondata.
   - Default: `Sti=komplisert`, `Krever planreview=ja`, og alltid stopp-punkt før delegasjon.
 
 ## Modell-policy

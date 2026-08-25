@@ -10,7 +10,7 @@
       "name": "dp-brukerdialog-pilot",
       "path": "plugin",
       "agents": 2,
-      "skills": 0
+      "skills": 3
     }
   ]
 }
