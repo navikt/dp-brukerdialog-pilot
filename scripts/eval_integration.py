@@ -13,6 +13,10 @@ Each test case describes:
 - expect_contains: substrings that must appear in named files afterwards
 - expect_no_commit: if true, assert no new commit was made (since the prompt
   doesn't ask for one, and agent policy says no auto-commit unless asked)
+- expect_no_file_changes: if true, assert the working tree is completely
+  unchanged (used for stopp-punkt tests, where planlegger should refuse to
+  delegate/edit anything without explicit confirmation it can't get since
+  the harness runs with --no-ask-user)
 """
 from __future__ import annotations
 
@@ -103,6 +107,11 @@ def check_test(test: dict[str, Any], scratch: Path) -> list[str]:
         commit_count = run_git(["rev-list", "--count", "HEAD"], scratch)
         if commit_count != "1":
             failures.append(f"forventet ingen ny commit (fortsatt 1 commit), fant {commit_count}")
+
+    if test.get("expect_no_file_changes"):
+        status = run_git(["status", "--porcelain"], scratch)
+        if status:
+            failures.append(f"forventet ingen filendringer (stopp-punkt skal blokkere), fant:\n{status}")
 
     return failures
 

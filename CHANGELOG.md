@@ -6,6 +6,12 @@ Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnu
 ## [0.2.0]
 
 ### Lagt til
+- To nye scenarioer i `eval_integration.py`: komplisert sti (offentlig
+  API-kontraktendring i en DTO) og persondata-stopp-punkt (fødselsnummer-
+  endepunkt). Sistnevnte innfører `expect_no_file_changes`-assertion, som
+  verifiserer at `planlegger` gjør null filendringer når den treffer et
+  stopp-punkt den ikke kan få bekreftet (harnessen kjører med
+  `--no-ask-user`), i stedet for å gjette seg videre.
 - CI-sjekk (`scripts/validate_plugin_schema.py`) som validerer agent-/skill-
   frontmatter (påkrevde felt, `name` matcher filnavn/mappenavn) og at
   agent-/skill-antall i `package-manifest.json` stemmer med det som faktisk

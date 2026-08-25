@@ -207,7 +207,19 @@ Dette:
   `--keep-sessions` for å beholde dem ved feilsøking)
 
 Testene defineres i `eval/integration-tests.json` med `fixture` (filer som
-seedes), `prompt` (det ekte oppdraget) og `expect_contains`/`expect_no_commit`.
+seedes), `prompt` (det ekte oppdraget) og
+`expect_contains`/`expect_no_commit`/`expect_no_file_changes`.
+
+Suiten dekker tre reelle scenarioer:
+- `smoke` (id 1): enkel sti, direkte filendring uten planreview.
+- `policy` (id 2): komplisert sti (offentlig API-kontraktendring) — verifiserer
+  at oppgaven fortsatt fullføres korrekt end-to-end selv når den krever et
+  ekstra planreview-steg internt.
+- `policy` (id 3): persondata-stopp-punkt (fødselsnummer-endepunkt) —
+  verifiserer at `planlegger` ikke gjør noen filendringer i det hele tatt når
+  den treffer et stopp-punkt den ikke kan få bekreftet (harnessen kjører med
+  `--no-ask-user`), altså at den fail-closed-oppfører seg trygt i stedet for å
+  gjette seg videre.
 
 > Denne harnessen tar vesentlig lengre tid enn de andre (ekte agentkjøring med
 > verktøy), så den er ikke ment å kjøres med høy `--repeats` som de andre.
