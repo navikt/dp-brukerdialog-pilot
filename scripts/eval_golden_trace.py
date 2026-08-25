@@ -2,16 +2,25 @@
 from __future__ import annotations
 
 import argparse
-from collections import Counter
-import json
 import re
-import shutil
-import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from eval_common import (  # noqa: E402
+    EvalResult,
+    aggregate_actuals,
+    load_json,
+    load_plugin_name,
+    parse_brief,
+    print_report,
+    require_copilot_bin,
+    resolve_agent,
+    resolve_tests_path,
+    run_copilot,
+    select_tests,
+)
 
 PLANLEGGER_WRAPPER = """Du er planlegger-agenten i en eval-harness.
 Ikke bruk verktøy.
@@ -79,67 +88,7 @@ REQUIRED_KODER_SECTIONS = (
     "Avvik fra brief:",
 )
 
-
-@dataclass
-class TraceResult:
-    test_id: int
-    status: str
-    notes: str
-    expected: dict[str, Any]
-    actual: dict[str, str] | None
-
-
-def load_tests(path: Path) -> list[dict[str, Any]]:
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-def select_tests(tests: list[dict[str, Any]], suite: str) -> list[dict[str, Any]]:
-    if suite == "all":
-        return tests
-    return [test for test in tests if str(test.get("suite", "policy")) == suite]
-
-
-def load_plugin_name(repo_root: Path) -> str:
-    plugin_manifest = repo_root / "plugin" / "plugin.json"
-    with plugin_manifest.open("r", encoding="utf-8") as file:
-        return str(json.load(file)["name"])
-
-
-def run_copilot(copilot_bin: str, agent: str, prompt: str) -> str:
-    command = [
-        copilot_bin,
-        "--agent",
-        agent,
-        "-p",
-        prompt,
-        "-s",
-        "--no-ask-user",
-    ]
-    completed = subprocess.run(command, capture_output=True, text=True)
-    if completed.returncode != 0:
-        error_text = completed.stderr.strip() or completed.stdout.strip() or "unknown error"
-        raise RuntimeError(error_text)
-    return completed.stdout.strip()
-
-
-def parse_brief(text: str) -> dict[str, str] | None:
-    normalized = text.replace("\r\n", "\n").strip()
-    if not normalized.startswith("KODER_BRIEF"):
-        return None
-
-    missing = [field for field in REQUIRED_BRIEF_FIELDS if field not in normalized]
-    sti_match = re.search(r"^Sti:\s*(.+)$", normalized, flags=re.MULTILINE)
-    review_match = re.search(r"^Krever planreview:\s*(.+)$", normalized, flags=re.MULTILINE)
-    if sti_match is None or review_match is None:
-        return None
-
-    return {
-        "sti": sti_match.group(1).strip().lower(),
-        "planreview": review_match.group(1).strip().lower(),
-        "missing_fields": ",".join(missing),
-        "raw": normalized,
-    }
+KEY_FIELDS = ("sti", "planreview", "missing_brief_fields", "koder_status", "missing_koder_sections")
 
 
 def parse_koder_status(text: str) -> dict[str, str] | None:
@@ -156,14 +105,9 @@ def parse_koder_status(text: str) -> dict[str, str] | None:
     }
 
 
-def run_trace_once(
-    copilot_bin: str,
-    planlegger_agent: str,
-    koder_agent: str,
-    user_prompt: str,
-) -> dict[str, str] | None:
+def run_trace_once(copilot_bin: str, planlegger_agent: str, koder_agent: str, user_prompt: str) -> dict[str, str] | None:
     brief_raw = run_copilot(copilot_bin, planlegger_agent, f"{PLANLEGGER_WRAPPER}{user_prompt}")
-    brief = parse_brief(brief_raw)
+    brief = parse_brief(brief_raw, REQUIRED_BRIEF_FIELDS, include_raw=True)
     if brief is None:
         return None
 
@@ -181,37 +125,6 @@ def run_trace_once(
     }
 
 
-def aggregate_runs(actuals: list[dict[str, str] | None], repeats: int) -> tuple[dict[str, str] | None, str, bool]:
-    normalized: list[tuple[str, str, str, str, str]] = []
-    for actual in actuals:
-        if actual is None:
-            continue
-        normalized.append(
-            (
-                actual.get("sti", ""),
-                actual.get("planreview", ""),
-                actual.get("missing_brief_fields", ""),
-                actual.get("koder_status", ""),
-                actual.get("missing_koder_sections", ""),
-            )
-        )
-
-    if not normalized:
-        return None, "could not parse trace in any run", False
-
-    counts = Counter(normalized)
-    winner, winner_count = counts.most_common(1)[0]
-    total_valid = len(normalized)
-    has_majority = winner_count > (repeats / 2)
-    return {
-        "sti": winner[0],
-        "planreview": winner[1],
-        "missing_brief_fields": winner[2],
-        "koder_status": winner[3],
-        "missing_koder_sections": winner[4],
-    }, f"majority {winner_count}/{total_valid}", has_majority
-
-
 def score(expected: dict[str, Any], actual: dict[str, str] | None) -> tuple[str, str]:
     if actual is None:
         return "fail", "could not parse planlegger->koder trace"
@@ -224,11 +137,11 @@ def score(expected: dict[str, Any], actual: dict[str, str] | None) -> tuple[str,
     if missing_koder:
         return "fail", f"missing koder status sections: {missing_koder}"
 
-    mismatches: list[str] = []
-    for key in ("sti", "planreview"):
-        expected_value = str(expected.get(key, "")).lower()
-        if actual.get(key) != expected_value:
-            mismatches.append(f"{key}: expected {expected_value!r}, got {actual.get(key)!r}")
+    mismatches = [
+        f"{key}: expected {str(expected.get(key, '')).lower()!r}, got {actual.get(key)!r}"
+        for key in ("sti", "planreview")
+        if actual.get(key) != str(expected.get(key, "")).lower()
+    ]
 
     allowed_statuses = [str(value).lower() for value in expected.get("koder_statuses", [])]
     if allowed_statuses and actual.get("koder_status") not in allowed_statuses:
@@ -261,42 +174,27 @@ def main() -> int:
         parser.error("choose --run")
     if args.repeats < 1:
         parser.error("--repeats must be >= 1")
-    if shutil.which(args.copilot_bin) is None:
-        print(f"error: {args.copilot_bin!r} not found in PATH", file=sys.stderr)
+    if not require_copilot_bin(args.copilot_bin):
         return 2
 
-    tests_path = Path(args.tests)
-    if not tests_path.is_absolute():
-        candidate = (repo_root / tests_path).resolve()
-        if candidate.exists():
-            tests_path = candidate
-        else:
-            tests_path = tests_path.resolve()
-
-    tests = select_tests(load_tests(tests_path), args.suite)
+    tests_path = resolve_tests_path(repo_root, args.tests)
+    tests = select_tests(load_json(tests_path), args.suite)
     if not tests:
         print(f"error: no tests found for suite={args.suite!r}", file=sys.stderr)
         return 2
 
-    results: list[TraceResult] = []
+    results: list[EvalResult] = []
     for test in tests:
         test_id = int(test["id"])
         prompt = str(test["prompt"])
         expected = dict(test["expected"])
 
         try:
-            actuals: list[dict[str, str] | None] = []
-            for _ in range(args.repeats):
-                actuals.append(
-                    run_trace_once(
-                        copilot_bin=args.copilot_bin,
-                        planlegger_agent=args.planlegger_agent,
-                        koder_agent=args.koder_agent,
-                        user_prompt=prompt,
-                    )
-                )
-
-            actual, majority_note, has_majority = aggregate_runs(actuals, args.repeats)
+            actuals = [
+                run_trace_once(args.copilot_bin, args.planlegger_agent, args.koder_agent, prompt)
+                for _ in range(args.repeats)
+            ]
+            actual, majority_note, has_majority = aggregate_actuals(actuals, args.repeats, key_fields=KEY_FIELDS)
             if not has_majority:
                 status = "fail"
                 notes = f"inconclusive: {majority_note}"
@@ -308,39 +206,10 @@ def main() -> int:
             notes = str(error)
             actual = None
 
-        results.append(TraceResult(test_id=test_id, status=status, notes=notes, expected=expected, actual=actual))
+        results.append(EvalResult(test_id=test_id, status=status, notes=notes, expected=expected, actual=actual))
 
-    passed = sum(1 for result in results if result.status == "pass")
-    failed = len(results) - passed
-
-    if args.json:
-        print(
-            json.dumps(
-                {
-                    "suite": args.suite,
-                    "repeats": args.repeats,
-                    "passed": passed,
-                    "failed": failed,
-                    "results": [
-                        {
-                            "id": result.test_id,
-                            "status": result.status,
-                            "notes": result.notes,
-                            "expected": result.expected,
-                            "actual": result.actual,
-                        }
-                        for result in results
-                    ],
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
-    else:
-        for result in results:
-            print(f"[{result.status.upper():5}] {result.test_id}: {result.notes}")
-        print(f"\nSummary: {passed} passed, {failed} failed")
-
+    print_report(results, args.suite, args.repeats, args.json)
+    failed = sum(1 for r in results if r.status != "pass")
     return 0 if failed == 0 else 1
 
 

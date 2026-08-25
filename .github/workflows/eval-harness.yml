@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Validate scripts
         run: |
-          python3 -m py_compile scripts/eval_planlegger.py scripts/eval_koder_brief.py scripts/eval_golden_trace.py
+          python3 -m py_compile scripts/eval_common.py scripts/eval_planlegger.py scripts/eval_koder_brief.py scripts/eval_golden_trace.py
       - name: Validate eval matrices
         run: |
           python3 - <<'PY'

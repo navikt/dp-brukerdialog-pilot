@@ -20,7 +20,7 @@
   {
     "id": 3,
     "suite": "policy",
-    "prompt": "Oppdater personalia-flyt slik at adresse normaliseres før lagring, uten auth-endringer.",
+    "prompt": "Oppdater lagringslogikken for personopplysninger (adresse, fødselsnummer og navn) slik at adressen normaliseres før lagring i databasen, uten auth-endringer.",
     "expected": {
       "sti": "komplisert",
       "planreview": "ja"
