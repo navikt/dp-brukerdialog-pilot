@@ -216,6 +216,10 @@ seedes), `prompt` (det ekte oppdraget) og `expect_contains`/`expect_no_commit`.
 
 Workflowen `.github/workflows/eval-harness.yml` kjører:
 - statiske sjekker av scripts + eval-filer
+- `scripts/validate_plugin_schema.py`: validerer at agent-/skill-frontmatter
+  har påkrevde felt, at `name` matcher filnavn/mappenavn, og at
+  agent-/skill-antall i `package-manifest.json` stemmer med det som faktisk
+  finnes på disk. Ingen Copilot-lisens kreves for denne sjekken.
 
 Live-eval kjøres lokalt:
 

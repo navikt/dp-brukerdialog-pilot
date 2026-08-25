@@ -29,3 +29,6 @@ jobs:
               data = json.loads(path.read_text(encoding="utf-8"))
               assert isinstance(data, list) and data, f"{rel} must be a non-empty list"
           PY
+      - name: Validate plugin schema (agents, skills, manifests)
+        run: |
+          python3 scripts/validate_plugin_schema.py
