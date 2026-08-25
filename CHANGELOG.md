@@ -6,6 +6,11 @@ Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnu
 ## [0.2.0]
 
 ### Lagt til
+- `.github/plugin/marketplace.json`: riktig marketplace-manifest for
+  distribusjon (`copilot plugin marketplace add` + `copilot plugin install
+  <navn>@<marketplace>`), i stedet for direkte sti-/repo-install som CLI-en nå
+  advarer om at blir faset ut. Den gamle, uoffisielle `package-manifest.json`
+  (som CLI-en aldri faktisk leste) er fjernet.
 - To nye scenarioer i `eval_integration.py`: komplisert sti (offentlig
   API-kontraktendring i en DTO) og persondata-stopp-punkt (fødselsnummer-
   endepunkt). Sistnevnte innfører `expect_no_file_changes`-assertion, som
@@ -14,8 +19,9 @@ Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnu
   `--no-ask-user`), i stedet for å gjette seg videre.
 - CI-sjekk (`scripts/validate_plugin_schema.py`) som validerer agent-/skill-
   frontmatter (påkrevde felt, `name` matcher filnavn/mappenavn) og at
-  agent-/skill-antall i `package-manifest.json` stemmer med det som faktisk
-  finnes på disk. Kjører uten Copilot-lisens, som en del av CI-gaten.
+  `.github/plugin/marketplace.json` ikke har driftet fra `plugin/plugin.json`
+  (feil `source`-sti, eller name/version-mismatch). Kjører uten
+  Copilot-lisens, som en del av CI-gaten.
 - Ekte end-to-end integrasjonstest (`scripts/eval_integration.py`,
   `eval/integration-tests.json`): kjører `planlegger` med `--allow-all-tools`
   mot en engangs git-scratch-repo og verifiserer det faktiske filresultatet

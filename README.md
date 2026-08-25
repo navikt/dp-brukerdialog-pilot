@@ -11,7 +11,7 @@ Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
 Plugin-filer:
 
 ```text
-package-manifest.json
+.github/plugin/marketplace.json
 plugin/plugin.json
 plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
@@ -28,12 +28,22 @@ Målet i første versjon var en bevisst liten plugin med:
 Vi har siden lagt til 3 domain-preset-skills (se "Domain-preset-skills" under) for å gjøre
 `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse opp agent-promptet.
 
-## Installer lokalt
+## Installer
 
-Fra repo-roten:
+Direkte install fra sti/repo/URL er under utfasing i Copilot CLI ("Direct plugin installs
+(repos, URLs, local paths) are deprecated"). Bruk marketplace-oppsettet i stedet:
 
 ```bash
-copilot plugin install ./plugin
+copilot plugin marketplace add <owner>/dp-brukerdialog-pilot
+copilot plugin install dp-brukerdialog-pilot@dp-brukerdialog-pilot
+```
+
+For lokal utvikling (uten å pushe til GitHub først) kan du legge til marketplacet fra en
+lokal sti:
+
+```bash
+copilot plugin marketplace add /full/sti/til/dp-brukerdialog-pilot
+copilot plugin install dp-brukerdialog-pilot@dp-brukerdialog-pilot
 ```
 
 Verifiser installasjon:
@@ -87,19 +97,20 @@ sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer f
 innebygd tekst er at de er lettere å teste/utvide isolert, og at de er tydelig
 tilgjengelige for andre agenter/verktøy som leser skills uavhengig av `planlegger`.
 
-## Oppdatere lokal installasjon etter endringer
+## Oppdatere installasjon etter endringer
 
-Hvis du endrer agentfiler/manifest, installer på nytt:
+Hvis du endrer agentfiler/skills/manifest, oppdater marketplacet og installer på nytt:
 
 ```bash
-copilot plugin install ./plugin
+copilot plugin marketplace update dp-brukerdialog-pilot
+copilot plugin install dp-brukerdialog-pilot@dp-brukerdialog-pilot
 ```
 
 Eventuelt fjern og installer igjen:
 
 ```bash
 copilot plugin uninstall dp-brukerdialog-pilot
-copilot plugin install ./plugin
+copilot plugin install dp-brukerdialog-pilot@dp-brukerdialog-pilot
 ```
 
 Dette er bevisst for å holde pluginen liten og enkel å bygge videre på.
@@ -230,8 +241,9 @@ Workflowen `.github/workflows/eval-harness.yml` kjører:
 - statiske sjekker av scripts + eval-filer
 - `scripts/validate_plugin_schema.py`: validerer at agent-/skill-frontmatter
   har påkrevde felt, at `name` matcher filnavn/mappenavn, og at
-  agent-/skill-antall i `package-manifest.json` stemmer med det som faktisk
-  finnes på disk. Ingen Copilot-lisens kreves for denne sjekken.
+  `.github/plugin/marketplace.json` ikke har driftet fra `plugin/plugin.json`
+  (feil `source`-sti, eller name/version-mismatch). Ingen Copilot-lisens
+  kreves for denne sjekken.
 
 Live-eval kjøres lokalt:
 

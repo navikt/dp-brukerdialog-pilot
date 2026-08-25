@@ -3,8 +3,9 @@
 This is a cheap CI-safe check (stdlib only, no live copilot invocation) that
 catches the kind of mistake that would otherwise only surface as a confusing
 runtime error from `copilot plugin install`: missing required frontmatter
-fields, a name that doesn't match its filename/directory, or a manifest
-skill/agent count that's drifted out of sync with what's actually on disk.
+fields, a name that doesn't match its filename/directory, or the
+`.github/plugin/marketplace.json` entry drifting out of sync (wrong source
+path, or name/version mismatch) with `plugin/plugin.json`.
 """
 from __future__ import annotations
 
@@ -116,28 +117,48 @@ def validate_manifests(agent_count: int, skill_count: int) -> list[str]:
         if field not in plugin_json:
             errors.append(f"{plugin_json_path}: mangler felt '{field}'")
 
-    manifest_path = REPO_ROOT / "package-manifest.json"
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, FileNotFoundError) as exc:
-        return errors + [f"{manifest_path}: kunne ikke leses som JSON ({exc})"]
+    if agent_count == 0:
+        errors.append(f"{PLUGIN_DIR}: fant ingen agent-filer under agents/")
 
-    packages = manifest.get("packages", [])
-    if not packages:
-        errors.append(f"{manifest_path}: 'packages' er tom eller mangler")
+    marketplace_path = REPO_ROOT / ".github" / "plugin" / "marketplace.json"
+    try:
+        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, FileNotFoundError) as exc:
+        return errors + [f"{marketplace_path}: kunne ikke leses som JSON ({exc})"]
+
+    for field in ("name", "owner", "plugins"):
+        if field not in marketplace:
+            errors.append(f"{marketplace_path}: mangler felt '{field}'")
+
+    plugins = marketplace.get("plugins", [])
+    if not plugins:
+        errors.append(f"{marketplace_path}: 'plugins' er tom eller mangler")
         return errors
 
-    package = packages[0]
-    if package.get("agents") != agent_count:
-        errors.append(
-            f"{manifest_path}: packages[0].agents={package.get('agents')!r}, "
-            f"men fant {agent_count} agent-filer på disk"
-        )
-    if package.get("skills") != skill_count:
-        errors.append(
-            f"{manifest_path}: packages[0].skills={package.get('skills')!r}, "
-            f"men fant {skill_count} skill-mapper på disk"
-        )
+    for entry in plugins:
+        source = entry.get("source")
+        if not source:
+            errors.append(f"{marketplace_path}: plugin-oppføring mangler 'source'")
+            continue
+        source_dir = (REPO_ROOT / source).resolve()
+        if not source_dir.is_dir():
+            errors.append(f"{marketplace_path}: source={source!r} finnes ikke som mappe")
+            continue
+        source_plugin_json = source_dir / "plugin.json"
+        if not source_plugin_json.exists():
+            errors.append(f"{marketplace_path}: {source} mangler plugin.json")
+            continue
+        source_plugin = json.loads(source_plugin_json.read_text(encoding="utf-8"))
+        if entry.get("name") != source_plugin.get("name"):
+            errors.append(
+                f"{marketplace_path}: plugin name={entry.get('name')!r} matcher ikke "
+                f"{source_plugin_json}.name={source_plugin.get('name')!r}"
+            )
+        if entry.get("version") != source_plugin.get("version"):
+            errors.append(
+                f"{marketplace_path}: plugin version={entry.get('version')!r} matcher ikke "
+                f"{source_plugin_json}.version={source_plugin.get('version')!r} (versjonsdrift)"
+            )
 
     return errors
 

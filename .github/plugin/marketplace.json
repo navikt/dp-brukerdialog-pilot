@@ -1,0 +1,18 @@
+{
+  "name": "dp-brukerdialog-pilot",
+  "owner": {
+    "name": "Team dagpenger"
+  },
+  "metadata": {
+    "description": "Marketplace for Team dagpenger sin AI-pilot: planlegger-agent som delegerer kodeoppgaver til en koder-agent, med domain-preset-skills for Nav-typiske oppgaver.",
+    "version": "0.2.0"
+  },
+  "plugins": [
+    {
+      "name": "dp-brukerdialog-pilot",
+      "description": "Minimal plugin med en planlegger-agent som kan delegere kodeoppgaver til en koder-agent.",
+      "version": "0.2.0",
+      "source": "./plugin"
+    }
+  ]
+}
