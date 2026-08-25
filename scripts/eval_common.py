@@ -11,12 +11,53 @@ from __future__ import annotations
 
 import json
 import shutil
+import sqlite3
 import subprocess
 import sys
+import uuid
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
+
+SESSION_STORE_DB = Path.home() / ".copilot" / "session-store.db"
+SESSION_STATE_DIR = Path.home() / ".copilot" / "session-state"
+
+# Child tables keyed by session_id that must be cleaned up alongside a
+# deleted session row, to avoid orphaned data in session-store.db.
+_SESSION_CHILD_TABLES = (
+    "turns",
+    "checkpoints",
+    "session_files",
+    "session_refs",
+    "search_index",
+    "forge_trajectory_events",
+    "assistant_usage_events",
+)
+
+
+def delete_eval_session(session_id: str) -> None:
+    """Best-effort delete of a single local session (DB rows + on-disk state).
+
+    Never raises: eval results matter more than cleanup succeeding. A locked
+    or missing session-store.db (e.g. another copilot process holding a
+    write lock) should not fail the eval run.
+    """
+    try:
+        if SESSION_STORE_DB.exists():
+            con = sqlite3.connect(SESSION_STORE_DB, timeout=5)
+            try:
+                with con:
+                    for table in _SESSION_CHILD_TABLES:
+                        con.execute(f"DELETE FROM {table} WHERE session_id = ?", (session_id,))
+                    con.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
+            finally:
+                con.close()
+    except sqlite3.Error:
+        pass
+    session_dir = SESSION_STATE_DIR / session_id
+    if session_dir.exists():
+        shutil.rmtree(session_dir, ignore_errors=True)
 
 
 def load_json(path: Path) -> list[dict[str, Any]]:
@@ -63,13 +104,34 @@ def require_copilot_bin(copilot_bin: str) -> bool:
     return True
 
 
-def run_copilot(copilot_bin: str, agent: str, prompt: str) -> str:
-    command = [copilot_bin, "--agent", agent, "-p", prompt, "-s", "--no-ask-user"]
+def run_copilot(copilot_bin: str, agent: str, prompt: str, keep_session: bool = False) -> str:
+    """Run one copilot invocation and, by default, delete the local session it creates.
+
+    Each call spins up a throwaway session purely for the eval prompt/response;
+    keeping those around just fills up the session list. Set keep_session=True
+    (e.g. via --keep-sessions) to inspect a run afterwards for debugging.
+    """
+    session_id = str(uuid.uuid4())
+    command = [
+        copilot_bin,
+        "--agent",
+        agent,
+        "-p",
+        prompt,
+        "-s",
+        "--no-ask-user",
+        "--session-id",
+        session_id,
+    ]
     completed = subprocess.run(command, capture_output=True, text=True)
-    if completed.returncode != 0:
-        error_text = completed.stderr.strip() or completed.stdout.strip() or "unknown error"
-        raise RuntimeError(error_text)
-    return completed.stdout.strip()
+    try:
+        if completed.returncode != 0:
+            error_text = completed.stderr.strip() or completed.stdout.strip() or "unknown error"
+            raise RuntimeError(error_text)
+        return completed.stdout.strip()
+    finally:
+        if not keep_session:
+            delete_eval_session(session_id)
 
 
 def aggregate_actuals(

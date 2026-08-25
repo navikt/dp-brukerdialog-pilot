@@ -105,13 +105,19 @@ def parse_koder_status(text: str) -> dict[str, str] | None:
     }
 
 
-def run_trace_once(copilot_bin: str, planlegger_agent: str, koder_agent: str, user_prompt: str) -> dict[str, str] | None:
-    brief_raw = run_copilot(copilot_bin, planlegger_agent, f"{PLANLEGGER_WRAPPER}{user_prompt}")
+def run_trace_once(
+    copilot_bin: str,
+    planlegger_agent: str,
+    koder_agent: str,
+    user_prompt: str,
+    keep_sessions: bool = False,
+) -> dict[str, str] | None:
+    brief_raw = run_copilot(copilot_bin, planlegger_agent, f"{PLANLEGGER_WRAPPER}{user_prompt}", keep_sessions)
     brief = parse_brief(brief_raw, REQUIRED_BRIEF_FIELDS, include_raw=True)
     if brief is None:
         return None
 
-    koder_raw = run_copilot(copilot_bin, koder_agent, f"{KODER_WRAPPER}{brief['raw']}")
+    koder_raw = run_copilot(copilot_bin, koder_agent, f"{KODER_WRAPPER}{brief['raw']}", keep_sessions)
     koder = parse_koder_status(koder_raw)
     if koder is None:
         return None
@@ -166,6 +172,11 @@ def main() -> int:
     parser.add_argument("--koder-agent", default=f"{plugin_name}:koder", help="Koder agent name")
     parser.add_argument("--suite", choices=("all", "smoke", "policy"), default="all", help="Test suite selector")
     parser.add_argument("--repeats", type=int, default=1, help="How many runs per test (majority vote)")
+    parser.add_argument(
+        "--keep-sessions",
+        action="store_true",
+        help="Don't delete the local copilot sessions created by each run (default: delete)",
+    )
     parser.add_argument("--run", action="store_true", help="Run tests")
     parser.add_argument("--json", action="store_true", help="Output JSON summary")
     args = parser.parse_args()
@@ -191,7 +202,7 @@ def main() -> int:
 
         try:
             actuals = [
-                run_trace_once(args.copilot_bin, args.planlegger_agent, args.koder_agent, prompt)
+                run_trace_once(args.copilot_bin, args.planlegger_agent, args.koder_agent, prompt, args.keep_sessions)
                 for _ in range(args.repeats)
             ]
             actual, majority_note, has_majority = aggregate_actuals(actuals, args.repeats, key_fields=KEY_FIELDS)

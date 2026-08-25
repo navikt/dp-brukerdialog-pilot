@@ -102,6 +102,18 @@ copilot plugin install ./plugin
 
 Dette er bevisst for å holde pluginen liten og enkel å bygge videre på.
 
+## Sesjonsopprydding for eval-kjøringer
+
+Hver `copilot -p`-kjøring i eval-harnessen oppretter en lokal sesjon. Som default sletter
+harnessen sesjonen (DB-rader i `~/.copilot/session-store.db` + `~/.copilot/session-state/<id>/`)
+rett etter hver kjøring, slik at sesjonslisten ikke fylles opp av testkjøringer.
+
+Bruk `--keep-sessions` for å beholde sesjonene (f.eks. for å feilsøke en enkelt kjøring):
+
+```bash
+python3 scripts/eval_planlegger.py --run --keep-sessions
+```
+
 ## Eval-harness
 
 Kjør faste prompts mot `planlegger` og score beslutningene automatisk:

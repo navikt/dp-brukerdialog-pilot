@@ -89,6 +89,11 @@ def main() -> int:
     parser.add_argument("--copilot-bin", default="copilot", help="Copilot CLI binary")
     parser.add_argument("--suite", choices=("all", "smoke", "policy"), default="all", help="Test suite selector")
     parser.add_argument("--repeats", type=int, default=1, help="How many runs per test")
+    parser.add_argument(
+        "--keep-sessions",
+        action="store_true",
+        help="Don't delete the local copilot sessions created by each run (default: delete)",
+    )
     parser.add_argument("--run", action="store_true", help="Run tests")
     parser.add_argument("--json", action="store_true", help="Output JSON summary")
     args = parser.parse_args()
@@ -115,7 +120,7 @@ def main() -> int:
         expected = {k: str(v).lower() for k, v in test["expected"].items()}
         try:
             run_actuals = [
-                parse_brief(run_copilot(args.copilot_bin, agent, f"{WRAPPER_PREFIX}{prompt}"), REQUIRED_FIELDS)
+                parse_brief(run_copilot(args.copilot_bin, agent, f"{WRAPPER_PREFIX}{prompt}", args.keep_sessions), REQUIRED_FIELDS)
                 for _ in range(args.repeats)
             ]
             actual, majority_note, has_majority = aggregate_actuals(run_actuals, args.repeats, key_fields=KEY_FIELDS)
