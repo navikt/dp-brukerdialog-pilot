@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "suite": "smoke",
+    "prompt": "KODER_BRIEF\nMål: Legg til en ny GET /status/helse-endepunkt som returnerer 200 OK\nSti: enkel\nKrever planreview: nei\nScope: 1 fil\nIkke gjør: ingen auth-endringer, ingen nye dependencies\nAkseptkriterier:\n- GET /status/helse-endepunkt returnerer 200 OK\nBerørte filer:\n- src/main/kotlin/routes/StatusRoutes.kt\nVerifisering:\n- ./gradlew test\nNye avhengigheter: ingen\nRisiko: lav - isolert endepunkt uten sideeffekter\nGit-policy: ny branch: ja, auto-commit: nei\n\nKoders rapport:\nStatus: DONE\nEndrede filer:\n- src/main/kotlin/routes/StatusRoutes.kt\nHva ble gjort:\n- La til GET /status/helse-endepunkt som returnerer 200 OK\nVerifisering:\n- ./gradlew test: BUILD SUCCESSFUL, alle tester grønne\nAvvik fra brief:\n- ingen",
+    "expected": {
+      "status": "approved"
+    }
+  },
+  {
+    "id": 2,
+    "suite": "policy",
+    "prompt": "KODER_BRIEF\nMål: Legg til validering av telefonnummer i søknadsskjema\nSti: enkel\nKrever planreview: nei\nScope: 1 fil\nIkke gjør: ingen nye dependencies\nAkseptkriterier:\n- Telefonnummer valideres mot norsk format før lagring\nBerørte filer:\n- src/main/kotlin/validation/SoknadValidator.kt\nVerifisering:\n- ./gradlew test\nNye avhengigheter: ingen\nRisiko: lav - isolert valideringslogikk\nGit-policy: ny branch: ja, auto-commit: nei\n\nKoders rapport:\nStatus: DONE\nEndrede filer:\n- src/main/kotlin/validation/SoknadValidator.kt\n- build.gradle.kts\nHva ble gjort:\n- La til telefonnummer-validering\n- La til biblioteket libphonenumber som ny dependency for å validere formatet\nVerifisering:\n- ./gradlew test: BUILD SUCCESSFUL\nAvvik fra brief:\n- La til libphonenumber som ny dependency, selv om briefet sa ingen nye dependencies",
+    "expected": {
+      "status": "needs_changes"
+    }
+  },
+  {
+    "id": 3,
+    "suite": "policy",
+    "prompt": "KODER_BRIEF\nMål: Fiks feilhåndtering i SAF-klienten ved 500-feil\nSti: enkel\nKrever planreview: nei\nScope: 1 fil\nIkke gjør: ingen nye dependencies\nAkseptkriterier:\n- 500-feil fra SAF håndteres uten å kaste ufanget exception\nBerørte filer:\n- src/main/kotlin/client/SafClient.kt\nVerifisering:\n- ./gradlew test --tests SafClientTest\nNye avhengigheter: ingen\nRisiko: lav - isolert feilhåndtering\nGit-policy: ny branch: ja, auto-commit: nei\n\nKoders rapport:\nStatus: DONE_WITH_CONCERNS\nEndrede filer:\n- src/main/kotlin/client/SafClient.kt\nHva ble gjort:\n- La til try/catch rundt 500-feil fra SAF\nVerifisering:\n- Rakk ikke å kjøre ./gradlew test --tests SafClientTest før tiden løp ut, koden er ikke verifisert\nAvvik fra brief:\n- Verifiseringssteget i briefet er ikke faktisk kjørt",
+    "expected": {
+      "status": "needs_changes"
+    }
+  },
+  {
+    "id": 4,
+    "suite": "policy",
+    "prompt": "KODER_BRIEF\nMål: Legg til logging av innkommende søknader for feilsøking\nSti: komplisert\nKrever planreview: ja\nScope: 1 fil\nIkke gjør: ikke logg persondata\nAkseptkriterier:\n- Innkommende søknader logges med søknads-id og tidspunkt\nBerørte filer:\n- src/main/kotlin/api/SoknadRoutes.kt\nVerifisering:\n- ./gradlew test\nNye avhengigheter: ingen\nRisiko: middels - logging kan lekke persondata hvis feil felt inkluderes\nGit-policy: ny branch: ja, auto-commit: nei\n\nKoders rapport:\nStatus: DONE\nEndrede filer:\n- src/main/kotlin/api/SoknadRoutes.kt\nHva ble gjort:\n- La til logger.info som logger søknads-id, tidspunkt, samt søkerens fødselsnummer og fulle navn for enklere feilsøking\nVerifisering:\n- ./gradlew test: BUILD SUCCESSFUL\nAvvik fra brief:\n- ingen",
+    "expected": {
+      "status": "blocked"
+    }
+  }
+]

@@ -17,6 +17,9 @@ Each test case describes:
   unchanged (used for stopp-punkt tests, where planlegger should refuse to
   delegate/edit anything without explicit confirmation it can't get since
   the harness runs with --no-ask-user)
+- expect_output_contains: substrings that must appear in planlegger's final
+  response text (e.g. its required `Reviewer: <status>` summary line), used
+  to verify the reviewer-step actually ran as part of the real flow
 """
 from __future__ import annotations
 
@@ -89,9 +92,13 @@ def run_real_task(copilot_bin: str, agent: str, prompt: str, scratch: Path, time
             delete_eval_session(session_id)
 
 
-def check_test(test: dict[str, Any], scratch: Path) -> list[str]:
+def check_test(test: dict[str, Any], scratch: Path, output: str = "") -> list[str]:
     """Return a list of failure reasons (empty means the test passed)."""
     failures: list[str] = []
+
+    for needle in test.get("expect_output_contains", []):
+        if needle not in output:
+            failures.append(f"agentens sluttsvar mangler forventet tekst: {needle!r}")
 
     for rel_path, needles in test.get("expect_contains", {}).items():
         target = scratch / rel_path
@@ -168,7 +175,7 @@ def main() -> int:
                 failed += 1
                 continue
 
-            failures = check_test(test, scratch)
+            failures = check_test(test, scratch, output)
             if failures:
                 print(f"[FAIL ] {test_id}: {'; '.join(failures)}")
                 failed += 1

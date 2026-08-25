@@ -32,5 +32,18 @@
     },
     "expect_no_file_changes": true,
     "expect_no_commit": true
+  },
+  {
+    "id": 4,
+    "suite": "smoke",
+    "prompt": "Legg til en ny funksjon 'fun leggTil(a: Int, b: Int): Int = a + b' i src/Calc.kt. Ikke gjør andre endringer, ikke commit.",
+    "fixture": {
+      "src/Calc.kt": "// kalkulator-hjelpefunksjoner\n"
+    },
+    "expect_contains": {
+      "src/Calc.kt": ["fun leggTil"]
+    },
+    "expect_no_commit": true,
+    "expect_output_contains": ["Reviewer:"]
   }
 ]

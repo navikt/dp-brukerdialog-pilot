@@ -141,6 +141,8 @@ ekstra felt som skal tvinges inn i `KODER_BRIEF`.
 
 - `planlegger`: `gpt-5.4`
 - `koder`: `gpt-5.4-mini`
+- `reviewer`: `gemini-3.7-flash` (annen modellfamilie enn koder/planlegger for å unngå
+  delte blindsoner, samtidig lett/rask-tier for lav kost)
 - Planreview ved komplisert sti bruker Copilot sin valgte review-modell.
 - Innebygd `rubber-duck` er Copilot-styrt (se "Sti og planreview" for når den skal brukes).
 
@@ -175,6 +177,8 @@ ekstra felt som skal tvinges inn i `KODER_BRIEF`.
 Når du avslutter en oppgave, skal du alltid nevne kort:
 - hva som bør verifiseres nøye
 - eventuelle usikkerheter eller antakelser som bør sjekkes videre
+- `Reviewer: <APPROVED|NEEDS_CHANGES|BLOCKED>`, eller `Reviewer: hoppet over (ingen
+  filendringer)` hvis reviewer-steget ikke ble kjørt
 
 ## Status-kontrakt mellom agenter
 
@@ -185,6 +189,29 @@ Planlegger skal tolke og returnere én av disse statusene fra `koder`:
 - `NEEDS_DECISION`: krever eksplisitt valg fra bruker
 - `BLOCKED`: stoppet av ekstern blokkering
 
+Planlegger skal tolke og returnere én av disse statusene fra `reviewer`:
+- `APPROVED`: diffen samsvarer med brief, ingen brudd
+- `NEEDS_CHANGES`: konkret, avgrenset endring må gjøres av `koder` før FERDIG
+- `BLOCKED`: stopp-punkt-policy brutt, eller alvorlig avvik som krever brukerens
+  avklaring
+
+## Reviewer-steg
+
+- Etter at `koder` returnerer `DONE` eller `DONE_WITH_CONCERNS` (altså faktisk har
+  endret filer), deleger alltid videre til `reviewer` med det opprinnelige
+  `KODER_BRIEF` + `koder`s statusrapport — uansett `Sti` (enkel eller komplisert).
+- Hopp over reviewer-steget hvis `koder` returnerte `NEEDS_CONTEXT`, `NEEDS_DECISION`
+  eller `BLOCKED` (ingen diff å reviewe).
+- Bruk progresjonsetiketten `VALIDERER` mens reviewer kjører.
+- Ved `Reviewer-status: APPROVED`: gå videre til `FERDIG` som normalt.
+- Ved `Reviewer-status: NEEDS_CHANGES`: send reviewers konkrete punkt som et nytt,
+  avgrenset oppfølgingsbrief til `koder`. Maks 1 slik retry-runde. Hvis `reviewer`
+  fortsatt returnerer `NEEDS_CHANGES` etter runde 2, ikke fortsett loopen — bruk
+  handoff-malen under "Stopp-punkter"/`STOPPET` og eskaler til bruker med hva som
+  gjenstår.
+- Ved `Reviewer-status: BLOCKED`: ikke fortsett automatisk. Bruk handoff-malen og
+  stopp med `STOPPET`, uansett hvor liten endringen ellers virker.
+
 ## Arbeidsmåte
 
 1. Oppsummer brukerens mål i 1–2 setninger.
@@ -193,7 +220,9 @@ Planlegger skal tolke og returnere én av disse statusene fra `koder`:
 4. Lag `KODER_BRIEF` med alle felter.
 5. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon.
 6. Deleger til `koder`.
-7. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
+7. Hvis `koder` faktisk endret filer, deleger videre til `reviewer` (se
+   "Reviewer-steg").
+8. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
 
 ## Obligatorisk briefformat
 

@@ -1,8 +1,10 @@
 # dp-brukerdialog-pilot
 
-En enkel AI-pilot som **ren Copilot-plugin** med to agenter:
+En enkel AI-pilot som **ren Copilot-plugin** med tre agenter:
 - `planlegger` (synlig for bruker)
 - `koder` (intern, delegert av planlegger)
+- `reviewer` (intern, delegert av planlegger etter koder — kvalitetssjekker den
+  faktiske diffen før planlegger rapporterer FERDIG)
 
 Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
 
@@ -15,6 +17,7 @@ Plugin-filer:
 plugin/plugin.json
 plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
+plugin/agents/reviewer.agent.md
 plugin/skills/api-kafka/SKILL.md
 plugin/skills/db-migrasjon/SKILL.md
 plugin/skills/persondata/SKILL.md
@@ -198,6 +201,23 @@ Dette sjekker:
 - at `Sti` og `Krever planreview` matcher forventet golden-trace
 - at `koder`-status er innenfor forventet statussett per test
 
+## Reviewer-harness
+
+Valider at `reviewer`-agenten returnerer riktig verdikt (`APPROVED`/`NEEDS_CHANGES`/
+`BLOCKED`) gitt et syntetisk `KODER_BRIEF` + `koder`s statusrapport:
+
+```bash
+python3 scripts/eval_reviewer.py --run --repeats 3
+```
+
+Dette sjekker at reviewer:
+- godkjenner en ren diff som samsvarer med briefet (`APPROVED`)
+- krever endring ved rapportert `Ikke gjør`-brudd, f.eks. en ugodkjent ny
+  dependency (`NEEDS_CHANGES`)
+- krever endring ved manglende/uekte verifisering (`NEEDS_CHANGES`)
+- blokkerer ved rapportert stopp-punkt-brudd, f.eks. fødselsnummer logget i
+  vanlig logg (`BLOCKED`), uansett hvor liten endringen ellers virker
+
 ## Ekte integrasjonstest (scratch-repo)
 
 De andre harnessene er simulerte kontrakttester ("ikke bruk verktøy, ikke gjør
@@ -219,9 +239,9 @@ Dette:
 
 Testene defineres i `eval/integration-tests.json` med `fixture` (filer som
 seedes), `prompt` (det ekte oppdraget) og
-`expect_contains`/`expect_no_commit`/`expect_no_file_changes`.
+`expect_contains`/`expect_no_commit`/`expect_no_file_changes`/`expect_output_contains`.
 
-Suiten dekker tre reelle scenarioer:
+Suiten dekker fire reelle scenarioer:
 - `smoke` (id 1): enkel sti, direkte filendring uten planreview.
 - `policy` (id 2): komplisert sti (offentlig API-kontraktendring) — verifiserer
   at oppgaven fortsatt fullføres korrekt end-to-end selv når den krever et
@@ -231,9 +251,19 @@ Suiten dekker tre reelle scenarioer:
   den treffer et stopp-punkt den ikke kan få bekreftet (harnessen kjører med
   `--no-ask-user`), altså at den fail-closed-oppfører seg trygt i stedet for å
   gjette seg videre.
+- `smoke` (id 4): verifiserer at reviewer-steget faktisk trigges i den ekte
+  flyten, ved å sjekke at planleggers sluttsvar inneholder den obligatoriske
+  `Reviewer: <status>`-linjen.
 
 > Denne harnessen tar vesentlig lengre tid enn de andre (ekte agentkjøring med
 > verktøy), så den er ikke ment å kjøres med høy `--repeats` som de andre.
+
+> **Kjent flakiness:** scenario id 2 (komplisert sti) kan av og til feile fordi
+> modellen (falt tilbake til `auto` siden `gpt-5.4` ikke er tilgjengelig i
+> dette miljøet) enten stopper med et unødvendig avklaringsspørsmål eller
+> hevder å ha gjort en endring uten faktisk å ha kalt verktøyet. Dette er
+> bekreftet å være modell-flakiness som fantes før reviewer-agenten ble lagt
+> til (reprodusert identisk på forrige plugin-versjon), ikke en regresjon.
 
 ## CI-gate
 
@@ -254,5 +284,7 @@ python3 scripts/eval_koder_brief.py --run --suite smoke --repeats 3
 python3 scripts/eval_koder_brief.py --run --suite policy --repeats 5
 python3 scripts/eval_golden_trace.py --run --suite smoke --repeats 3
 python3 scripts/eval_golden_trace.py --run --suite policy --repeats 5
+python3 scripts/eval_reviewer.py --run --suite smoke --repeats 3
+python3 scripts/eval_reviewer.py --run --suite policy --repeats 5
 python3 scripts/eval_integration.py --run
 ```

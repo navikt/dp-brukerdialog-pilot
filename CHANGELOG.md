@@ -3,6 +3,31 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.3.0]
+
+### Lagt til
+- Ny intern agent `reviewer` (`plugin/agents/reviewer.agent.md`, modell
+  `gemini-3.7-flash` — bevisst en annen modellfamilie enn `koder`/`planlegger`
+  for å unngå delte blindsoner, samtidig en lett/rask-tier for lav kost).
+  Delegeres av `planlegger` etter at `koder` er ferdig, men før `FERDIG`
+  rapporteres til bruker. Sjekker den faktiske diffen (ikke planen — det gjør
+  planreview allerede) opp mot brief: akseptkriterier, "ikke gjør"-brudd,
+  scope-kryp, manglende verifisering og stopp-punkt-brudd.
+- Reviewer kjører alltid (uansett sti), men bare når `koder` faktisk endret
+  filer. Ved `NEEDS_CHANGES` sendes ett avgrenset oppfølgingsbrief tilbake til
+  `koder` (maks 1 retry-runde), deretter eskaleres til bruker i stedet for å
+  loope videre. Ved `BLOCKED` (stopp-punkt-brudd) stoppes alltid, uansett
+  hvor liten endringen ellers virker.
+- Planleggers sluttoppsummering inneholder nå alltid en
+  `Reviewer: <APPROVED|NEEDS_CHANGES|BLOCKED>`-linje (eller "hoppet over" hvis
+  ingen filer ble endret), for åpenhet om reviewer-vurderingen.
+- Ny kontraktstest `scripts/eval_reviewer.py` + `eval/reviewer-tests.json` (4
+  scenarier: ren diff, "ikke gjør"-brudd, manglende verifisering,
+  stopp-punkt-brudd).
+- Nytt `expect_output_contains`-assertion i `eval_integration.py` + nytt
+  scenario (id 4) som verifiserer at reviewer-steget faktisk trigges i den
+  ekte ende-til-ende-flyten.
+
 ## [0.2.0]
 
 ### Lagt til
