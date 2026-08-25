@@ -6,6 +6,11 @@ Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnu
 ## [0.2.0]
 
 ### Lagt til
+- Ekte end-to-end integrasjonstest (`scripts/eval_integration.py`,
+  `eval/integration-tests.json`): kjører `planlegger` med `--allow-all-tools`
+  mot en engangs git-scratch-repo og verifiserer det faktiske filresultatet
+  på disk, i motsetning til de andre harnessene som simulerer kontrakten uten
+  verktøybruk.
 - Domain-presets (`API+Kafka`, `DB+migrasjon`, `Persondata`) er trukket ut fra
   `planlegger.agent.md` til egne skills i `plugin/skills/`, hver med trigger,
   default sti/planreview, obligatoriske brief-felt, sjekkliste for `koder` og

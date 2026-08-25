@@ -187,6 +187,31 @@ Dette sjekker:
 - at `Sti` og `Krever planreview` matcher forventet golden-trace
 - at `koder`-status er innenfor forventet statussett per test
 
+## Ekte integrasjonstest (scratch-repo)
+
+De andre harnessene er simulerte kontrakttester ("ikke bruk verktøy, ikke gjør
+filendringer") og kan derfor ikke fange feil i selve verktøybruken. Denne
+harnessen kjører et ekte oppdrag med verktøy skrudd på, i en engangs
+git-scratch-repo, og verifiserer det faktiske resultatet på disk:
+
+```bash
+python3 scripts/eval_integration.py --run
+```
+
+Dette:
+- oppretter en midlertidig git-repo med gitt fixture-innhold
+- kjører `planlegger` mot den med `--allow-all-tools` (ekte fil-/verktøybruk)
+- sjekker at forventet innhold faktisk finnes i filene etterpå
+- sjekker at det ikke ble gjort en uventet commit (policy: ingen auto-commit)
+- rydder opp scratch-repo og lokal sesjon automatisk (`--keep-scratch` /
+  `--keep-sessions` for å beholde dem ved feilsøking)
+
+Testene defineres i `eval/integration-tests.json` med `fixture` (filer som
+seedes), `prompt` (det ekte oppdraget) og `expect_contains`/`expect_no_commit`.
+
+> Denne harnessen tar vesentlig lengre tid enn de andre (ekte agentkjøring med
+> verktøy), så den er ikke ment å kjøres med høy `--repeats` som de andre.
+
 ## CI-gate
 
 Workflowen `.github/workflows/eval-harness.yml` kjører:
@@ -201,4 +226,5 @@ python3 scripts/eval_koder_brief.py --run --suite smoke --repeats 3
 python3 scripts/eval_koder_brief.py --run --suite policy --repeats 5
 python3 scripts/eval_golden_trace.py --run --suite smoke --repeats 3
 python3 scripts/eval_golden_trace.py --run --suite policy --repeats 5
+python3 scripts/eval_integration.py --run
 ```

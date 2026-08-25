@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "suite": "smoke",
+    "prompt": "Legg til en ny seksjon '## Status' med teksten 'Under utvikling' nederst i README.md. Ikke gjør andre endringer, ikke commit.",
+    "fixture": {
+      "README.md": "# Test repo\n\nDette er en test.\n"
+    },
+    "expect_contains": {
+      "README.md": ["## Status", "Under utvikling"]
+    },
+    "expect_no_commit": true
+  }
+]
