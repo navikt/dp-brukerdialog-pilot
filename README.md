@@ -4,6 +4,8 @@ En enkel AI-pilot som **ren Copilot-plugin** med to agenter:
 - `planlegger` (synlig for bruker)
 - `koder` (intern, delegert av planlegger)
 
+Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
+
 ## Copilot-plugin-struktur
 
 Plugin-filer:
