@@ -3,6 +3,24 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.4.3]
+
+### Endret
+- Styrket stopp-punkt-håndhevelsen i `planlegger.agent.md`: sikkerhetstriggere
+  (database, auth, persondata, secrets/infra) sjekkes nå **først**, før
+  implementasjonsdetaljer vurderes. `STOPPUNKT` er gjort til en eksplisitt
+  hard grense — planlegger skal ikke kalle noe verktøy (edit/create/task/bash)
+  etter at `STOPPUNKT` er skrevet i samme tur, og fail-closed gjelder ved tvil.
+  Lagt til eksplisitt regel for å oppdage og avbryte midt i en implementasjon
+  hvis et stopp-punkt-tema dukker opp for sent.
+- Årsak: scenario id 3 (persondata-stopp-punkt) i `eval_integration.py` viste
+  gjentatte ganger at planlegger kunne si i prosa at den stoppet
+  (`NEEDS_DECISION`) men likevel fortsette å implementere endringen —
+  bekreftet modell-agnostisk (samme feilrate på `gpt-5.4`/`auto` og
+  `claude-sonnet-4.6`).
+- Verifisert: 8/8 rene kjøringer av scenario id 3 etter endringen (mot
+  gjentatte brudd før). README oppdatert til å markere id 3 som løst.
+
 ## [0.4.2]
 
 ### Endret

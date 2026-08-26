@@ -292,17 +292,22 @@ Suiten dekker fire reelle scenarioer:
 > Denne harnessen tar vesentlig lengre tid enn de andre (ekte agentkjøring med
 > verktøy), så den er ikke ment å kjøres med høy `--repeats` som de andre.
 
-> **Kjent flakiness:** scenario id 2 (komplisert sti) og id 3
-> (persondata-stopp-punkt) kan av og til feile fordi modellen enten stopper
-> med et unødvendig avklaringsspørsmål, hevder å ha gjort en endring uten
-> faktisk å ha kalt verktøyet, eller — i id 3 sitt tilfelle — sier i prosa at
-> den stopper (`NEEDS_DECISION`/stopp-punkt) men fortsetter å implementere og
-> gjør faktiske filendringer likevel. Dette er bekreftet modell-agnostisk:
-> reprodusert med både `gpt-5.4` (falt tilbake til `auto`, brukt før
-> `planlegger` ble pinnet) og med `claude-sonnet-4.6`/`claude-sonnet-5` i
-> direkte A/B-testing (se CHANGELOG [0.4.1]/[0.4.2]). `planlegger` er nå
-> pinnet til `claude-sonnet-4.6` for å unngå udokumentert `auto`-fallback,
-> men det løser ikke denne kategorien flakiness — kun modellvalg-usikkerheten.
+> **Kjent flakiness:** scenario id 2 (komplisert sti) kan av og til feile fordi
+> modellen enten stopper med et unødvendig avklaringsspørsmål eller hevder å ha
+> gjort en endring uten faktisk å ha kalt verktøyet. Dette er bekreftet
+> modell-agnostisk: reprodusert med både `gpt-5.4` (falt tilbake til `auto`,
+> brukt før `planlegger` ble pinnet) og med `claude-sonnet-4.6`/`claude-sonnet-5`
+> i direkte A/B-testing (se CHANGELOG [0.4.1]/[0.4.2]). `planlegger` er nå
+> pinnet til `claude-sonnet-4.6` for å unngå udokumentert `auto`-fallback, men
+> det løser ikke denne kategorien flakiness — kun modellvalg-usikkerheten.
+>
+> **Løst (tidligere kjent flakiness):** scenario id 3 (persondata-stopp-punkt)
+> viste tidligere samme mønster — sa i prosa at den stoppet (`NEEDS_DECISION`)
+> men fortsatte å implementere likevel. Løst i [0.4.3] ved å gjøre
+> `STOPPUNKT` til en eksplisitt hard grense i `planlegger.agent.md` (ingen
+> verktøykall etter at `STOPPUNKT` er skrevet, fail-closed ved tvil, sjekk
+> triggere før implementasjonsdetaljer). Verifisert 8/8 rene kjøringer etter
+> endringen (mot tydelige brudd før). Følges opp om ny flakiness dukker opp.
 >
 > **Kjent flakiness (2):** for svært små mikro-endringer (se
 > "Mikro-endring-unntak" i `planlegger.agent.md`) hender det fortsatt at

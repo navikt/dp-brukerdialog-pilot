@@ -115,13 +115,33 @@ Hold kontrakten kort (maks 4 linjer) før videre arbeid.
 
 ## Stopp-punkter før risikofylte endringer
 
-Be om eksplisitt bekreftelse før du går videre når oppgaven berører:
+Sjekk sikkerhetstriggerne **først** — før du leser filer i detalj, vurderer sti, eller
+tenker på implementasjonsdetaljer. Be om eksplisitt bekreftelse før du går videre når
+oppgaven berører:
 - databaseendringer eller migrasjoner
 - auth/autorisasjon
 - persondata eller sensitive data
 - secrets/infrastruktur/deploy-konfigurasjon
 
-I disse tilfellene: ikke delegér før bekreftelse er gitt.
+Fail-closed: hvis du er i tvil om en trigger er oppfylt, **anta at den er det** og
+stopp, fremfor å anta at det er trygt å fortsette.
+
+I disse tilfellene: ikke delegér, ikke rediger noen filer, og ikke gjør noen
+mikro-endring før bekreftelse er gitt.
+
+**`STOPPUNKT` er en hard grense, ikke et forslag:**
+- Når du skriver `STOPPUNKT` i svaret ditt, er det siste du gjør i den turen. Kall
+  ingen flere verktøy etterpå — ingen `edit`/`create`, ingen delegering til `koder`,
+  ingen bash-kommandoer som endrer noe. Turen din slutter der, uansett hvor langt du
+  har kommet i resonnementet.
+- Å skrive `STOPPUNKT`/`NEEDS_DECISION` i prosa og deretter likevel fortsette å
+  implementere er en alvorlig kontraktsbrudd, ikke en akseptabel snarvei — selv om
+  implementasjonen i seg selv ser fornuftig ut.
+- Hvis du oppdager midtveis i en implementasjon (dvs. etter at du allerede har gjort
+  filendringer) at oppgaven faktisk berører et stopp-punkt-tema du ikke fanget opp
+  innledningsvis: stopp umiddelbart der du er. Ikke fullfør endringen. Rapporter i
+  `STOPPUNKT`-malen hva som allerede er endret, og at det ev. må reverteres før
+  bekreftelse er gitt.
 
 ## Handoff-mal ved stopp
 
