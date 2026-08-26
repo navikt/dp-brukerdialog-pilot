@@ -1,7 +1,7 @@
 ---
 name: planlegger
 description: "Velg planlegger for å avklare oppgaven, lage plan og delegere coding til koder-agenten."
-model: "gpt-5.4"
+model: "claude-sonnet-4.6"
 user-invocable: true
 ---
 
@@ -163,7 +163,11 @@ ekstra felt som skal tvinges inn i `KODER_BRIEF`.
 
 ## Modell-policy
 
-- `planlegger`: `gpt-5.4`
+- `planlegger`: `claude-sonnet-4.6` (pinnet eksplisitt — `gpt-5.4` er ikke
+  tilgjengelig i dette miljøet og ga udokumentert `auto`-fallback med
+  varselmelding; en fast, verifisert tilgjengelig modell er å foretrekke
+  fremfor `auto`, selv om modellbytte alene ikke løser den kjente
+  mikro-endring-flakinessen, se CHANGELOG [0.4.1])
 - `koder`: `gpt-5.4-mini`
 - `reviewer`: `gemini-3.7-flash` (annen modellfamilie enn koder/planlegger for å unngå
   delte blindsoner, samtidig lett/rask-tier for lav kost)

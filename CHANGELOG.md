@@ -3,6 +3,21 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.4.2]
+
+### Endret
+- Pinnet `planlegger` og `pr-reviewer` til `claude-sonnet-4.6` istedenfor
+  `gpt-5.4` (som ikke er tilgjengelig i dette miljøet og ga udokumentert,
+  varierende `auto`-fallback med varselmelding). En fast, verifisert
+  tilgjengelig modell er bedre praksis enn `auto`, selv om modellbytte alene
+  ikke fikser den kjente instruksjons-flakinessen (se [0.4.1]).
+- Fant og dokumenterte enda et tilfelle av samme flakiness-mønster: scenario
+  id 3 (persondata-stopp-punkt) kan av og til si i prosa at den stopper
+  (`NEEDS_DECISION`) men likevel fortsette å implementere endringen.
+  Bekreftet modell-agnostisk via direkte A/B-test (`gpt-5.4`/`auto` vs.
+  `claude-sonnet-4.6`) — samme feilrate på begge. Dokumentert i README som
+  utvidelse av eksisterende "Kjent flakiness"-note.
+
 ## [0.4.1]
 
 ### Endret
