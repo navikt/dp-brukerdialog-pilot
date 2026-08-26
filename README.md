@@ -2,7 +2,9 @@
 
 En enkel AI-pilot som **ren Copilot-plugin** med fire agenter:
 - `planlegger` (synlig for bruker)
-- `koder` (intern, delegert av planlegger)
+- `koder` (intern, delegert av planlegger — unntak: for svært små, mekaniske
+  mikro-endringer på enkel sti kan planlegger gjøre endringen selv, se
+  "Mikro-endring-unntak" i `plugin/agents/planlegger.agent.md`)
 - `reviewer` (intern, delegert av planlegger etter koder — kvalitetssjekker den
   faktiske diffen før planlegger rapporterer FERDIG)
 - `pr-reviewer` (synlig for bruker, uavhengig av de tre andre — reviewer andres
@@ -296,6 +298,18 @@ Suiten dekker fire reelle scenarioer:
 > hevder å ha gjort en endring uten faktisk å ha kalt verktøyet. Dette er
 > bekreftet å være modell-flakiness som fantes før reviewer-agenten ble lagt
 > til (reprodusert identisk på forrige plugin-versjon), ikke en regresjon.
+>
+> **Kjent flakiness (2):** for svært små mikro-endringer (se
+> "Mikro-endring-unntak" i `planlegger.agent.md`) hender det fortsatt at
+> planlegger feilaktig sier `Reviewer: hoppet over (ingen filendringer)` selv
+> om `git diff` faktisk viser en endring. Instruksjonene ble skjerpet
+> (eksplisitt "scope ≠ ingen endring") og reduserte problemet merkbart i
+> manuell testing, men eliminerte det ikke helt — samme type
+> instruksjonsflakiness som over. Testet på tvers av flere modeller
+> (`gpt-5.4`/`auto`, `claude-sonnet-4.6`, `claude-sonnet-5`); problemet er
+> ikke modellspesifikt. `eval_integration.py` sjekker i dag kun at teksten
+> `Reviewer:` finnes i output, ikke at statusen er semantisk riktig — dette er
+> en kjent svakhet i selve eval-harnessen, ikke bare i agenten.
 
 ## Ekte PR-reviewer-test (scratch-repo)
 

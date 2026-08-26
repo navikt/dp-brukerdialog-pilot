@@ -3,6 +3,30 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.4.1]
+
+### Endret
+- Undersøkte om `planlegger`/`pr-reviewer`s modell (`gpt-5.4`, ikke tilgjengelig i
+  dette miljøet, faller tilbake til `auto`) var årsaken til dokumentert flakiness.
+  Testet `claude-sonnet-4.6` og `claude-sonnet-5` som erstatning — konklusjon:
+  **modellbytte løste ikke problemet** og introduserte i ett tilfelle uleselig
+  tekst (modell-glitch). Beholdt derfor `gpt-5.4` uendret.
+- Fant og fikset en reell logikkfeil underveis: `planlegger` hoppet iblant over
+  formell delegering til `koder` for trivielle 1-fils-endringer og redigerte
+  filen selv, men rapporterte deretter feilaktig `Reviewer: hoppet over (ingen
+  filendringer)` selv når filen faktisk var endret. Dette skjedde uavhengig av
+  modell.
+- Formaliserte dette som et eksplisitt, avgrenset unntak i
+  `planlegger.agent.md` ("Mikro-endring-unntak"): kun på enkel sti, kun for
+  mekaniske få-linjers endringer uten sikkerhetstriggere, og alltid med samme
+  brief- og reviewer-plikt som ved delegering til `koder`.
+- Reviewer-triggeren er nå basert på faktisk `git status`/`git diff`, ikke bare
+  `koder`s returstatus, og instruksjonene presiserer eksplisitt at "endring
+  innenfor scope" ikke er det samme som "ingen endring".
+- Dette reduserte feilraten merkbart i manuell testing, men eliminerte den ikke
+  helt — dokumentert som ny "Kjent flakiness"-note i README, samme kategori som
+  den eksisterende for scenario id 2.
+
 ## [0.4.0]
 
 ### Lagt til
