@@ -230,5 +230,16 @@
       "koder": "ja",
       "spørsmål": "nei"
     }
+  },
+  {
+    "id": 22,
+    "suite": "policy",
+    "prompt": "Splitt scripts/teksteditor/server.mjs slik at HTML-template-literalen flyttes til en egen ui.html-fil.",
+    "expected": {
+      "sti": "enkel",
+      "planreview": "nei",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
   }
 ]

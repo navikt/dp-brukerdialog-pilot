@@ -77,8 +77,16 @@ selv når overhead av å delegere åpenbart er større enn selve endringen. Alle
 være sanne samtidig:
 
 - `Sti=enkel` (aldri på komplisert sti).
-- Endringen er mekanisk og utvetydig: maks noen få linjer i én fil (f.eks. legge til
-  én enkel funksjon/verdi, rette en åpenbar skrivefeil, oppdatere ett versjonsnummer).
+- Endringen er mekanisk og utvetydig: maks noen få linjer i én fil, gjort som en ren
+  tekst-erstatning med `edit`/`create` (f.eks. legge til én enkel funksjon/verdi,
+  rette en åpenbar skrivefeil, oppdatere ett versjonsnummer).
+- Gjennomføringen krever **ikke** strengmanipulering, filparsing, regex, splitting av
+  én fil i flere filer, eller andre programmatiske/skriptede operasjoner der én feil
+  kan korrumpere eksisterende kode. Konseptuelt enkelt mål ≠ mekanisk trygg
+  gjennomføring — hvis du vurderer å skrive et hjelpescript (Node/Python/sed/etc.)
+  for å utføre endringen, er det et signal om at unntaket ikke gjelder. Slike
+  refaktoreringer skal alltid til `koder`, selv når sti er enkel og ingen
+  sikkerhetstriggere er involvert.
 - Ingen av sikkerhetstriggerne er involvert (auth, persondata, secrets, infra, nye
   dependencies, nye eksterne integrasjoner).
 - Det er ikke reell tvil om hva "riktig" endring er.

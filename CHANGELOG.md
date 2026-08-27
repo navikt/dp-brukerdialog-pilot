@@ -3,6 +3,21 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.9.1]
+
+### Rettet
+- **Mikro-endring-unntaket** tillot feilaktig at `planlegger` selv utførte en
+  "konseptuelt enkel" refaktorering (flytte en HTML-template-literal til egen fil)
+  fordi sti=enkel og ingen sikkerhetstrigger var involvert. I praksis krevde det et
+  skriptet søk/erstatt-forsøk som korrumperte importer i `server.mjs` (måtte
+  `git checkout` og re-applisere to bugfixer manuelt) før et nytt forsøk lyktes.
+  Bakgrunn: reell tilbakemelding fra en `planlegger`-sesjon i `dp-brukerdialog-frontend`.
+  Lagt til et eksplisitt kriterium: unntaket gjelder ikke hvis gjennomføringen krever
+  strengmanipulering/filparsing/regex/filsplitting — kun rene `edit`/`create`-erstatninger.
+  Slike refaktoreringer skal alltid til `koder`, uansett hvor enkelt målet virker.
+- Ny eval-scenario (id 22) som dekker nettopp denne casen: fil-splitting via
+  skript skal gi `koder=ja`, ikke selvutført mikro-endring.
+
 ## [0.9.0]
 
 ### Lagt til
