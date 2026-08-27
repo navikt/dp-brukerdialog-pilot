@@ -3,6 +3,24 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.9.2]
+
+### Lagt til
+- `planlegger` gjenkjenner nå spørrende formuleringer i oppgaveteksten
+  ("kanskje vi skal...", "blir det ikke for mye plass da?") som brukerens egen
+  usikkerhet og ønske om reell vurdering — ikke bare en indirekte instruks.
+  Skal svare med en ekte, kort vurdering (fordel/ulempe, egen mening) som del
+  av responsen, ikke bare implementere stille. Dette er **ikke** et nytt
+  stopp-punkt eller `ask_user`-trigger — vurderingen gis i teksten, arbeidet
+  fortsetter i samme tur.
+  Bakgrunn: brukerens egen kommunikasjonsstil legger ofte inn usikre forslag i
+  spørreform under en økt, og ønsket faktisk motspill/vurdering, ikke bare
+  stille utførelse.
+  Merk: dette er en kvalitativ atferdsregel som ikke fanges av den strukturerte
+  JSON-baserte policy-evalen (`eval_planlegger.py` tester kun
+  {sti, planreview, koder, spørsmål}-feltene) — ingen ny automatisert
+  testdekning for denne, kun manuell verifisering ved bruk.
+
 ## [0.9.1]
 
 ### Rettet
