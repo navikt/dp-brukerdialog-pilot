@@ -3,6 +3,35 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.7.0]
+
+### Lagt til
+- `scripts/eval_pr_review.py`: en portabel **fake `gh`-binær** for
+  `pr-reviewer`s gh-fallback-tester, i stedet for å stole på at dette
+  miljøet tilfeldigvis mangler `gh`. Tre `gh_mode`-varianter kan settes per
+  testcase:
+  - `absent`: PATH saneres for et ekte `gh` (fjerner enhver PATH-mappe med en
+    kjørbar `gh`), så testen oppfører seg likt uansett om maskinen som kjører
+    harnessen faktisk har `gh` installert.
+  - `unauthenticated`: en fake `gh` finnes, men `gh auth status` feiler.
+  - `authenticated`: en fake `gh` finnes og lykkes — `gh pr comment
+    --body-file` fanges opp i en egen fil, slik at testen kan verifisere at
+    posting **faktisk** skjedde, ikke bare at agentens tekst påstår det (samme
+    prinsipp som `expect_reviewer_verdict_if_changed` i [0.5.1]).
+- Nye `expect_posted`/`pr_number`/`gh_mode`-felt i `eval/pr-reviewer-tests.json`.
+  Scenario id 3 (tidligere "ingen PR-nummer nevnt i det hele tatt", som aldri
+  faktisk testet gh-fallback-stien) er erstattet med et scenario som nevner et
+  konkret PR-nummer og `gh_mode=absent` — dette tester nå faktisk stien den
+  påstod å teste. Nye scenarier id 4 (`unauthenticated`) og id 5
+  (`authenticated`, med verifisert ekte posting-forsøk) er lagt til.
+- Kjørt: id 3/4/5 alle grønne, inkl. verifisert at fake-`gh` faktisk mottok et
+  `gh pr comment`-kall i id 5.
+
+### Kjent begrensning (uendret)
+- Fake-`gh`-en verifiserer at agenten kaller riktig `gh`-kommando i riktig
+  situasjon, men selve kallet mot en ekte GitHub-PR er fortsatt ikke kjørt
+  live (ingen `gh`-CLI/root-tilgang i dette miljøet).
+
 ## [0.6.1]
 
 ### Endret

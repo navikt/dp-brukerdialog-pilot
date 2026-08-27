@@ -155,13 +155,24 @@ ikke generisk `git diff`), **og** `gh`-CLI er installert og autentisert
 `gh pr comment <nr> --body-file <fil>` og rapporterer om det lyktes. Mangler ett av
 disse vilkårene, forsøker den ikke posting i det hele tatt — den forklarer i stedet
 konkret hvorfor i rapportens `Kommentar-posting`-linje, og faller tilbake til vanlig
-terminal-only-oppførsel (verifisert i `eval/pr-reviewer-tests.json` scenario id 3:
-`gh` mangler i dette miljøet, og agenten håndterer det korrekt uten å krasje eller
-late som noe ble postet).
+terminal-only-oppførsel.
 
-> **Ikke testet live i dette miljøet:** selve `gh pr comment`-kallet (den ekte
-> postingen) er implementert etter `gh`s dokumenterte grensesnitt, men `gh`-CLI kan
-> ikke installeres her (ingen root/sudo-tilgang). Test selv på en maskin med `gh`
+Verifisert med en **fake `gh`-binær** i eval-harnessen (`eval/pr-reviewer-tests.json`,
+`scripts/eval_pr_review.py`), portabel uansett om maskinen som kjører evalen faktisk
+har `gh` installert (PATH saneres for et ekte `gh` i "absent"-modus, så testen ikke
+bare "tilfeldigvis" passerer fordi dette miljøet mangler `gh`):
+- id 3 (`gh_mode=absent`): `gh` finnes ikke på PATH — agenten faller korrekt tilbake
+  uten å krasje eller late som noe ble postet.
+- id 4 (`gh_mode=unauthenticated`): en fake `gh` finnes, men `gh auth status` feiler —
+  samme korrekte fallback.
+- id 5 (`gh_mode=authenticated`): en fake `gh` finnes og lykkes — harnessen
+  verifiserer at et ekte `gh pr comment --body-file`-kall faktisk ble fanget opp
+  (ikke bare at outputen *påstår* posting), via en fake-gh-`comment-capture`-fil.
+
+> **Ikke testet mot ekte GitHub:** fake-`gh`-en verifiserer at agenten kaller riktig
+> `gh`-kommando med riktig argumenter i alle tre tilstander, men selve `gh pr
+> comment`-kallet mot en ekte PR på github.com er fortsatt ikke kjørt live (ingen
+> `gh`-CLI/root-tilgang i dette miljøet). Test selv på en maskin med ekte `gh`
 > installert og innlogget før du stoler fullt på denne biten.
 
 ## Oppdatere installasjon etter endringer
