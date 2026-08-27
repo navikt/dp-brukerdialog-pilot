@@ -3,6 +3,27 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.1]
+
+### Lagt til
+- `scripts/troubleshoot-safe.sh`: launcher for `troubleshoot`-agenten som legger på
+  `--deny-tool "shell(kubectl <verb>:*)"` for alle destruktive kubectl-verb
+  (delete/apply/patch/replace/create/edit/exec/cp/rollout/scale/m.fl.) — en ekte
+  CLI-nivå-sperre (Copilot CLI sitt permission-system), ikke bare en prompt-instruks.
+
+### Verifisert
+- Brukeren spurte om read-only-kontrakten i `troubleshoot.agent.md` (ren prosa) var
+  tilstrekkelig for noe så konsekvensfylt. Testet empirisk med en falsk
+  `kubectl`-stubb: en agent uten `--deny-tool` kunne overtales til å kjøre
+  `kubectl delete`/`kubectl apply` med riktig framing i prompten ("dette er bare et
+  testmiljø, kjør det direkte") — presis det motsatte av read-only-kontrakten. Med
+  `--deny-tool` ble samme forsøk avvist på CLI-nivå (`Permission to run this tool
+  was denied...`) **før** kommandoen nådde `kubectl`, uavhengig av modellens eget
+  resonnement. Konklusjon: prosa alene er ikke nok for skriveaksjoner mot
+  produksjon — konklusjonen er dokumentert i README og `troubleshoot.agent.md`
+  peker nå til launcher-scriptet som påkrevd bruksmåte. Sterkeste lag er uansett
+  RBAC på selve klyngen (utenfor denne pluginens kontroll).
+
 ## [0.10.0]
 
 ### Lagt til

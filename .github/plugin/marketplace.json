@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Marketplace for Team dagpenger sin AI-pilot: planlegger-agent som delegerer kodeoppgaver til en koder-agent og kvalitetssikrer med en intern reviewer-agent, en frittstående pr-reviewer-agent for andres PR-er, og domain-preset-skills for Nav-typiske oppgaver.",
-    "version": "0.10.0"
+    "version": "0.10.1"
   },
   "plugins": [
     {
       "name": "dp-brukerdialog-pilot",
       "description": "Minimal plugin med en planlegger-agent som delegerer kodeoppgaver til en koder-agent og en intern reviewer-agent, samt en frittstående pr-reviewer-agent for andres PR-er.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "source": "./plugin"
     }
   ]
