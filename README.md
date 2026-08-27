@@ -327,16 +327,21 @@ Suiten dekker fire reelle scenarioer:
 > endringen (mot tydelige brudd før). Følges opp om ny flakiness dukker opp.
 >
 > **Kjent flakiness (2):** for svært små mikro-endringer (se
-> "Mikro-endring-unntak" i `planlegger.agent.md`) hender det fortsatt at
-> planlegger feilaktig sier `Reviewer: hoppet over (ingen filendringer)` selv
-> om `git diff` faktisk viser en endring. Instruksjonene ble skjerpet
-> (eksplisitt "scope ≠ ingen endring") og reduserte problemet merkbart i
-> manuell testing, men eliminerte det ikke helt — samme type
-> instruksjonsflakiness som over. Testet på tvers av flere modeller
-> (`gpt-5.4`/`auto`, `claude-sonnet-4.6`, `claude-sonnet-5`); problemet er
-> ikke modellspesifikt. `eval_integration.py` sjekker i dag kun at teksten
-> `Reviewer:` finnes i output, ikke at statusen er semantisk riktig — dette er
-> en kjent svakhet i selve eval-harnessen, ikke bare i agenten.
+> "Mikro-endring-unntak" i `planlegger.agent.md`) hender det ofte at planlegger
+> feilaktig sier `Reviewer: hoppet over (ingen filendringer)` selv om
+> `git diff` faktisk viser en endring. Flere runder med instruksjonsskjerping
+> er forsøkt (eksplisitt "scope ≠ ingen endring", og en "hard sperre før
+> FERDIG"-regel likt mønsteret som løste stopp-punkt-flakinessen) — ingen av
+> dem ga en klar, målbar forbedring for dette spesifikke tilfellet (fortsatt
+> ~1/5–2/3 feilrate i gjentatt testing). I motsetning til stopp-punkt-fiksen
+> ser dette ut som en dypereliggende modell-tendens til å ta snarveier på
+> trivielle oppgaver, ikke noe ren promptjustering løser. Bekreftet
+> modell-agnostisk (`gpt-5.4`/`auto`, `claude-sonnet-4.6`, `claude-sonnet-5`).
+> `eval_integration.py` sjekker nå (siden [0.5.1]) faktisk semantisk korrekthet
+> via `expect_reviewer_verdict_if_changed` (sjekker ekte `git status` mot
+> output), så denne testen fanger nå reelt opp problemet i stedet for å skjule
+> det bak en tekst-substring-sjekk — det er selve fiksen i [0.5.1], ikke en
+> løsning på flakinessen.
 
 ## Ekte PR-reviewer-test (scratch-repo)
 

@@ -3,6 +3,27 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.5.1]
+
+### Endret
+- Fikset en reell svakhet i `eval_integration.py`: scenario id 4 sjekket
+  tidligere kun at teksten `Reviewer:` fantes i output, ikke om verdikten var
+  semantisk riktig. Ny assertion `expect_reviewer_verdict_if_changed` sjekker
+  nå faktisk `git status` mot output — feiler hvis filer reelt sett ble
+  endret men output likevel hevder `Reviewer: hoppet over` uten et ekte
+  `APPROVED`/`NEEDS_CHANGES`/`BLOCKED`-verdikt.
+- Denne fiksen avdekket at mikro-endring-reviewer-bugen (kjent siden [0.4.1])
+  faktisk skjer oftere enn tidligere antatt — tidligere passerte testen alltid
+  fordi den kun sjekket tekst-substring.
+- Forsøkte en tredje runde med instruksjonsskjerping i `planlegger.agent.md`
+  ("hard sperre før FERDIG", samme mønster som løste stopp-punkt-flakinessen
+  i [0.4.3]) — ga **ingen** klar, målbar forbedring for dette spesifikke
+  tilfellet (fortsatt betydelig feilrate i gjentatt testing). Beholdt
+  endringen likevel (ufarlig, kan gi marginal effekt), men dokumentert
+  ærlig i README at problemet ikke er løst av ren promptjustering denne
+  gangen — trolig en dypereliggende modell-tendens til snarveier på
+  trivielle oppgaver.
+
 ## [0.5.0]
 
 ### Lagt til

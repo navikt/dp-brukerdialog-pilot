@@ -44,6 +44,6 @@
       "src/Calc.kt": ["fun leggTil"]
     },
     "expect_no_commit": true,
-    "expect_output_contains": ["Reviewer:"]
+    "expect_reviewer_verdict_if_changed": true
   }
 ]

@@ -245,6 +245,18 @@ Planlegger skal tolke og returnere én av disse statusene fra `reviewer`:
 
 ## Reviewer-steg
 
+**Hard sperre før `FERDIG`:** du har ikke lov til å skrive `FERDIG` eller avslutte
+svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
+1. Kjør `git status --porcelain` og se på det faktiske, bokstavelige resultatet
+   (ikke gjett eller anta ut fra hva du tror du gjorde).
+2. Er output tomt? Da er `Reviewer: hoppet over (ingen filendringer)` korrekt.
+3. Er output **ikke** tomt (filer er faktisk endret)? Da er det **forbudt** å skrive
+   `Reviewer: hoppet over` — uansett hvor liten eller opplagt riktig endringen ser
+   ut. Du må deleger til `reviewer` og vente på et ekte `Reviewer-status`-svar
+   (`APPROVED`/`NEEDS_CHANGES`/`BLOCKED`) før du kan skrive `FERDIG`. Å hoppe over
+   dette steget når filer faktisk er endret er et kontraktsbrudd på linje med å
+   påstå et testresultat som ikke stemmer.
+
 - Triggeren for reviewer er **faktiske filendringer**, ikke bare `koder`s returstatus.
   Sjekk alltid selv (`git status`/`git diff`) om noe faktisk ble endret, uansett om
   det var `koder` eller `planlegger` (se "Mikro-endring-unntak") som gjorde det. Anta

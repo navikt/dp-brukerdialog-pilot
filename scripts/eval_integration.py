@@ -120,6 +120,30 @@ def check_test(test: dict[str, Any], scratch: Path, output: str = "") -> list[st
         if status:
             failures.append(f"forventet ingen filendringer (stopp-punkt skal blokkere), fant:\n{status}")
 
+    if test.get("expect_reviewer_verdict_if_changed"):
+        # Semantisk sjekk, ikke bare tekst-substring: hvis filer faktisk ble
+        # endret, skal reviewer ha kjørt med et ekte verdikt (APPROVED/
+        # NEEDS_CHANGES/BLOCKED) -- planlegger skal aldri kunne skrive
+        # "Reviewer: hoppet over" når git faktisk viser endringer.
+        status = run_git(["status", "--porcelain"], scratch)
+        files_changed = bool(status.strip())
+        real_verdicts = ["Reviewer: APPROVED", "Reviewer: NEEDS_CHANGES", "Reviewer: BLOCKED",
+                          "Reviewer-status: APPROVED", "Reviewer-status: NEEDS_CHANGES",
+                          "Reviewer-status: BLOCKED"]
+        has_real_verdict = any(v in output for v in real_verdicts)
+        claims_skipped = "hoppet over" in output.lower()
+        if files_changed and claims_skipped and not has_real_verdict:
+            failures.append(
+                "reviewer-steg ble feilaktig hoppet over: git status viser faktiske "
+                f"filendringer ({status.strip()!r}), men output hevder "
+                "'Reviewer: hoppet over' uten et ekte verdikt"
+            )
+        elif files_changed and not has_real_verdict:
+            failures.append(
+                "filer ble endret, men output mangler et ekte reviewer-verdikt "
+                "(APPROVED/NEEDS_CHANGES/BLOCKED)"
+            )
+
     return failures
 
 
