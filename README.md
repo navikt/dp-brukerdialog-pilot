@@ -23,12 +23,12 @@ plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
 plugin/agents/reviewer.agent.md
 plugin/agents/pr-reviewer.agent.md
-plugin/skills/api-kafka/SKILL.md
-plugin/skills/db-migrasjon/SKILL.md
-plugin/skills/persondata/SKILL.md
-plugin/skills/frontend-aksel/SKILL.md
-plugin/skills/testrammeverk/SKILL.md
-plugin/skills/nais-deploy/SKILL.md
+plugin/skills/brukerdialog-api-kafka/SKILL.md
+plugin/skills/brukerdialog-db-migrasjon/SKILL.md
+plugin/skills/brukerdialog-persondata/SKILL.md
+plugin/skills/brukerdialog-frontend-aksel/SKILL.md
+plugin/skills/brukerdialog-testrammeverk/SKILL.md
+plugin/skills/brukerdialog-nais-deploy/SKILL.md
 ```
 
 Målet i første versjon var en bevisst liten plugin med:
@@ -103,15 +103,15 @@ Og den bruker domain-presets for Nav-typiske oppgaver:
 
 Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
 
-- `plugin/skills/api-kafka/SKILL.md`
-- `plugin/skills/db-migrasjon/SKILL.md`
-- `plugin/skills/persondata/SKILL.md`
-- `plugin/skills/frontend-aksel/SKILL.md` — UI-komponenter med Aksel Design System
+- `plugin/skills/brukerdialog-api-kafka/SKILL.md`
+- `plugin/skills/brukerdialog-db-migrasjon/SKILL.md`
+- `plugin/skills/brukerdialog-persondata/SKILL.md`
+- `plugin/skills/brukerdialog-frontend-aksel/SKILL.md` — UI-komponenter med Aksel Design System
   (@navikt/ds-react). Enkel sti for isolerte komponent-tillegg, komplisert for nye
   sider/bred layout-endring.
-- `plugin/skills/testrammeverk/SKILL.md` — innføring av nytt testrammeverk/CI-oppsett
+- `plugin/skills/brukerdialog-testrammeverk/SKILL.md` — innføring av nytt testrammeverk/CI-oppsett
   (Vitest/Playwright/Kotest), ikke enkelttester i eksisterende oppsett.
-- `plugin/skills/nais-deploy/SKILL.md` — endringer i Nais-manifest, deploy-workflow
+- `plugin/skills/brukerdialog-nais-deploy/SKILL.md` — endringer i Nais-manifest, deploy-workflow
   eller GCP-ressurser. Faller inn under eksisterende infra/secrets-stopp-punkt.
 
 Hver skill inneholder trigger, default sti/planreview, obligatoriske ekstra brief-felt,

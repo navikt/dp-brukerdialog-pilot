@@ -1,5 +1,5 @@
 ---
-name: db-migrasjon
+name: brukerdialog-db-migrasjon
 description: Preset for oppgaver som endrer databaseskjema via Flyway-migrasjoner
 license: MIT
 compatibility: Kotlin/Java med Flyway og PostgreSQL

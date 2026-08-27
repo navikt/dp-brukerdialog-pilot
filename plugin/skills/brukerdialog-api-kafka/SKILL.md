@@ -1,5 +1,5 @@
 ---
-name: api-kafka
+name: brukerdialog-api-kafka
 description: Preset for oppgaver som kombinerer et API-endepunkt med et Kafka-event i samme leveranse
 license: MIT
 compatibility: Kotlin/Ktor eller Spring Boot backend med Kafka/Rapids & Rivers

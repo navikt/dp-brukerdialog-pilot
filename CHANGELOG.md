@@ -3,6 +3,22 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.6.1]
+
+### Endret
+- Omdøpt alle 6 skills med `brukerdialog-`-prefiks (`brukerdialog-api-kafka`,
+  `brukerdialog-db-migrasjon`, `brukerdialog-persondata`,
+  `brukerdialog-frontend-aksel`, `brukerdialog-testrammeverk`,
+  `brukerdialog-nais-deploy`) — samme konvensjon som `grillmester`-pluginen bruker
+  for å unngå kollisjon med andre installerte skills. Oppdatert `name`-felt i
+  frontmatter, mappenavn og alle referanser i `planlegger.agent.md`/README.
+- Styrket innholdet i de 3 nye skillene (`frontend-aksel`, `testrammeverk`,
+  `nais-deploy`), som i [0.6.0] var skrevet fra bunnen uten forankring i noe
+  eksisterende. De er nå basert på de etablerte, mer utfyllende skillene
+  `aksel-builder`, `playwright-testing` og `nais` (MCP-first-regel for Aksel,
+  page object/locator-strategi for Playwright, accessPolicy-deny-all/pod-
+  lifecycle-detaljer for Nais), kondensert til `planlegger`s korte preset-format.
+
 ## [0.6.0]
 
 ### Lagt til

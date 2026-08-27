@@ -169,29 +169,29 @@ Presets er implementert som egne skills i `plugin/skills/`, ikke innebygd tekst 
 riktig skill når en trigger matcher, og bruk den til å avgjøre sti/planreview og hvilke
 ekstra felt som skal tvinges inn i `KODER_BRIEF`.
 
-- `api-kafka` (`plugin/skills/api-kafka/SKILL.md`)
+- `brukerdialog-api-kafka` (`plugin/skills/brukerdialog-api-kafka/SKILL.md`)
   - Trigger: endpoint + event/hendelse/topic/kafka i samme oppgave.
   - Default: `Sti=komplisert`, `Krever planreview=ja`.
 
-- `db-migrasjon` (`plugin/skills/db-migrasjon/SKILL.md`)
+- `brukerdialog-db-migrasjon` (`plugin/skills/brukerdialog-db-migrasjon/SKILL.md`)
   - Trigger: kolonne/tabell/migrasjon/backfill/flyway.
   - Default: `Sti=komplisert`, `Krever planreview=ja`.
 
-- `persondata` (`plugin/skills/persondata/SKILL.md`)
+- `brukerdialog-persondata` (`plugin/skills/brukerdialog-persondata/SKILL.md`)
   - Trigger: fødselsnummer, aktør-id, adresse, navn, journal, sensitive felt.
   - Default: `Sti=komplisert`, `Krever planreview=ja`, og alltid stopp-punkt før delegasjon.
 
-- `frontend-aksel` (`plugin/skills/frontend-aksel/SKILL.md`)
+- `brukerdialog-frontend-aksel` (`plugin/skills/brukerdialog-frontend-aksel/SKILL.md`)
   - Trigger: UI-komponent, Aksel, designsystem, `@navikt/ds-react`, Figma-lenke.
   - Default: `Sti=enkel` for isolerte komponent-tillegg i etablert mønster,
     `Sti=komplisert`/`Krever planreview=ja` for nye sider eller bred layout/tema-endring.
 
-- `testrammeverk` (`plugin/skills/testrammeverk/SKILL.md`)
+- `brukerdialog-testrammeverk` (`plugin/skills/brukerdialog-testrammeverk/SKILL.md`)
   - Trigger: innføring av nytt testrammeverk/CI-testoppsett (ikke enkelttester i
     eksisterende oppsett).
   - Default: `Sti=komplisert`, `Krever planreview=ja`.
 
-- `nais-deploy` (`plugin/skills/nais-deploy/SKILL.md`)
+- `brukerdialog-nais-deploy` (`plugin/skills/brukerdialog-nais-deploy/SKILL.md`)
   - Trigger: endring i `.nais/*.yaml`, deploy-workflow eller GCP-ressurser via Nais.
   - Default: `Sti=komplisert`, `Krever planreview=ja`, og alltid stopp-punkt før delegasjon.
 

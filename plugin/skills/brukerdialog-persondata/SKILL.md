@@ -1,5 +1,5 @@
 ---
-name: persondata
+name: brukerdialog-persondata
 description: Preset for oppgaver som håndterer fødselsnummer, aktør-id eller annen sensitiv persondata
 license: MIT
 compatibility: Nav-applikasjoner som behandler persondata
