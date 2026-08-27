@@ -3,6 +3,30 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.0]
+
+### Lagt til
+- Ny frittstående agent `troubleshoot` (5. agent, uavhengig av
+  planlegger→koder→reviewer-kjeden, samme frittstående mønster som `pr-reviewer`):
+  feilsøker produksjonsproblemer på Nais (pod-krasj, auth-feil, Kafka-lag,
+  DB-tilkobling, treg respons) ved å kjøre `kubectl`/`curl` mot klynge og
+  observability-stacken (Mimir/Loki/Tempo) som vanlige bash-kommandoer — ingen
+  MCP-kobling involvert eller nødvendig, kun lokal autentisering (naisdevice +
+  kubeconfig) forutsatt hos bruker.
+  Grunnet i `nav-troubleshoot` (diagnostiske trær for pod/auth/Kafka/DB) og
+  `observability-debugging` (metrics→logs→traces-korrelasjon) fra nav-pilot.
+  Rent read-only/diagnostisk: gjør aldri `kubectl apply`/`rollout restart`/
+  manifest-endringer selv, foreslår i stedet fiksen eller sender den videre som
+  oppgave til `planlegger`.
+  Bakgrunn: brukeren antok at logg-tilkobling var umulig uten MCP — verifisert at
+  det ikke stemmer, siden Nais sin observability-stack er tilgjengelig via vanlig
+  `kubectl`/`curl` gitt at brukeren selv er lokalt autentisert.
+
+### Ikke verifisert
+- Selve `kubectl`/Mimir/Loki-kallene er ikke kjørt live mot en ekte Nais-klynge fra
+  denne pluginens side (ingen klyngetilgang i utviklingsmiljøet). Verifiser selv
+  ved første reelle bruk.
+
 ## [0.9.2]
 
 ### Lagt til

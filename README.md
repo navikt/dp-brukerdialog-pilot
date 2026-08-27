@@ -1,6 +1,6 @@
 # dp-brukerdialog-pilot
 
-En enkel AI-pilot som **ren Copilot-plugin** med fire agenter:
+En enkel AI-pilot som **ren Copilot-plugin** med fem agenter:
 - `planlegger` (synlig for bruker)
 - `koder` (intern, delegert av planlegger — unntak: for svært små, mekaniske
   mikro-endringer på enkel sti kan planlegger gjøre endringen selv, se
@@ -9,6 +9,9 @@ En enkel AI-pilot som **ren Copilot-plugin** med fire agenter:
   faktiske diffen før planlegger rapporterer FERDIG)
 - `pr-reviewer` (synlig for bruker, uavhengig av de tre andre — reviewer andres
   PR-er/branches på forespørsel, se "PR-reviewer" under)
+- `troubleshoot` (synlig for bruker, uavhengig av de andre — feilsøker
+  produksjonsproblemer på Nais ved å kjøre kubectl/curl mot klynge og
+  observability-stacken, se "Troubleshoot" under)
 
 Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
 
@@ -23,6 +26,7 @@ plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
 plugin/agents/reviewer.agent.md
 plugin/agents/pr-reviewer.agent.md
+plugin/agents/troubleshoot.agent.md
 plugin/skills/brukerdialog-api-kafka/SKILL.md
 plugin/skills/brukerdialog-db-migrasjon/SKILL.md
 plugin/skills/brukerdialog-persondata/SKILL.md
@@ -202,6 +206,39 @@ bare "tilfeldigvis" passerer fordi dette miljøet mangler `gh`):
 > comment`-kallet mot en ekte PR på github.com er fortsatt ikke kjørt live (ingen
 > `gh`-CLI/root-tilgang i dette miljøet). Test selv på en maskin med ekte `gh`
 > installert og innlogget før du stoler fullt på denne biten.
+
+## Troubleshoot
+
+`troubleshoot` er en frittstående, bruker-invokerbar agent for å feilsøke
+produksjonsproblemer på Nais (pod-krasj, auth-feil, Kafka-lag, DB-tilkobling, treg
+respons) — uavhengig av `planlegger`→`koder`→`reviewer`-kjeden. Rent diagnostisk:
+gjør aldri endringer selv, foreslår i stedet fiksen (manuell drift-handling, eller
+en oppgave som bør sendes til `planlegger` for kodeendring).
+
+Forutsetter at du selv er autentisert lokalt mot klyngen (naisdevice-tunnel +
+kubeconfig) — agenten kjører `kubectl`/`curl` som vanlige bash-kommandoer, ingen
+MCP-kobling er involvert eller nødvendig. Sjekker `kubectl auth can-i` først; hvis
+det feiler, ber den deg koble til eller lime inn logger/feilmeldinger manuelt i
+stedet for å gjette cluster/namespace.
+
+Korrelerer på tvers av tre søyler, grunnet i nav-pilot sin
+`observability-debugging`-skill: Metrics (Mimir, *hva* skjer) → Logs (Loki,
+*hvorfor*) → Traces (Tempo, *hvor* i kallkjeden). Diagnostiske trær for de vanligste
+symptomene (401/403, Kafka consumer lag, DB-tilkoblingsfeil) er hentet fra
+`nav-troubleshoot`-skillen.
+
+Bruk den ved å velge `troubleshoot` i `/agent`, f.eks.:
+
+```text
+Appen min krasjer i dev-gcp, namespace teamdagpenger
+Vi får 403 fra en annen tjeneste som kaller oss
+Kafka-consumeren vår henger etter
+```
+
+> **Ikke testet mot en ekte Nais-klynge fra denne pluginens side:** agenten er
+> grunnet i etablerte nav-pilot-diagnostikktrær, men selve `kubectl`/Mimir/Loki-
+> kallene er ikke kjørt live herfra (ingen klyngetilgang i dette miljøet). Verifiser
+> selv første gang du bruker den mot en ekte app.
 
 ## Oppdatere installasjon etter endringer
 
