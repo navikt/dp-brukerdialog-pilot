@@ -3,6 +3,24 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.6.0]
+
+### Lagt til
+- 3 nye domain-preset-skills, samme mønster som `api-kafka`/`db-migrasjon`/`persondata`:
+  - `frontend-aksel`: UI-komponenter med Aksel Design System (@navikt/ds-react).
+    Enkel sti for isolerte komponent-tillegg i etablert mønster, komplisert sti
+    for nye sider eller bred layout/tema-endring.
+  - `testrammeverk`: innføring av nytt testrammeverk/CI-testoppsett (Vitest,
+    Playwright, Kotest, Testcontainers) — skiller eksplisitt fra å legge til én
+    enkelt test i et allerede fungerende oppsett (fortsatt enkel sti).
+  - `nais-deploy`: endringer i Nais-manifest, deploy-workflow eller GCP-ressurser.
+    Faller allerede inn under det eksisterende infra/secrets-stopp-punktet, så
+    skillen legger primært til obligatoriske brief-felt (accessPolicy-diff,
+    miljøscope, rollback-plan) fremfor å endre sti/planreview-defaultene.
+- Oppdatert `planlegger.agent.md`s skill-referansetabell med trigger og default
+  sti/planreview for alle tre nye skills.
+- README oppdatert med de nye skillene i "Domain-preset-skills" og innledningen.
+
 ## [0.5.1]
 
 ### Endret

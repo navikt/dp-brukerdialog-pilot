@@ -26,6 +26,9 @@ plugin/agents/pr-reviewer.agent.md
 plugin/skills/api-kafka/SKILL.md
 plugin/skills/db-migrasjon/SKILL.md
 plugin/skills/persondata/SKILL.md
+plugin/skills/frontend-aksel/SKILL.md
+plugin/skills/testrammeverk/SKILL.md
+plugin/skills/nais-deploy/SKILL.md
 ```
 
 Målet i første versjon var en bevisst liten plugin med:
@@ -33,7 +36,7 @@ Målet i første versjon var en bevisst liten plugin med:
 - 1 koder-agent som implementerer
 - 0 skills
 
-Vi har siden lagt til 3 domain-preset-skills (se "Domain-preset-skills" under) for å gjøre
+Vi har siden lagt til 6 domain-preset-skills (se "Domain-preset-skills" under) for å gjøre
 `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse opp agent-promptet.
 
 ## Installer
@@ -92,6 +95,9 @@ Og den bruker domain-presets for Nav-typiske oppgaver:
 - `API+Kafka`
 - `DB+migrasjon`
 - `Persondata`
+- `Frontend+Aksel`
+- `Testrammeverk`
+- `Nais-deploy`
 
 ## Domain-preset-skills
 
@@ -100,6 +106,13 @@ Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
 - `plugin/skills/api-kafka/SKILL.md`
 - `plugin/skills/db-migrasjon/SKILL.md`
 - `plugin/skills/persondata/SKILL.md`
+- `plugin/skills/frontend-aksel/SKILL.md` — UI-komponenter med Aksel Design System
+  (@navikt/ds-react). Enkel sti for isolerte komponent-tillegg, komplisert for nye
+  sider/bred layout-endring.
+- `plugin/skills/testrammeverk/SKILL.md` — innføring av nytt testrammeverk/CI-oppsett
+  (Vitest/Playwright/Kotest), ikke enkelttester i eksisterende oppsett.
+- `plugin/skills/nais-deploy/SKILL.md` — endringer i Nais-manifest, deploy-workflow
+  eller GCP-ressurser. Faller inn under eksisterende infra/secrets-stopp-punkt.
 
 Hver skill inneholder trigger, default sti/planreview, obligatoriske ekstra brief-felt,
 sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer fremfor

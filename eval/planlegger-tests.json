@@ -142,5 +142,38 @@
       "koder": "ja",
       "spørsmål": "nei"
     }
+  },
+  {
+    "id": 14,
+    "suite": "policy",
+    "prompt": "Legg til en ny Aksel Button-komponent i en eksisterende form, samme mønster som andre knapper i mappen.",
+    "expected": {
+      "sti": "enkel",
+      "planreview": "nei",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 15,
+    "suite": "policy",
+    "prompt": "Sett opp Playwright som nytt E2E-testrammeverk i frontend-prosjektet og koble det til CI.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 16,
+    "suite": "policy",
+    "prompt": "Endre accessPolicy i nais.yaml slik at tjenesten kan kalle en ny ekstern avhengighet.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
   }
 ]
