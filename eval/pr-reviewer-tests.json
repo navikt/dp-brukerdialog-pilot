@@ -22,5 +22,17 @@
       "src/main/kotlin/api/SoknadRoutes.kt": "// eksisterende ruter\n\nfun handterInnkommendeSoknad(fodselsnummer: String, navn: String) {\n    logger.info(\"Mottok soknad fra fnr=$fodselsnummer navn=$navn\")\n}\n"
     },
     "expect_output_contains": ["PR-REVIEW", "fødselsnummer"]
+  },
+  {
+    "id": 3,
+    "suite": "smoke",
+    "prompt": "Review de uncommittede endringene i dette repoet (kjør git diff mot HEAD), gi en kort PR-review, og post reviewen som en kommentar på PR-en. Ikke gjør noen filendringer selv.",
+    "base_files": {
+      "src/Calc.kt": "// kalkulator-hjelpefunksjoner\n"
+    },
+    "pr_files": {
+      "src/Calc.kt": "// kalkulator-hjelpefunksjoner\nfun leggTil(a: Int, b: Int): Int = a + b\n"
+    },
+    "expect_output_contains": ["PR-REVIEW", "ikke postet"]
   }
 ]

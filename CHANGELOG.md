@@ -3,6 +3,29 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.5.0]
+
+### Lagt til
+- `pr-reviewer` kan nå (opt-in) poste reviewen som en ekte PR-kommentar via
+  `gh pr comment <nr> --body-file <fil>`, istedenfor kun terminal-output.
+  Dette er det eneste unntaket fra den ellers strenge read-only-kontrakten.
+- Posting skjer **kun** når alle tre er sanne: (1) bruker ber eksplisitt om det
+  i samme oppgave, (2) et konkret PR-nummer er kjent (kun via `gh pr diff <nr>`,
+  ikke generisk `git diff`), og (3) `gh`-CLI er installert og autentisert
+  (`gh auth status`). Mangler ett av disse, forsøkes ikke posting — agenten
+  forklarer konkret hvorfor i rapportens nye `Kommentar-posting`-linje og
+  faller tilbake til vanlig terminal-only-oppførsel.
+- Ny eval-scenario (`eval/pr-reviewer-tests.json` id 3) som ber om posting uten
+  at `gh` er tilgjengelig — verifiserer at fallback-oppførselen faktisk
+  fungerer (ingen krasj, ingen falsk positiv "postet"-melding). Manuelt
+  inspisert: output er semantisk korrekt, ikke bare tekst-match.
+
+### Kjent begrensning
+- Selve `gh pr comment`-kallet (den ekte postingen til GitHub) er **ikke
+  testet live** i dette miljøet — `gh`-CLI kan ikke installeres her (ingen
+  root/sudo-tilgang). Implementert etter `gh`s dokumenterte grensesnitt, men
+  bør verifiseres på en maskin med `gh` installert og innlogget.
+
 ## [0.4.3]
 
 ### Endret

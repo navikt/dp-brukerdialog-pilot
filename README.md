@@ -127,12 +127,29 @@ Review de uncommittede endringene mine
 3. MCP (f.eks. IntelliJ sin PR-integrasjon) kan berike konteksten, men er aldri en
    forutsetning — samme prinsipp som `planlegger`s MCP-policy.
 
-`pr-reviewer` er **read-only**: den gjør aldri filendringer, commits, eller poster
-kommentarer til GitHub. Den skriver kun ut en strukturert review i terminalen
+`pr-reviewer` er **read-only** som hovedregel: den gjør aldri filendringer eller
+commits. Den skriver alltid ut en strukturert review i terminalen
 (sikkerhetskritisk / infrastruktur / kodekvalitet), og flagger for et menneske —
 den blokkerer aldri og gir ikke et formelt godkjent/avvist-verdikt (det er den
 interne `reviewer`s jobb for vårt eget arbeid, ikke denne agentens jobb for andres
-PR-er). Ekte PR-kommentar-posting (`gh pr comment`) er bevisst utsatt til senere.
+PR-er).
+
+**PR-kommentar-posting (opt-in, unntaket fra read-only):** som standard poster den
+ingenting. Hvis du eksplisitt ber om det i samme oppgave ("post som kommentar på
+PR-en"), **og** et konkret PR-nummer er kjent (kun via `gh pr diff <nr>`-flyten,
+ikke generisk `git diff`), **og** `gh`-CLI er installert og autentisert
+(`gh auth status`): poster den reviewrapporten med
+`gh pr comment <nr> --body-file <fil>` og rapporterer om det lyktes. Mangler ett av
+disse vilkårene, forsøker den ikke posting i det hele tatt — den forklarer i stedet
+konkret hvorfor i rapportens `Kommentar-posting`-linje, og faller tilbake til vanlig
+terminal-only-oppførsel (verifisert i `eval/pr-reviewer-tests.json` scenario id 3:
+`gh` mangler i dette miljøet, og agenten håndterer det korrekt uten å krasje eller
+late som noe ble postet).
+
+> **Ikke testet live i dette miljøet:** selve `gh pr comment`-kallet (den ekte
+> postingen) er implementert etter `gh`s dokumenterte grensesnitt, men `gh`-CLI kan
+> ikke installeres her (ingen root/sudo-tilgang). Test selv på en maskin med `gh`
+> installert og innlogget før du stoler fullt på denne biten.
 
 ## Oppdatere installasjon etter endringer
 
@@ -341,11 +358,15 @@ Dette:
 - sjekker at sluttsvaret inneholder forventede nøkkelord (f.eks. et planta
   problem som skal flagges)
 
-Suiten dekker to scenarioer:
+Suiten dekker tre scenarioer:
 - `smoke` (id 1): en ren, uskyldig endring — bekrefter at agenten kjører og
   svarer i riktig format uten å krasje eller gjøre endringer.
 - `policy` (id 2): en plantet feil (fødselsnummer logget i vanlig logg) —
   verifiserer at reviewen faktisk flagger det konkrete sikkerhetsproblemet.
+- `smoke` (id 3): ber eksplisitt om PR-kommentar-posting uten at `gh` er
+  tilgjengelig — verifiserer at opt-in-postingen faller korrekt tilbake til
+  terminal-only med en tydelig forklaring, i stedet for å krasje eller late
+  som noe ble postet.
 
 ## CI-gate
 

@@ -38,10 +38,35 @@ eget arbeid internt i én økt, du sjekker **andres** ferdige endringer på fore
 ## Read-only kontrakt
 
 - Du gjør aldri filendringer, commits, eller `git push`.
-- Du poster ikke kommentarer til GitHub (ingen `gh pr comment`/`gh pr review`) med
-  mindre bruker eksplisitt ber om det i fremtiden — ikke standardadferd i dag.
-- Verktøybruk er begrenset til lesing: `git diff`/`git log`/`gh pr diff`/`gh pr view`
-  og å lese filinnhold for kontekst rundt diffen.
+- Poster aldri kommentarer automatisk. Se "PR-kommentar-posting (opt-in)" for det
+  eneste unntaket, og kun når bruker eksplisitt ber om det i samme oppgave.
+- Verktøybruk er ellers begrenset til lesing: `git diff`/`git log`/`gh pr diff`/
+  `gh pr view` og å lese filinnhold for kontekst rundt diffen.
+
+## PR-kommentar-posting (opt-in)
+
+Standard er fortsatt kun terminal-output. Post en ekte PR-kommentar **kun** når alt
+dette er sant:
+1. Bruker ber eksplisitt om det i samme oppgave (f.eks. "post som kommentar på
+   PR-en", "kommenter på PR-en med funnene"). Aldri på eget initiativ.
+2. Et konkret PR-nummer er kjent — kun via diff-strategi steg 1 (`gh pr diff <nr>`).
+   Ikke poster hvis diffen kom fra generisk `git diff` mot en branch uten kjent
+   PR-nummer.
+3. `gh`-CLI er installert og `gh auth status` bekrefter aktiv innlogging.
+
+Hvis alle tre er oppfylt:
+- Vis hele reviewrapporten i terminalen først, akkurat som normalt.
+- Skriv rapportteksten til en midlertidig fil og kjør
+  `gh pr comment <nr> --body-file <fil>` (ikke `--body` — unngår shell-escaping-
+  problemer med multiline markdown).
+- Rapporter eksplisitt etterpå om postingen lyktes (`gh`s exit code), med PR-nummer.
+
+Hvis ett av de tre ikke er oppfylt (ingen eksplisitt forespørsel, ukjent PR-nummer,
+`gh` mangler, eller ikke autentisert): ikke forsøk posting i det hele tatt. Skriv en
+tydelig linje i rapporten om at kommentaren **ikke** ble postet og konkret hvorfor
+(f.eks. "gh ikke installert/autentisert" eller "ingen PR-nummer kjent — kun lokal
+diff"), og fall tilbake til vanlig terminal-only-oppførsel. Ikke la manglende
+posting stoppe selve reviewen.
 
 ## Sjekkliste
 
@@ -86,6 +111,7 @@ Kodekvalitet:
 - <fil/kontekst>: <funn> — <forslag>, eller "ingen funnet"
 
 Konklusjon: Flagget for menneskelig reviewer. Blokkerer ikke.
+Kommentar-posting: <ikke forsøkt (standard) | postet på PR #<nr> | ikke postet: <konkret grunn>>
 ```
 
 ## Grenser
@@ -97,3 +123,5 @@ Konklusjon: Flagget for menneskelig reviewer. Blokkerer ikke.
   jobb for vårt eget arbeid, ikke denne agentens jobb for andres PR-er).
 - Ikke logg eller gjenta sensitive verdier (fødselsnummer, tokens) i selve
   rapporten — beskriv problemet uten å sitere den faktiske sensitive verdien.
+- Ikke post en PR-kommentar uten eksplisitt forespørsel i samme oppgave, uansett
+  hvor alvorlige funnene er — posting er alltid opt-in, aldri automatisk.
