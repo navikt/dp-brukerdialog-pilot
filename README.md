@@ -131,6 +131,22 @@ sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer f
 innebygd tekst er at de er lettere å teste/utvide isolert, og at de er tydelig
 tilgjengelige for andre agenter/verktøy som leser skills uavhengig av `planlegger`.
 
+Alle 9 skills er prefikset `brukerdialog-` (matcher `grillmester`s konvensjon
+`grillmester-*`) fordi Copilot CLI slår sammen skills fra alle kilder (personal,
+plugin, prosjekt, builtin) til én flat liste uten automatisk namespacing — uten
+prefiks kunne f.eks. en skill kalt `nais` fra en annen kilde kollidert i navn med
+vår `nais-deploy`-skill.
+
+## Diagnostikk
+
+`plugin/skills/brukerdialog-doctor/SKILL.md` er en read-only audit-skill,
+`disable-model-invocation: true` — den trigges aldri automatisk av `planlegger`,
+kun når brukeren eksplisitt ber om å sjekke/diagnostisere oppsettet. Den
+verifiserer at plugin/agenter/skills er synlige i sesjonen, og flagger både
+eksakte navnekollisjoner og forventet faglig overlapp mot andre installerte
+skills (f.eks. `nais-deploy` vs. personal `nais`) — sistnevnte rapporteres som
+informativt, ikke som feil.
+
 ## PR-reviewer
 
 `pr-reviewer` er en frittstående, bruker-invokerbar agent for å reviewe **andres**

@@ -3,6 +3,22 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.9.0]
+
+### Lagt til
+- `brukerdialog-doctor`: read-only audit-skill (`disable-model-invocation: true`,
+  trigges aldri automatisk) som verifiserer at plugin/agenter/9 skills faktisk er
+  synlige i sesjonen (`copilot plugin list`, `/agent`, `copilot skill list`), og
+  flagger eksakte navnekollisjoner mot andre installerte skills. Skalert ned
+  versjon av `grillmester-doctor`-mønsteret (samme idé: prefiks alene løser ikke
+  faglig overlapp, så en egen audit-skill gjør overlapp synlig i stedet for å late
+  som det ikke finnes).
+- README: ny "Diagnostikk"-seksjon, og en forklaring av *hvorfor* alle skills er
+  prefikset — bekreftet empirisk denne sesjonen at Copilot CLI (v1.0.80) slår
+  sammen skills fra personal/plugin/prosjekt/builtin til én flat liste uten
+  automatisk namespacing, så prefikset er reell kollisjonsbeskyttelse, ikke bare
+  kosmetikk.
+
 ## [0.8.0]
 
 ### Lagt til
