@@ -195,6 +195,23 @@ ekstra felt som skal tvinges inn i `KODER_BRIEF`.
   - Trigger: endring i `.nais/*.yaml`, deploy-workflow eller GCP-ressurser via Nais.
   - Default: `Sti=komplisert`, `Krever planreview=ja`, og alltid stopp-punkt før delegasjon.
 
+- `brukerdialog-kotlin-ktor` (`plugin/skills/brukerdialog-kotlin-ktor/SKILL.md`)
+  - Trigger: Ktor-ruter, Rapids & Rivers, repository-kode eller DI-oppsett i Kotlin.
+  - Default: `Sti=enkel` for tillegg i etablert mønster, `Sti=komplisert`/
+    `Krever planreview=ja` for ny service/modul eller endret DI/transaksjonsstrategi.
+
+- `brukerdialog-observability` (`plugin/skills/brukerdialog-observability/SKILL.md`)
+  - Trigger: metrikker, tracing eller health-endepunkter (`/isalive`/`/isready`/`/metrics`).
+  - Default: `Sti=enkel` for én ny forretningsmetrikk i etablert oppsett,
+    `Sti=komplisert`/`Krever planreview=ja` for nytt observability-oppsett eller
+    endret health-sjekk-logikk.
+
+- `brukerdialog-security-owasp` (`plugin/skills/brukerdialog-security-owasp/SKILL.md`)
+  - Trigger: tilgangskontroll/IDOR, injeksjon, CORS, dependency-pinning eller
+    kryptografi utover det `brukerdialog-persondata` og auth-stopp-punktet dekker.
+  - Default: `Sti=komplisert`, `Krever planreview=ja`; alltid stopp-punkt før
+    delegasjon for tilgangskontroll/IDOR og kryptografi.
+
 ## Modell-policy
 
 - `planlegger`: `claude-sonnet-4.6` (pinnet eksplisitt — `gpt-5.4` er ikke

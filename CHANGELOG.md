@@ -3,6 +3,30 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.8.0]
+
+### Lagt til
+- 3 nye domain-preset-skills, forankret i etablerte nav-pilot-skills (samme mønster
+  som [0.6.1] brukte for `frontend-aksel`/`testrammeverk`/`nais-deploy`):
+  - `brukerdialog-kotlin-ktor`: Ktor-ruter, Rapids & Rivers, repository-kode og
+    DI-oppsett. Basert på `ktor-scaffold`/`kotlin-app-config` — extension functions
+    på `Application`, Kotliquery fremfor JPA, konstruktørinjeksjon som default
+    (Koin kun hvis prosjektet allerede bruker det), advarsel om `ThreadLocal`
+    +coroutines i transaksjonsblokker.
+  - `brukerdialog-observability`: metrikker, tracing og health-endepunkter. Basert
+    på `observability-setup` — `/isready` skal faktisk sjekke avhengigheter (503,
+    ikke krasj), strukturert logging med `kv(...)`, ingen persondata i metrikk-tags.
+  - `brukerdialog-security-owasp`: tilgangskontroll/IDOR, injeksjon, CORS,
+    dependency-pinning og kryptografi utover det `brukerdialog-persondata` og
+    auth-stopp-punktet allerede dekker. Basert på `security-owasp` (OWASP
+    Top 10:2025) — eierskapssjekk ved `{id}`-basert tilgang, parameteriserte
+    spørringer, CORS aldri `anyHost()`.
+- Oppdatert `planlegger.agent.md`s skill-referansetabell og README.
+- 5 nye policy-scenarier i `eval/planlegger-tests.json` (id 17-21), alle grønne
+  (18/18 policy-suite totalt).
+
+Plugin har nå 9 skills totalt.
+
 ## [0.7.0]
 
 ### Lagt til

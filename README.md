@@ -98,6 +98,9 @@ Og den bruker domain-presets for Nav-typiske oppgaver:
 - `Frontend+Aksel`
 - `Testrammeverk`
 - `Nais-deploy`
+- `Kotlin+Ktor`
+- `Observability`
+- `Security-OWASP`
 
 ## Domain-preset-skills
 
@@ -113,6 +116,15 @@ Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
   (Vitest/Playwright/Kotest), ikke enkelttester i eksisterende oppsett.
 - `plugin/skills/brukerdialog-nais-deploy/SKILL.md` — endringer i Nais-manifest, deploy-workflow
   eller GCP-ressurser. Faller inn under eksisterende infra/secrets-stopp-punkt.
+- `plugin/skills/brukerdialog-kotlin-ktor/SKILL.md` — Ktor-ruter, Rapids & Rivers,
+  repository-kode og DI-oppsett. Enkel sti for tillegg i etablert mønster, komplisert
+  for ny service/modul eller endret DI/transaksjonsstrategi.
+- `plugin/skills/brukerdialog-observability/SKILL.md` — metrikker, tracing og
+  health-endepunkter. Enkel sti for én ny forretningsmetrikk, komplisert for nytt
+  oppsett eller endret health-sjekk-logikk.
+- `plugin/skills/brukerdialog-security-owasp/SKILL.md` — tilgangskontroll/IDOR,
+  injeksjon, CORS, dependency-pinning og kryptografi utover det persondata-presetet
+  og auth-stopp-punktet dekker.
 
 Hver skill inneholder trigger, default sti/planreview, obligatoriske ekstra brief-felt,
 sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer fremfor

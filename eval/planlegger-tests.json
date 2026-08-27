@@ -175,5 +175,60 @@
       "koder": "ja",
       "spørsmål": "nei"
     }
+  },
+  {
+    "id": 17,
+    "suite": "policy",
+    "prompt": "Legg til en ny GET-rute i en eksisterende Ktor-fil som følger samme mønster som de andre rutene i filen.",
+    "expected": {
+      "sti": "enkel",
+      "planreview": "nei",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 18,
+    "suite": "policy",
+    "prompt": "Bytt ut manuell konstruktørinjeksjon med Koin for wiring av alle services og repositories i en eksisterende Ktor-app.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 19,
+    "suite": "policy",
+    "prompt": "Legg til en ny forretningsmetrikk (counter) for antall opprettede søknader i en tjeneste som allerede har Prometheus-oppsett.",
+    "expected": {
+      "sti": "enkel",
+      "planreview": "nei",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 20,
+    "suite": "policy",
+    "prompt": "Endre /isready slik at den også sjekker en ny ekstern avhengighet før den svarer klar.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
+  },
+  {
+    "id": 21,
+    "suite": "policy",
+    "prompt": "Legg til et endepunkt som henter et vedtak basert på id fra URL-en, og sørg for at kun eieren av vedtaket kan se det (IDOR-sjekk).",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
   }
 ]
