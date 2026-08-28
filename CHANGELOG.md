@@ -3,6 +3,30 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.6]
+
+### Lagt til
+- `koder` og `planlegger` kan nå forklare *hvorfor* en løsning ble valgt, uten
+  å blåse opp hver sluttoppsummering:
+  - Automatisk (minimalt): `koder`s rapportformat har fått et valgfritt
+    `Nøkkelvalg`-felt som kun fylles ut når det faktisk var en ikke-opplagt
+    avveining — utelates helt for mekaniske/rutinemessige oppgaver.
+    `planlegger` tar dette videre i én kort setning, pluss egne
+    arkitektur/tilnærming-valg på samme måte.
+  - På forespørsel (grundig): begge agentene skal svare grundig og ærlig med
+    konkrete alternativer og tradeoffs når brukeren spør om begrunnelse i
+    etterkant (f.eks. "hvorfor gjorde du det sånn?"), i stedet for bare å
+    gjenta hva som ble gjort.
+  - Ny README-seksjon "Begrunnelse og læring" dokumenterer dette og kobler det
+    til "generer-så-forstå"-mønsteret.
+
+### Fikset
+- `eval_integration.py` sin `expect_reviewer_verdict_if_changed`-sjekk feilet
+  noen ganger fordi modellen skriver `**Reviewer:** APPROVED` (markdown fet
+  skrift) i stedet for `Reviewer: APPROVED`, og en ren substring-sjekk fanget
+  ikke opp det. Fjerner nå `*` før sammenligning. Verifisert 3/3 rene
+  smoke-kjøringer etter fiksen (mot en observert feilkjøring før).
+
 ## [0.10.5]
 
 ### Lagt til

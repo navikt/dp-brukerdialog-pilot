@@ -127,10 +127,14 @@ def check_test(test: dict[str, Any], scratch: Path, output: str = "") -> list[st
         # "Reviewer: hoppet over" når git faktisk viser endringer.
         status = run_git(["status", "--porcelain"], scratch)
         files_changed = bool(status.strip())
+        # Fjern markdown-uthevingstegn før sjekk: modellen skriver noen ganger
+        # "**Reviewer:** APPROVED" i stedet for "Reviewer: APPROVED", og en ren
+        # substring-sjekk skal ikke feile bare pga. fet skrift rundt kolonet.
+        output_plain = output.replace("*", "")
         real_verdicts = ["Reviewer: APPROVED", "Reviewer: NEEDS_CHANGES", "Reviewer: BLOCKED",
                           "Reviewer-status: APPROVED", "Reviewer-status: NEEDS_CHANGES",
                           "Reviewer-status: BLOCKED"]
-        has_real_verdict = any(v in output for v in real_verdicts)
+        has_real_verdict = any(v in output_plain for v in real_verdicts)
         claims_skipped = "hoppet over" in output.lower()
         if files_changed and claims_skipped and not has_real_verdict:
             failures.append(

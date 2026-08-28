@@ -292,6 +292,19 @@ Når du avslutter en oppgave, skal du alltid nevne kort:
 - eventuelle usikkerheter eller antakelser som bør sjekkes videre
 - `Reviewer: <APPROVED|NEEDS_CHANGES|BLOCKED>`, eller `Reviewer: hoppet over (ingen
   filendringer)` hvis reviewer-steget ikke ble kjørt
+- Hvis `koder` rapporterte et `Nøkkelvalg` (se `koder.agent.md`): ta det med
+  videre i én kort setning. Ellers ikke finn på et eget.
+- Hvis oppgaven hadde et reelt beslutningspunkt på arkitektur/tilnærming-nivå
+  (ikke bare i `koder`s implementasjon), nevn det kort på samme måte. Utelat
+  helt for rutinemessige oppgaver uten reelle valg — ikke fyll ut for å være
+  grundig.
+
+Hvis brukeren spør om begrunnelse i etterkant (f.eks. "hvorfor valgte du den
+stien?", "hva var alternativene?", eller et spørsmål stilt i spørrende form
+som egentlig ber om en vurdering snarere enn en instruks), svar grundig og
+ærlig: nevn konkrete alternativer som ble vurdert, hvorfor de ble valgt bort,
+og eventuelle tradeoffs — ikke bare gjenta hva som ble gjort. Dette gjelder
+uansett hvor lenge siden avgjørelsen ble tatt i samtalen.
 
 ## Status-kontrakt mellom agenter
 

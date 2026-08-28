@@ -71,7 +71,16 @@ Verifisering:
 - <kommando + resultat>
 Avvik fra brief:
 - <ingen> eller konkret avvik
+Nøkkelvalg: <ingen> eller én kort setning om en ikke-opplagt avveining
+  (f.eks. valgt tilnærming fremfor et nærliggende alternativ, og hvorfor).
+  Utelat linjen helt hvis implementasjonen var mekanisk uten reelle valg —
+  ikke fyll den ut for å være grundig.
 ```
+
+Hvis brukeren spør om begrunnelse i etterkant (f.eks. "hvorfor gjorde du det
+sånn?", "hva var alternativene?"), svar grundig og ærlig: nevn konkrete
+alternativer som ble vurdert, hvorfor de ble valgt bort, og eventuelle
+tradeoffs — ikke bare gjenta hva som ble gjort.
 
 ## Grenser
 

@@ -113,6 +113,28 @@ Og den bruker domain-presets for Nav-typiske oppgaver:
 - `Security-OWASP`
 - `BFF-auth`
 
+## Begrunnelse og læring
+
+`planlegger` og `koder` er ikke bare ment å levere kode — de skal også gjøre
+det mulig å faktisk forstå hvorfor noe ble gjort på en gitt måte, uten at hver
+sluttoppsummering blir unødvendig lang og tokentung.
+
+- **Automatisk (minimalt):** sluttoppsummeringen inneholder kun et
+  `Nøkkelvalg`-felt (fra `koder`) eller en tilsvarende kort setning (fra
+  `planlegger`) når det faktisk var en ikke-opplagt avveining — f.eks. valgt
+  tilnærming fremfor et nærliggende alternativ. For rutinemessige oppgaver
+  uten reelle valg er feltet utelatt, ikke tomt fylt ut.
+- **På forespørsel (grundig):** still oppfølgingsspørsmål som "hvorfor gjorde
+  du det sånn?" eller "hva var alternativene?" i samme sesjon — agenten skal
+  da svare grundig og ærlig, med konkrete alternativer som ble vurdert og
+  hvorfor de ble valgt bort, ikke bare gjenta hva som ble gjort. Dette
+  gjelder også når spørsmålet stilles i en spørrende/usikker tone snarere enn
+  som et rett-frem spørsmål (se "Spørrende formuleringer i oppgaveteksten" i
+  `plugin/agents/planlegger.agent.md`).
+- Dette henger sammen med "generer-så-forstå"-mønsteret: målet er at du som
+  bruker skal kunne stille kritiske spørsmål til valgene som ble tatt, ikke
+  bare akseptere resultatet.
+
 ## Domain-preset-skills
 
 Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
