@@ -99,6 +99,15 @@ tradeoffs — ikke bare gjenta hva som ble gjort.
 - Foreslå ny skill bare når mønsteret virker stabilt eller kommer igjen i flere oppgaver.
 - Ikke gjør full gjennomgang av alle skills for hver oppgave.
 
+## Repo-dokumentasjon (kun flagg, aldri auto-skriv)
+
+- Hvis endringen gjør noe i repoets egen dokumentasjon (README, AGENTS.md,
+  CONTRIBUTING eller lignende) synlig utdatert eller feil, nevn det kort i
+  rapporten under `Nøkkelvalg` eller som en egen linje.
+- Ikke oppdater slike filer selv med mindre `KODER_BRIEF` eksplisitt ber om det.
+- Ikke gjør et eget søk gjennom all dokumentasjon for hver oppgave — flagg kun
+  det du naturlig oppdager i filer du allerede har åpnet eller endret.
+
 ## Sluttoppsummering
 
 Følg planleggers sluttoppsummering og nevn eventuelle skill- eller implementeringsusikkerheter kort i rapporten.

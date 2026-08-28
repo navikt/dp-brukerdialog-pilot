@@ -3,6 +3,20 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.7]
+
+### Lagt til
+- `koder` (ny seksjon "Repo-dokumentasjon") og `planlegger` kan nå flagge —
+  aldri fikse selv — hvis en endring gjør repoets egen dokumentasjon (README,
+  AGENTS.md, CONTRIBUTING eller lignende) synlig utdatert. Bevisst begrenset
+  til ren flagging: å opprette nye skills/dokumentasjon i et target-repo er en
+  bevisst handling brukeren tar selv, ikke noe pluginen gjør uoppfordret eller
+  automatisk (vurdert og avgrenset eksplisitt mot bredere automatisk
+  skill-/dokumentasjonsvedlikehold i target-repos, som ble vurdert som for
+  stor scope-utvidelse og delvis overlappende med CLI-ens egen
+  `store_memory`-mekanisme).
+- README: utvidet "Begrunnelse og læring"-seksjonen med denne avgrensningen.
+
 ## [0.10.6]
 
 ### Lagt til

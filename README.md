@@ -135,6 +135,15 @@ sluttoppsummering blir unødvendig lang og tokentung.
   bruker skal kunne stille kritiske spørsmål til valgene som ble tatt, ikke
   bare akseptere resultatet.
 
+`koder` og `planlegger` kan også flagge (aldri fikse selv) hvis en endring
+gjør repoets **egen** dokumentasjon (README, AGENTS.md, CONTRIBUTING eller
+lignende) synlig utdatert — se "Repo-dokumentasjon" i `koder.agent.md`. Dette
+er bevisst begrenset til ren flagging: pluginen skal ikke automatisk
+opprette/oppdatere skills eller dokumentasjon i repoene den jobber i, kun
+nevne det du naturlig oppdager mens du allerede er i filene. Å opprette nye
+skills/dokumentasjon i et repo er en bevisst handling du tar selv, ikke noe
+pluginen gjør uoppfordret.
+
 ## Domain-preset-skills
 
 Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:

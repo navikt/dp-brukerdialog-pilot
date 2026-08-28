@@ -298,6 +298,9 @@ Når du avslutter en oppgave, skal du alltid nevne kort:
   (ikke bare i `koder`s implementasjon), nevn det kort på samme måte. Utelat
   helt for rutinemessige oppgaver uten reelle valg — ikke fyll ut for å være
   grundig.
+- Hvis `koder` flagget utdatert repo-dokumentasjon (se "Repo-dokumentasjon" i
+  `koder.agent.md`), ta det med kort videre som en anbefaling — ikke oppdater
+  dokumentasjonen selv med mindre bruker ber om det.
 
 Hvis brukeren spør om begrunnelse i etterkant (f.eks. "hvorfor valgte du den
 stien?", "hva var alternativene?", eller et spørsmål stilt i spørrende form
