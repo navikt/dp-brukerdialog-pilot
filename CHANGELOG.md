@@ -3,6 +3,36 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.5]
+
+### Lagt til
+- Eval-scenario 24 i `eval/planlegger-tests.json`: isolerer spesifikt
+  "programmatisk operasjon"-klausulen i mikro-endring-unntaket
+  (versjonsnummer-oppdatering i én stor, generert fil med kolliderende
+  verdier andre steder i fila). Erstatter ikke scenario 22 (som fortsatt er en
+  gyldig regresjonssperre for den historiske bugen), men dekker et gap
+  scenario 22 ikke traff: mutasjonstesting viste at å fjerne klausulen ikke
+  påvirket scenario 22 (5/5 uendret utfall, siden splitting-i-flere-filer
+  allerede er ekskludert av en annen, urelatert klausul), mens scenario 24
+  faktisk flipper fra en klar `koder=ja`-majoritet (5/5) til inkonklusivt
+  (2/5) ved samme mutasjon — bekrefter at scenario 24 isolerer riktig regel.
+- `eval/koder-direct-tests.json` + ny bruk av `eval_integration.py --agent
+  dp-brukerdialog-pilot:koder`: kjører `koder` direkte (uten `planlegger` i
+  løpet) med en håndskrevet `KODER_BRIEF` der `Git-policy` er til stede men
+  ikke nevner commit. Dekker et gap der både `eval_koder_brief.py` (tekst-only)
+  og `eval_integration.py` sin normale bruk (alltid via `planlegger`) skjuler
+  regresjoner i `koder` sin egen "ikke commit uten eksplisitt instruks"-regel,
+  fordi `planlegger` alltid genererer et eksplisitt
+  `Git-policy: auto-commit: nei`-felt uansett hva `koder.agent.md` sier.
+  Bekreftet med mutasjonstesting: en eksplisitt positiv "kjør alltid
+  `git commit`"-instruks flipper testen korrekt (ny commit oppdaget); en
+  svakere "det er greit å committe"-mutasjon flipper den ikke (modellens egen
+  forsiktighet uten imperativ er nok i praksis) — dokumentert som en kjent,
+  akseptert begrensning i README.
+- Begge nye tester lagt til i `.github/workflows/eval-harness.yml` sine
+  statiske sjekker (schema-validering).
+- README: ny seksjon "Ekte koder-direkte-test (commit-policy-isolasjon)".
+
 ## [0.10.4]
 
 ### Lagt til

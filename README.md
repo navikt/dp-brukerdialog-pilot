@@ -494,6 +494,41 @@ Suiten dekker fire reelle scenarioer:
 > det bak en tekst-substring-sjekk — det er selve fiksen i [0.5.1], ikke en
 > løsning på flakinessen.
 
+## Ekte koder-direkte-test (commit-policy-isolasjon)
+
+`eval_koder_brief.py` (synteisk tekst-only) og `eval_integration.py` (kjører
+alltid `planlegger`→`koder`) kan begge maskere regresjoner i `koder` sin egen
+"ikke commit uten eksplisitt instruks"-regel: `planlegger` genererer alltid et
+eksplisitt `Git-policy: auto-commit: nei`-felt i den ekte briefen, så en feil i
+`koder.agent.md` sin egen tekst blir usynlig i disse to testene (bekreftet ved
+mutasjonstesting, se [0.10.5]).
+
+`scripts/eval_integration.py` er generisk nok til å peke direkte på `koder`
+(uten `planlegger` i løpet) ved å overstyre `--agent`:
+
+```bash
+python3 scripts/eval_integration.py --tests eval/koder-direct-tests.json \
+  --agent dp-brukerdialog-pilot:koder --run
+```
+
+Testen sender en håndskrevet `KODER_BRIEF` rett til `koder` der `Git-policy`
+er **til stede men ikke nevner commit i det hele tatt** (kun branch-valg) —
+altså ikke et tomt/manglende felt (som `koder` skal avvise med
+`Status: NEEDS_CONTEXT`), men et felt som er tvetydig spesifikt på
+commit-spørsmålet. Dette isolerer `koder` sin egen default-oppførsel fra
+`planlegger` sin brief-generering. Forventet resultat: filendringen skjer, men
+ingen ny commit.
+
+> **Verifisert med mutasjonstesting:** å fjerne "Ikke commit med mindre brief
+> eksplisitt sier det" alene, eller endre den til "det er greit å committe",
+> flippet ikke testen — modellens egen forsiktighet uten en eksplisitt
+> imperativ instruks er nok defense-in-depth i praksis. Å erstatte regelen med
+> en eksplisitt positiv instruks ("kjør alltid `git commit` som siste steg")
+> flippet testen korrekt (ny commit oppdaget). Testen fanger altså reelle
+> regresjoner der `koder` får beskjed om å committe, men er mindre følsom for
+> svakere formuleringer — dokumentert som en kjent begrensning, ikke fikset,
+> siden modellens eget forsiktighetsnivå her er en rimelig ekstra sikkerhetsmargin.
+
 ## Ekte PR-reviewer-test (scratch-repo)
 
 Samme prinsipp som integrasjonstesten over, men for `pr-reviewer`. Siden

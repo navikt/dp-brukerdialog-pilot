@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "suite": "policy",
+    "fixture": {
+      "src/Retry.kt": "object Retry {\n    const val MAKS_FORSOK_PLACEHOLDER = 1\n}\n"
+    },
+    "prompt": "KODER_BRIEF\nMål: Endre konstanten MAKS_FORSOK_PLACEHOLDER til å hete MAKS_FORSOK med verdi 3 i src/Retry.kt\nSti: enkel\nKrever planreview: nei\nScope: 1 fil\nIkke gjør: ikke endre annen logikk\nAkseptkriterier:\n- Konstanten heter MAKS_FORSOK og har verdi 3\nBerørte filer:\n- src/Retry.kt\nNye avhengigheter: ingen\nRisiko: lav\nGit-policy: branch=main, ingen ny branch",
+    "expect_contains": {
+      "src/Retry.kt": ["MAKS_FORSOK", "3"]
+    },
+    "expect_no_commit": true
+  }
+]

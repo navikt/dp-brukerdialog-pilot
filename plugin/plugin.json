@@ -1,6 +1,6 @@
 {
   "name": "dp-brukerdialog-pilot",
-  "version": "0.10.4",
+  "version": "0.10.5",
   "description": "Minimal plugin med en planlegger-agent som delegerer kodeoppgaver til en koder-agent og en intern reviewer-agent, samt en frittstående pr-reviewer-agent for andres PR-er.",
   "author": {
     "name": "Team dagpenger"

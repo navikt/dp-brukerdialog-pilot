@@ -24,7 +24,7 @@ jobs:
           import json
           from pathlib import Path
 
-          for rel in ("eval/planlegger-tests.json", "eval/koder-brief-tests.json", "eval/golden-trace-tests.json", "eval/integration-tests.json", "eval/reviewer-tests.json", "eval/pr-reviewer-tests.json", "eval/troubleshoot-tests.json"):
+          for rel in ("eval/planlegger-tests.json", "eval/koder-brief-tests.json", "eval/golden-trace-tests.json", "eval/integration-tests.json", "eval/koder-direct-tests.json", "eval/reviewer-tests.json", "eval/pr-reviewer-tests.json", "eval/troubleshoot-tests.json"):
               path = Path(rel)
               data = json.loads(path.read_text(encoding="utf-8"))
               assert isinstance(data, list) and data, f"{rel} must be a non-empty list"

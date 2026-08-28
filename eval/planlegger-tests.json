@@ -252,5 +252,16 @@
       "koder": "ja",
       "spørsmål": "nei"
     }
+  },
+  {
+    "id": 24,
+    "suite": "policy",
+    "prompt": "Oppdater versjonsnummeret for pakken venstre-widget fra 2.1.0 til 2.2.0 i package-lock.json. Fila er generert og har over 5000 linjer, og flere andre pakker har tilfeldigvis også versjonsnummer 2.1.0 andre steder i fila - sørg for at kun venstre-widget sin oppføring endres.",
+    "expected": {
+      "sti": "enkel",
+      "planreview": "nei",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
   }
 ]
