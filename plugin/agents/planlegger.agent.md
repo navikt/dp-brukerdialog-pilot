@@ -239,6 +239,13 @@ ekstra felt som skal tvinges inn i `KODER_BRIEF`.
   - Default: `Sti=komplisert`, `Krever planreview=ja`; alltid stopp-punkt før
     delegasjon for tilgangskontroll/IDOR og kryptografi.
 
+- `brukerdialog-bff-auth` (`plugin/skills/brukerdialog-bff-auth/SKILL.md`)
+  - Trigger: token-validering eller token-utveksling (OBO/TokenX) i en Next.js
+    API-route/route handler, `@navikt/oasis`, Wonderwall.
+  - Default: `Sti=enkel` for ny route i etablert valideringsmønster,
+    `Sti=komplisert`/`Krever planreview=ja` for nytt audience/ny nedstrøms-tjeneste
+    eller bytte av tokentype (ID-porten ↔ Azure AD).
+
 ## Modell-policy
 
 - `planlegger`: `claude-sonnet-4.6` (pinnet eksplisitt — `gpt-5.4` er ikke

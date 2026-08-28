@@ -241,5 +241,16 @@
       "koder": "ja",
       "spørsmål": "nei"
     }
+  },
+  {
+    "id": 23,
+    "suite": "policy",
+    "prompt": "Legg til en ny Next.js API-route som veksler inn brukerens token mot en tjeneste vi ikke har integrert mot fra før, via TokenX.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei"
+    }
   }
 ]

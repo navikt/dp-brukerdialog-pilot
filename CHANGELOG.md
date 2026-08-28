@@ -3,6 +3,45 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.4]
+
+### Lagt til
+- `plugin/skills/brukerdialog-bff-auth/SKILL.md`: nytt domain-preset for
+  autentisering/token-utveksling i Next.js API-routes (BFF) — validering av
+  innkommende token (`@navikt/oasis`) og OBO/TokenX-utveksling mot andre
+  Nav-tjenester. Dekker et reelt gap: `brukerdialog-frontend-aksel` dekker kun
+  UI-komponenter, og backend-siden av TokenX var kun dekket av den personlige
+  `tokenx-auth`-skillen (Kotlin-fokusert, ikke Next.js/BFF).
+  - Trigger: token-validering/-utveksling i en Next.js API-route/route handler.
+  - Default: `Sti=enkel` for ny route i etablert valideringsmønster,
+    `Sti=komplisert`/`Krever planreview=ja` for nytt audience/ny
+    nedstrøms-tjeneste eller bytte av tokentype.
+  - Obligatoriske brief-felt: token-kilde, målsystem+audience-format
+    (TokenX `cluster:ns:app` vs. Azure AD OBO `api://cluster.ns.app/.default`
+    — disse forveksles lett), feilhåndtering (401 vs. 403, aldri 500 eller
+    lekkasje av valideringsdetaljer), nedstrøms-protokoll (http internt/https
+    eksternt).
+- Registrert presetet i `planlegger.agent.md`s preset-tabell og i README.
+- Eval-scenario 23 i `eval/planlegger-tests.json` (ny TokenX-integrasjon mot
+  ukjent tjeneste → forventer `sti=komplisert`, `planreview=ja`) — kjørt og
+  bekreftet 3/3 rent.
+
+### Fikset
+- `plugin/skills/brukerdialog-doctor/SKILL.md` var utdatert (fortsatt "4
+  agenter og 9 skills" fra før `troubleshoot` ble lagt til og senere gjort
+  `user-invocable: false`, se [0.10.0]/[0.10.2]). Oppdatert til å reflektere
+  faktisk tilstand: kun `planlegger`/`pr-reviewer` skal være synlige i
+  `/agent`, mens `koder`/`reviewer`/`troubleshoot` er tilsiktet skjult
+  (internt-only/kun via launcher). Skill-listen oppdatert til alle 11.
+
+### Verifisert
+- `python3 scripts/validate_plugin_schema.py`: 5 agent-fil(er), 11
+  skill-fil(er) OK.
+- `python3 scripts/eval_planlegger.py --run --suite policy --repeats 3`:
+  17/19 pre-eksisterende scenarioer passerte (de 3 feilene — id 3, 9, 16 — er
+  allerede dokumentert kjent flakiness i README, ikke en regresjon fra denne
+  endringen), nytt scenario id 23 passerte rent 3/3.
+
 ## [0.10.3]
 
 ### Lagt til

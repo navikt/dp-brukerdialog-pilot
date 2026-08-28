@@ -1,6 +1,6 @@
 ---
 name: brukerdialog-doctor
-description: "Sjekker at dp-brukerdialog-pilot er riktig installert, at alle 4 agenter og 9 skills er synlige i sesjonen, og om noen av pluginens brukerdialog-*-skills overlapper i navn eller innhold med andre installerte skills (personal, prosjekt eller andre plugins). Kun for eksplisitt bruk når brukeren ber om diagnose/sjekk av oppsettet — les-only audit, trigges aldri automatisk."
+description: "Sjekker at dp-brukerdialog-pilot er riktig installert, at agentene og skillsene er synlige i sesjonen som forventet (skiller mellom bruker-valgbare og internt-only agenter), og om noen av pluginens brukerdialog-*-skills overlapper i navn eller innhold med andre installerte skills (personal, prosjekt eller andre plugins). Kun for eksplisitt bruk når brukeren ber om diagnose/sjekk av oppsettet — les-only audit, trigges aldri automatisk."
 disable-model-invocation: true
 license: MIT
 compatibility: Copilot CLI-sesjoner med dp-brukerdialog-pilot installert
@@ -31,20 +31,27 @@ Kjør `copilot plugin list` og bekreft:
 Manglende oppføring betyr `NOT_READY`, ikke automatisk feilinstallert — sjekk
 om `copilot plugin marketplace update` er kjørt nylig.
 
-## Steg 2: Verifiser at agentene er synlige
+## Steg 2: Verifiser at agentene er synlige (eller riktig skjult)
 
-I en interaktiv sesjon, sjekk `/agent`-dashbordet for at disse 4 er synlige:
-`planlegger`, `koder`, `reviewer`, `pr-reviewer`. Rapporter `UNVERIFIED` hvis
-dashbordet ikke er observerbart (f.eks. i en scriptet `-p`-kjøring).
+Kun `planlegger` og `pr-reviewer` er `user-invocable: true` og skal vises i
+`/agent`-dashbordet. `koder` og `reviewer` er internt-only (delegeres av
+`planlegger`, ikke direkte valgbare — dette er tilsiktet, ikke en feil).
+`troubleshoot` er også `user-invocable: false` **med vilje** (se CHANGELOG
+[0.10.2]): den skal kun startes via `scripts/troubleshoot-safe.sh`, som bruker
+`--agent`-flagget direkte og dermed omgår `/agent`-menyen. Rapporter
+`UNVERIFIED` hvis dashbordet ikke er observerbart (f.eks. i en scriptet
+`-p`-kjøring) — ikke `NOT_READY` bare fordi `koder`/`reviewer`/`troubleshoot`
+ikke dukker opp i `/agent`, det er forventet oppførsel.
 
 ## Steg 3: Verifiser skills og se etter overlapp
 
-Kjør `copilot skill list` og finn alle 9 `brukerdialog-*`-skills under
+Kjør `copilot skill list` og finn alle 11 `brukerdialog-*`-skills under
 "Plugin skills":
 
-`brukerdialog-api-kafka`, `brukerdialog-db-migrasjon`, `brukerdialog-frontend-aksel`,
-`brukerdialog-kotlin-ktor`, `brukerdialog-nais-deploy`, `brukerdialog-observability`,
-`brukerdialog-persondata`, `brukerdialog-security-owasp`, `brukerdialog-testrammeverk`
+`brukerdialog-api-kafka`, `brukerdialog-bff-auth`, `brukerdialog-db-migrasjon`,
+`brukerdialog-doctor`, `brukerdialog-frontend-aksel`, `brukerdialog-kotlin-ktor`,
+`brukerdialog-nais-deploy`, `brukerdialog-observability`, `brukerdialog-persondata`,
+`brukerdialog-security-owasp`, `brukerdialog-testrammeverk`
 
 Skills fra ulike kilder (personal, plugin, project, builtin) slås sammen til
 én flat liste i denne CLI-versjonen — det finnes ingen automatisk namespacing
@@ -58,7 +65,8 @@ eller presedensregel. Se derfor etter:
   vs. `aksel-builder`/`aksel-spacing`, `brukerdialog-kotlin-ktor` vs.
   `ktor-scaffold`/`kotlin-app-config`, `brukerdialog-observability` vs.
   `observability-setup`/`observability-debugging`, `brukerdialog-testrammeverk`
-  vs. `playwright-testing`. Rapporter disse som `DUPLICATION` (informativt) —
+  vs. `playwright-testing`, `brukerdialog-bff-auth` vs. personal
+  `tokenx-auth`/`nav-auth`. Rapporter disse som `DUPLICATION` (informativt) —
   ikke en `BLOCKER` — siden `brukerdialog-*`-varianten er et smalt
   planlegger-preset (brief-felt, sjekkliste), mens de andre er bredere
   fagkunnskap. Begge kan brukes samtidig uten konflikt.
@@ -72,11 +80,13 @@ Installasjon:
 - Plugin listet i `copilot plugin list`: VERIFIED | UNVERIFIED
 - Versjon matcher plugin.json: VERIFIED | UNVERIFIED | N/A
 
-Agenter (planlegger, koder, reviewer, pr-reviewer):
-- Synlige i /agent: VERIFIED | UNVERIFIED
+Agenter:
+- planlegger, pr-reviewer synlige i /agent: VERIFIED | UNVERIFIED
+- koder, reviewer, troubleshoot korrekt SKJULT fra /agent (tilsiktet,
+  user-invocable: false): VERIFIED | UNVERIFIED
 
-Skills (9 brukerdialog-*):
-- Alle 9 funnet i `copilot skill list`: VERIFIED | <mangler: liste> | UNVERIFIED
+Skills (11 brukerdialog-*):
+- Alle 11 funnet i `copilot skill list`: VERIFIED | <mangler: liste> | UNVERIFIED
 - Navnekollisjoner: INGEN | <liste over eksakte navnetreff>
 - Faglig overlapp (informativt, ikke blokkerende): <liste, eller INGEN>
 

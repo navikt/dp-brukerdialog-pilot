@@ -34,6 +34,11 @@ plugin/skills/brukerdialog-persondata/SKILL.md
 plugin/skills/brukerdialog-frontend-aksel/SKILL.md
 plugin/skills/brukerdialog-testrammeverk/SKILL.md
 plugin/skills/brukerdialog-nais-deploy/SKILL.md
+plugin/skills/brukerdialog-kotlin-ktor/SKILL.md
+plugin/skills/brukerdialog-observability/SKILL.md
+plugin/skills/brukerdialog-security-owasp/SKILL.md
+plugin/skills/brukerdialog-bff-auth/SKILL.md
+plugin/skills/brukerdialog-doctor/SKILL.md
 ```
 
 Målet i første versjon var en bevisst liten plugin med:
@@ -41,8 +46,8 @@ Målet i første versjon var en bevisst liten plugin med:
 - 1 koder-agent som implementerer
 - 0 skills
 
-Vi har siden lagt til 6 domain-preset-skills (se "Domain-preset-skills" under) for å gjøre
-`KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse opp agent-promptet.
+Vi har siden lagt til 11 domain-preset-/audit-skills (se "Domain-preset-skills" under) for å
+gjøre `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse opp agent-promptet.
 
 ## Installer
 
@@ -106,6 +111,7 @@ Og den bruker domain-presets for Nav-typiske oppgaver:
 - `Kotlin+Ktor`
 - `Observability`
 - `Security-OWASP`
+- `BFF-auth`
 
 ## Domain-preset-skills
 
@@ -130,13 +136,17 @@ Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
 - `plugin/skills/brukerdialog-security-owasp/SKILL.md` — tilgangskontroll/IDOR,
   injeksjon, CORS, dependency-pinning og kryptografi utover det persondata-presetet
   og auth-stopp-punktet dekker.
+- `plugin/skills/brukerdialog-bff-auth/SKILL.md` — token-validering/-utveksling
+  (OBO/TokenX) i Next.js API-routes med `@navikt/oasis`. Enkel sti for ny route i
+  etablert valideringsmønster, komplisert for nytt audience/ny nedstrøms-tjeneste
+  eller bytte av tokentype.
 
 Hver skill inneholder trigger, default sti/planreview, obligatoriske ekstra brief-felt,
 sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer fremfor
 innebygd tekst er at de er lettere å teste/utvide isolert, og at de er tydelig
 tilgjengelige for andre agenter/verktøy som leser skills uavhengig av `planlegger`.
 
-Alle 9 skills er prefikset `brukerdialog-` (matcher `grillmester`s konvensjon
+Alle 11 skills er prefikset `brukerdialog-` (matcher `grillmester`s konvensjon
 `grillmester-*`) fordi Copilot CLI slår sammen skills fra alle kilder (personal,
 plugin, prosjekt, builtin) til én flat liste uten automatisk namespacing — uten
 prefiks kunne f.eks. en skill kalt `nais` fra en annen kilde kollidert i navn med
