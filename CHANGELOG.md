@@ -3,6 +3,33 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.2]
+
+### Endret
+- `troubleshoot.agent.md`: `user-invocable: true` → `false`, og la til
+  `disable-model-invocation: true`. Agenten er derfor ikke lenger valgbar i
+  `/agent`-menyen og kan ikke auto-invokeres av andre agenter — den kan kun startes
+  via `scripts/troubleshoot-safe.sh`, som bruker `--agent`-CLI-flagget direkte.
+
+### Undersøkt
+- Fulgte opp spørsmålet om den tekniske sperren i [0.10.1] burde ligge direkte i
+  agent-filen i stedet for i et separat launcher-script. Sjekket offisiell
+  dokumentasjon (`custom-agents-configuration`, `configure-copilot-cli`):
+  `--allow-tool`/`--deny-tool` med finkornede kommandomønstre
+  (`shell(kubectl delete:*)`) finnes **kun** som CLI-launch-flagg — agent-frontmatter
+  sitt `tools`-felt støtter bare grov allow-listing av hele verktøykategorier
+  (f.eks. slå av all `shell`), ikke enkeltkommandoer. Konklusjon: sperren kan ikke
+  bakes inn i agent-filen selv.
+- Testet empirisk om `user-invocable: false` faktisk fjerner risikoen for at
+  brukeren velger agenten uten sperren: kjørte `copilot --agent
+  dp-brukerdialog-pilot:koder` (som allerede er `user-invocable: false`) direkte —
+  fungerte uendret. Bekrefter at `--agent`-flagget omgår `user-invocable`, så
+  launcher-scriptet fortsatt virker etter denne endringen, samtidig som agenten
+  forsvinner fra `/agent`-menyen for vanlig bruk.
+- **Uverifisert:** brukeren nevnte at Nav har en intern sandkasse/wrapper rundt
+  Copilot CLI ("cplt") som kan gripe inn i dette. Ikke undersøkt i dette miljøet —
+  flagget som uverifisert i README.
+
 ## [0.10.1]
 
 ### Lagt til

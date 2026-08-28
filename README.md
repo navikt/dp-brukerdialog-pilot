@@ -9,9 +9,10 @@ En enkel AI-pilot som **ren Copilot-plugin** med fem agenter:
   faktiske diffen før planlegger rapporterer FERDIG)
 - `pr-reviewer` (synlig for bruker, uavhengig av de tre andre — reviewer andres
   PR-er/branches på forespørsel, se "PR-reviewer" under)
-- `troubleshoot` (synlig for bruker, uavhengig av de andre — feilsøker
+- `troubleshoot` (**ikke** synlig i `/agent`-menyen — feilsøker
   produksjonsproblemer på Nais ved å kjøre kubectl/curl mot klynge og
-  observability-stacken, se "Troubleshoot" under)
+  observability-stacken, men startes kun via `scripts/troubleshoot-safe.sh`,
+  se "Troubleshoot" under for hvorfor)
 
 Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
 
@@ -209,11 +210,14 @@ bare "tilfeldigvis" passerer fordi dette miljøet mangler `gh`):
 
 ## Troubleshoot
 
-`troubleshoot` er en frittstående, bruker-invokerbar agent for å feilsøke
-produksjonsproblemer på Nais (pod-krasj, auth-feil, Kafka-lag, DB-tilkobling, treg
-respons) — uavhengig av `planlegger`→`koder`→`reviewer`-kjeden. Rent diagnostisk:
-gjør aldri endringer selv, foreslår i stedet fiksen (manuell drift-handling, eller
-en oppgave som bør sendes til `planlegger` for kodeendring).
+`troubleshoot` er en frittstående agent for å feilsøke produksjonsproblemer på
+Nais (pod-krasj, auth-feil, Kafka-lag, DB-tilkobling, treg respons) — uavhengig av
+`planlegger`→`koder`→`reviewer`-kjeden. Rent diagnostisk: gjør aldri endringer
+selv, foreslår i stedet fiksen (manuell drift-handling, eller en oppgave som bør
+sendes til `planlegger` for kodeendring).
+
+**Vises ikke i `/agent`-menyen** (`user-invocable: false`) — startes **kun** via
+`scripts/troubleshoot-safe.sh`, se avsnittet under for hvorfor.
 
 Forutsetter at du selv er autentisert lokalt mot klyngen (naisdevice-tunnel +
 kubeconfig) — agenten kjører `kubectl`/`curl` som vanlige bash-kommandoer, ingen
@@ -275,6 +279,13 @@ din kun har lesetilgang (get/list/watch), er verken agent-instruks eller
 CLI-flagg nødvendig for å hindre skade — API-serveren avviser skriving uansett.
 Sjekk din egen tilgang med `kubectl auth can-i delete pods -n {namespace}` før du
 stoler på noen av de andre lagene.
+
+> **UVERIFISERT: interaksjon med Navs "cplt"-sandkasse.** Noen i Nav har visstnok
+> laget en egen sandkasse/wrapper rundt Copilot CLI (omtalt som "cplt"). Det er
+> ikke sjekket om denne griper inn i, eller er inkompatibel med, `--deny-tool`
+> eller `kubectl`/`curl`-kall slik dette dokumentet beskriver. Sjekk dette selv i
+> ditt miljø før du stoler på beskrivelsen over hvis du bruker "cplt" i stedet for
+> `copilot` direkte.
 
 ## Oppdatere installasjon etter endringer
 
