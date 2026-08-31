@@ -21,6 +21,15 @@ PLUGIN_DIR = REPO_ROOT / "plugin"
 REQUIRED_AGENT_FIELDS = ("name", "description")
 REQUIRED_SKILL_FIELDS = ("name", "description")
 
+# Aggregate byte budget for every agent/skill `name` + `description` field.
+# These are always loaded for the model's skill/agent picker regardless of
+# whether a given skill is ever actually used in a session, so letting this
+# grow unbounded silently taxes every session's context. 8KB gives headroom
+# to roughly triple the current plugin size (11 skills + 5 agents, ~2.4KB
+# today) before this becomes a hard CI failure that forces a conscious
+# decision (trim descriptions, or consciously raise the budget).
+MAX_DISCOVERY_TEXT_BYTES = 8 * 1024
+
 _KEY_VALUE_RE = re.compile(r"^([A-Za-z0-9_-]+):\s*(.*)$")
 _NESTED_KEY_VALUE_RE = re.compile(r"^\s{2,}([A-Za-z0-9_-]+):\s*(.*)$")
 
@@ -163,6 +172,31 @@ def validate_manifests(agent_count: int, skill_count: int) -> list[str]:
     return errors
 
 
+def validate_discovery_budget(agent_files: list[Path], skill_files: list[Path]) -> list[str]:
+    """Fail if the total name+description text across all frontmatter grows
+    past MAX_DISCOVERY_TEXT_BYTES. See the constant's comment for rationale.
+    """
+    discovery_bytes = 0
+    for path in (*agent_files, *skill_files):
+        frontmatter = parse_frontmatter(path.read_text(encoding="utf-8"))
+        if frontmatter is None:
+            continue
+        name = frontmatter.get("name")
+        description = frontmatter.get("description")
+        if isinstance(name, str):
+            discovery_bytes += len(name.encode("utf-8"))
+        if isinstance(description, str):
+            discovery_bytes += len(description.encode("utf-8"))
+
+    if discovery_bytes > MAX_DISCOVERY_TEXT_BYTES:
+        return [
+            f"samlet discovery-tekst (name+description på tvers av agenter/skills) er "
+            f"{discovery_bytes} bytes, budsjettet er {MAX_DISCOVERY_TEXT_BYTES} bytes — "
+            "trim beskrivelser eller bevisst hev budsjettet i validate_plugin_schema.py"
+        ]
+    return []
+
+
 def main() -> int:
     agent_files = sorted((PLUGIN_DIR / "agents").glob("*.agent.md"))
     skill_files = sorted((PLUGIN_DIR / "skills").glob("*/SKILL.md"))
@@ -173,6 +207,7 @@ def main() -> int:
     for path in skill_files:
         all_errors.extend(validate_skill_file(path))
     all_errors.extend(validate_manifests(len(agent_files), len(skill_files)))
+    all_errors.extend(validate_discovery_budget(agent_files, skill_files))
 
     if all_errors:
         for error in all_errors:

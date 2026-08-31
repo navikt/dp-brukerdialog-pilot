@@ -3,6 +3,38 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.8]
+
+### Lagt til
+- CI-guard for "discovery-budget": `scripts/validate_plugin_schema.py` summerer
+  nå `name`+`description`-frontmatter på tvers av alle agent-/skill-filer
+  (disse lastes alltid inn i modellens picker/discovery-kontekst, uansett om
+  en gitt skill faktisk brukes i sesjonen) og feiler hvis summen passerer
+  8 KiB. Kalibrert til å tillate om lag en tredobling av dagens faktiske bruk
+  (~2,4 KB for 5 agenter + 12 skills) før det tvinger et bevisst valg
+  (trimme tekst eller heve konstanten med vilje). Portert fra `grillmester`,
+  som har en tilsvarende (men høyere) budsjettgrense for sitt langt større
+  antall agenter/skills.
+- `plugin/skills/brukerdialog-create-skill/SKILL.md`: ny meta-skill
+  (`disable-model-invocation: true`, samme mønster som `brukerdialog-doctor`)
+  som kodifiserer prosessen for å lage/revidere en av pluginens egne
+  domain-preset-skills — gap-sjekk, design, registrering, empirisk
+  validering via eval-skriptene, og CHANGELOG/versjonsoppdatering. Dekker
+  også når man bør diagnostisere hvorfor en skill ikke trigges. Gjelder kun
+  pluginens egne skills, ikke dokumentasjon/skills i target-repos (se
+  "Repo-dokumentasjon" i `koder.agent.md`).
+- `scripts/smoke_plugin_install.py`: ny lokal (ikke kjørt i CI, samme
+  konvensjon som de andre live `eval_*`-skriptene som krever ekte
+  `copilot`-binary) install-test som faktisk installerer pluginen i en
+  isolert `$COPILOT_HOME` og verifiserer at `copilot plugin
+  install`/`list` fungerer og viser forventet versjon — dekker en
+  installasjons-livssyklus-gap som den rent skjema-baserte valideringen ikke
+  kan fange opp. Portert og forenklet fra `grillmester`s tilsvarende skript.
+- `reviewer`: presisert at reviewer ikke skal stole blindt på koder sin
+  prosa-oppsummering av hva som ble gjort der den faktiske diffen er
+  tilgjengelig — konkrete påstander skal verifiseres mot selve diffen, ikke
+  bare beskrivelsen.
+
 ## [0.10.7]
 
 ### Lagt til

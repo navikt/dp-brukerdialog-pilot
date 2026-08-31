@@ -39,6 +39,7 @@ plugin/skills/brukerdialog-observability/SKILL.md
 plugin/skills/brukerdialog-security-owasp/SKILL.md
 plugin/skills/brukerdialog-bff-auth/SKILL.md
 plugin/skills/brukerdialog-doctor/SKILL.md
+plugin/skills/brukerdialog-create-skill/SKILL.md
 ```
 
 Målet i første versjon var en bevisst liten plugin med:
@@ -46,7 +47,7 @@ Målet i første versjon var en bevisst liten plugin med:
 - 1 koder-agent som implementerer
 - 0 skills
 
-Vi har siden lagt til 11 domain-preset-/audit-skills (se "Domain-preset-skills" under) for å
+Vi har siden lagt til 12 domain-preset-/audit-skills (se "Domain-preset-skills" under) for å
 gjøre `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse opp agent-promptet.
 
 ## Installer
@@ -177,7 +178,7 @@ sjekkliste for `koder` og en "ikke gjør"-liste. Fordelen med egne skill-filer f
 innebygd tekst er at de er lettere å teste/utvide isolert, og at de er tydelig
 tilgjengelige for andre agenter/verktøy som leser skills uavhengig av `planlegger`.
 
-Alle 11 skills er prefikset `brukerdialog-` (matcher `grillmester`s konvensjon
+Alle 12 skills er prefikset `brukerdialog-` (matcher `grillmester`s konvensjon
 `grillmester-*`) fordi Copilot CLI slår sammen skills fra alle kilder (personal,
 plugin, prosjekt, builtin) til én flat liste uten automatisk namespacing — uten
 prefiks kunne f.eks. en skill kalt `nais` fra en annen kilde kollidert i navn med
@@ -192,6 +193,14 @@ verifiserer at plugin/agenter/skills er synlige i sesjonen, og flagger både
 eksakte navnekollisjoner og forventet faglig overlapp mot andre installerte
 skills (f.eks. `nais-deploy` vs. personal `nais`) — sistnevnte rapporteres som
 informativt, ikke som feil.
+
+`plugin/skills/brukerdialog-create-skill/SKILL.md` er også
+`disable-model-invocation: true`, og kodifiserer prosessen for å lage/revidere
+en av pluginens egne domain-preset-skills (gap-sjekk, design, registrering i
+preset-tabellen, empirisk validering via `eval_planlegger.py`,
+CHANGELOG/versjon). Gjelder kun pluginens egne skills — ikke
+dokumentasjon/skills i repoene agentene jobber i, se "Repo-dokumentasjon" i
+`koder.agent.md`.
 
 ## PR-reviewer
 
@@ -350,6 +359,20 @@ copilot plugin install dp-brukerdialog-pilot@dp-brukerdialog-pilot
 ```
 
 Dette er bevisst for å holde pluginen liten og enkel å bygge videre på.
+
+Etter en versjonsbump (eller når du er usikker på om manifestene faktisk er
+installerbare, ikke bare schema-gyldige) kan du kjøre en ekte install-test i
+en isolert `$COPILOT_HOME` — den rører aldri din faktiske installasjon:
+
+```bash
+python3 scripts/smoke_plugin_install.py
+```
+
+Dette dekker et gap `validate_plugin_schema.py` ikke kan: at schema-gyldig
+JSON faktisk composerer til noe `copilot plugin install` aksepterer, og at
+`copilot plugin list` etterpå rapporterer riktig versjon. Krever den ekte
+`copilot`-binæren i `PATH`, så den kjøres lokalt (som de andre
+live-CLI-testene), ikke i CI.
 
 ## Sesjonsopprydding for eval-kjøringer
 

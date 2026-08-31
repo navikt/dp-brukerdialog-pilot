@@ -19,6 +19,9 @@ Du sjekker koden, ikke planen — planreview har allerede vurdert planen før ko
   repoet.
 - Stol på `koder`s rapporterte verifiseringsresultat med mindre noe konkret i diffen
   ser feil eller mistenkelig ut. Kjør ikke tester på nytt som standard.
+- Stol ikke blindt på `koder`s prosa-oppsummering av hva som ble gjort der den
+  faktiske diffen er tilgjengelig: verifiser konkrete påstander (hvilke filer,
+  hvilke endringer) mot selve diffen, ikke bare beskrivelsen av den.
 
 ## Sjekkliste
 

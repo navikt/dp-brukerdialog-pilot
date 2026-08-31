@@ -45,13 +45,13 @@ ikke dukker opp i `/agent`, det er forventet oppførsel.
 
 ## Steg 3: Verifiser skills og se etter overlapp
 
-Kjør `copilot skill list` og finn alle 11 `brukerdialog-*`-skills under
+Kjør `copilot skill list` og finn alle 12 `brukerdialog-*`-skills under
 "Plugin skills":
 
-`brukerdialog-api-kafka`, `brukerdialog-bff-auth`, `brukerdialog-db-migrasjon`,
-`brukerdialog-doctor`, `brukerdialog-frontend-aksel`, `brukerdialog-kotlin-ktor`,
-`brukerdialog-nais-deploy`, `brukerdialog-observability`, `brukerdialog-persondata`,
-`brukerdialog-security-owasp`, `brukerdialog-testrammeverk`
+`brukerdialog-api-kafka`, `brukerdialog-bff-auth`, `brukerdialog-create-skill`,
+`brukerdialog-db-migrasjon`, `brukerdialog-doctor`, `brukerdialog-frontend-aksel`,
+`brukerdialog-kotlin-ktor`, `brukerdialog-nais-deploy`, `brukerdialog-observability`,
+`brukerdialog-persondata`, `brukerdialog-security-owasp`, `brukerdialog-testrammeverk`
 
 Skills fra ulike kilder (personal, plugin, project, builtin) slås sammen til
 én flat liste i denne CLI-versjonen — det finnes ingen automatisk namespacing
