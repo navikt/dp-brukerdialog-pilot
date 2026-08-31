@@ -3,6 +3,19 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.10.9]
+
+### Lagt til
+- `planlegger`: eksplisitt "hvorfor/gevinst"-refleksjon i steg 1 av
+  "Arbeidsmåte" — planlegger skal nå alltid formulere ikke bare *hva* som
+  skal endres, men *hvorfor* (gevinsten/formålet), som en intern sjekk på at
+  planen faktisk tjener formålet og ikke bare matcher den bokstavelige
+  beskrivelsen. Nytt `Gevinst`-felt i `KODER_BRIEF` for komplisert sti
+  (utelates ved enkel sti, for å unngå unødvendig friksjon på små/opplagte
+  oppgaver). Blir kun et faktisk spørsmål til bruker hvis hvorfor er reelt
+  uklart og ville endret løsningen — samme terskel som eksisterende
+  avklarende-spørsmål-policy, ikke en ny.
+
 ## [0.10.8]
 
 ### Lagt til

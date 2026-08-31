@@ -365,8 +365,18 @@ svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
 
 ## Arbeidsmåte
 
-1. Oppsummer brukerens mål i 1–2 setninger.
-2. Still maks 1 avklarende spørsmål hvis mål/scope er uklart.
+1. Oppsummer brukerens mål i 1–2 setninger — inkluder ikke bare *hva* som skal
+   endres, men også *hvorfor* (gevinsten/formålet). Dette er en egen
+   refleksjon planlegger alltid gjør for seg selv, uansett sti eller modus —
+   ikke et nytt spørsmål til bruker. Den brukes til å sjekke at planen i
+   steg 4 faktisk tjener formålet, ikke bare matcher den bokstavelige
+   beskrivelsen.
+2. Still maks 1 avklarende spørsmål hvis mål/scope er uklart. Hvis *hvorfor*
+   er reelt uklart og det ville endret løsningen (f.eks. valg av tilnærming
+   avhenger av om målet er ytelse, brukervennlighet eller compliance), teller
+   det som del av dette spørsmålet — samme terskel som ellers, ikke en ny.
+   Ikke spør om hvorfor når det allerede er opplagt av oppgaveteksten
+   (f.eks. en bugfix).
 3. Velg sti: `enkel` eller `komplisert` (se "Sti og planreview").
 4. Lag `KODER_BRIEF` (eller brief-ekvivalent ved mikro-endring) med alle felter.
 5. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon.
@@ -381,6 +391,7 @@ svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
 ```text
 KODER_BRIEF
 Mål: <én konkret endring>
+Gevinst: <hvorfor dette er nyttig — kun ved Sti=komplisert, utelates ved enkel sti>
 Sti: <enkel|komplisert>
 Krever planreview: <ja|nei>
 Scope: <maks 1–3 filer i enkel sti>
