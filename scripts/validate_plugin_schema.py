@@ -172,27 +172,40 @@ def validate_manifests(agent_count: int, skill_count: int) -> list[str]:
     return errors
 
 
+DISCOVERY_TOP_OFFENDERS = 3
+
+
 def validate_discovery_budget(agent_files: list[Path], skill_files: list[Path]) -> list[str]:
     """Fail if the total name+description text across all frontmatter grows
     past MAX_DISCOVERY_TEXT_BYTES. See the constant's comment for rationale.
     """
     discovery_bytes = 0
+    per_file_bytes: list[tuple[int, Path]] = []
     for path in (*agent_files, *skill_files):
         frontmatter = parse_frontmatter(path.read_text(encoding="utf-8"))
         if frontmatter is None:
             continue
         name = frontmatter.get("name")
         description = frontmatter.get("description")
+        file_bytes = 0
         if isinstance(name, str):
-            discovery_bytes += len(name.encode("utf-8"))
+            file_bytes += len(name.encode("utf-8"))
         if isinstance(description, str):
-            discovery_bytes += len(description.encode("utf-8"))
+            file_bytes += len(description.encode("utf-8"))
+        discovery_bytes += file_bytes
+        per_file_bytes.append((file_bytes, path))
 
     if discovery_bytes > MAX_DISCOVERY_TEXT_BYTES:
+        per_file_bytes.sort(key=lambda pair: pair[0], reverse=True)
+        top_offenders = ", ".join(
+            f"{path.relative_to(PLUGIN_DIR)} ({size} bytes)"
+            for size, path in per_file_bytes[:DISCOVERY_TOP_OFFENDERS]
+        )
         return [
             f"samlet discovery-tekst (name+description på tvers av agenter/skills) er "
             f"{discovery_bytes} bytes, budsjettet er {MAX_DISCOVERY_TEXT_BYTES} bytes — "
-            "trim beskrivelser eller bevisst hev budsjettet i validate_plugin_schema.py"
+            "trim beskrivelser eller bevisst hev budsjettet i validate_plugin_schema.py. "
+            f"Største bidragsytere: {top_offenders}"
         ]
     return []
 
