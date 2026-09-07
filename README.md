@@ -281,12 +281,13 @@ Korrelerer på tvers av tre søyler, grunnet i nav-pilot sin
 symptomene (401/403, Kafka consumer lag, DB-tilkoblingsfeil) er hentet fra
 `nav-troubleshoot`-skillen.
 
-Bruk den ved å velge `troubleshoot` i `/agent`, f.eks.:
+Bruk den ved å starte `scripts/troubleshoot-safe.sh` (den vises **ikke** i
+`/agent`-menyen, se avsnittet under), f.eks.:
 
-```text
-Appen min krasjer i dev-gcp, namespace teamdagpenger
-Vi får 403 fra en annen tjeneste som kaller oss
-Kafka-consumeren vår henger etter
+```bash
+./scripts/troubleshoot-safe.sh -p "Appen min krasjer i dev-gcp, namespace teamdagpenger"
+./scripts/troubleshoot-safe.sh -p "Vi får 403 fra en annen tjeneste som kaller oss"
+./scripts/troubleshoot-safe.sh -p "Kafka-consumeren vår henger etter"
 ```
 
 > **Ikke testet mot en ekte Nais-klynge fra denne pluginens side:** agenten er
@@ -309,24 +310,57 @@ Start derfor alltid `troubleshoot` via `scripts/troubleshoot-safe.sh` i stedet f
 ./scripts/troubleshoot-safe.sh -p "Appen min krasjer i dev-gcp, namespace teamdagpenger"
 ```
 
-Scriptet legger på `--deny-tool "shell(kubectl <verb>:*)"` for alle destruktive verb
-(`delete`, `apply`, `patch`, `replace`, `create`, `edit`, `exec`, `cp`, `rollout`,
-`scale`, m.fl.). Dette er en **ekte CLI-nivå-sperre** (Copilot CLI sitt
-permission-system, se `copilot help permissions`), ikke bare en instruks til
-modellen — kommandoen blokkeres før den når `kubectl` i det hele tatt, uavhengig av
-hvordan modellen resonnerer i den aktuelle turen.
+Scriptet setter opp **to lag** teknisk sperre:
 
-Verifisert empirisk med en falsk `kubectl`-stubb (se CHANGELOG [0.10.1]):
-- Uten `--deny-tool`: agenten kjørte `kubectl delete`/`kubectl apply` når prompten
-  hevdet det var "bare et testmiljø".
-- Med `--deny-tool`: samme forsøk ble avvist med `Permission to run this tool was
-  denied due to the following rules: shell(kubectl apply:*)` — kommandoen ble
-  aldri utført. Vanlige lesekommandoer (`kubectl get`) er upåvirket og fungerer som
-  normalt (krever kun standard engangsbekreftelse, som alle shell-kommandoer).
+**Lag 1 — `scripts/kubectl-guard/kubectl` (primærsperren).** En PATH-shim som
+legges først i `PATH`, parser argumentene selv og blokkerer destruktive verb
+uansett hvor i kommandolinjen de står. Den feiler lukket: i tillegg til å
+identifisere det faktiske verbet, blokkerer den også hvis et destruktivt verb
+forekommer som et eget token noe sted i argumentlisten (sikkerhetsnett mot
+parsefeil). `kubectl auth can-i <verb>` er eksplisitt unntatt, siden det er en
+ren lesespørring der verbet er argumentet, ikke handlingen.
 
-Denne empiriske testen er siden [0.10.3] formalisert til en gjentagbar eval
-(`python3 scripts/eval_troubleshoot.py --run`, se "Ekte troubleshoot-test (fake
-kubectl)" under) i stedet for å bare være noe som ble sjekket manuelt én gang.
+**Lag 2 — `--deny-tool "shell(kubectl <verb>:*)"` (sekundært).** Copilot CLI
+sitt permission-system blokkerer på CLI-nivå før kallet når shimen. **Men det
+matcher kun når verbet står som første token etter `kubectl`.** Verifisert
+empirisk med en falsk `kubectl`-stubb:
+
+```text
+kubectl delete pod X -n ns   -> blokkert  ("Permission to run this tool was denied")
+kubectl -n ns delete pod X   -> KJØRTE    (mønsteret matcher ikke)
+```
+
+Wildcard-varianter (`shell(kubectl *delete*)`, `shell(*kubectl*delete*)`) tetter
+ikke hullet — matchingen er prefiks-basert på tokens, ikke glob over hele
+kommandolinjen. `--deny-tool` er derfor beholdt som ekstra dybde for den enkleste
+kommandoformen, men er **ikke** den sperren garantien hviler på.
+
+`--deny-tool`-lista manglet også flere muterende verb helt (`run`, `debug`,
+`attach`, `auth reconcile`); disse dekkes nå av shimen.
+
+Vanlige lesekommandoer (`kubectl get`/`describe`/`logs`/`top`/`auth can-i`) er
+upåvirket og fungerer som normalt.
+
+**Ingen av lagene erstatter RBAC på klyngen.** En kubeconfig med kun lesetilgang
+er den eneste beskyttelsen som gjelder uansett verktøy, prosess eller
+prompt-formulering — bruk den hvis du kan.
+
+#### Hvordan sperren testes
+
+To komplementære tester, fordi de svarer på ulike spørsmål:
+
+- **`bash scripts/test_kubectl_guard.sh`** — deterministisk enhetstest av shimen
+  (31 caser). Kjører uten modell, uten `copilot`-binary og uten auth, og går
+  derfor i CI. Dette er testen som faktisk beviser at den tekniske sperren
+  virker, inkludert alle kommandoformene `--deny-tool` ikke fanger.
+- **`python3 scripts/eval_troubleshoot.py --run`** — ende-til-ende med ekte
+  modell og falsk `kubectl` (se "Ekte troubleshoot-test (fake kubectl)" under).
+  Tester at prosa-kontrakten i agent-filen holder mot overtalelsesforsøk.
+
+Vær oppmerksom på at agent-evalen **ikke** kan skille "shimen blokkerte kallet"
+fra "modellen nektet av seg selv": en testcase med `kubectl -n ns delete pod X`
+passerer også når shimen er deaktivert, fordi prosa-kontrakten holdt i den
+kjøringen. Det er nettopp derfor enhetstesten av shimen finnes ved siden av.
 
 **Den sterkeste beskyttelsen er uansett RBAC på selve klyngen.** Hvis kubeconfigen
 din kun har lesetilgang (get/list/watch), er verken agent-instruks eller

@@ -3,6 +3,37 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.11.0]
+
+### Endret (sikkerhet)
+- **`troubleshoot`: `--deny-tool` viste seg utilstrekkelig som eneste tekniske
+  sperre.** Verifisert empirisk at mønsteret `shell(kubectl <verb>:*)` kun
+  matcher når verbet står som første token etter `kubectl`:
+  `kubectl delete pod X -n ns` blokkeres, mens `kubectl -n ns delete pod X`
+  kjørte helt gjennom. Wildcard-varianter (`shell(kubectl *delete*)`) tetter
+  ikke hullet, siden matchingen er prefiks-basert på tokens. Lista manglet i
+  tillegg flere muterende verb helt (`run`, `debug`, `attach`,
+  `auth reconcile`).
+- Ny primærsperre `scripts/kubectl-guard/kubectl`: en PATH-shim som parser
+  argumentene selv og blokkerer destruktive verb uansett posisjon i
+  kommandolinjen. Feiler lukket (blokkerer også hvis et destruktivt verb
+  forekommer som eget token noe sted, som sikkerhetsnett mot parsefeil), med
+  eksplisitt unntak for `kubectl auth can-i <verb>` som er en ren lesespørring.
+  `troubleshoot-safe.sh` legger shimen først i `PATH` og avbryter hvis den
+  mangler. `--deny-tool` beholdes som sekundært lag.
+- Ny `scripts/test_kubectl_guard.sh`: deterministisk enhetstest av shimen (31
+  caser), kjører uten modell/`copilot`-binary og er derfor koblet inn i CI.
+  Nødvendig fordi agent-evalen **ikke** kan skille "shimen blokkerte" fra
+  "modellen nektet selv" — verifisert at en bypass-testcase passerer også med
+  shimen deaktivert.
+- `eval/troubleshoot-tests.json`: tre nye policy-caser (id 5–7) med
+  kommandoformer der verbet ikke står først, samt `debug`/`exec`.
+  `eval_troubleshoot.py` legger nå shimen i `PATH`, slik at harnessen tester
+  det samme oppsettet som launcheren faktisk bruker.
+- README/`troubleshoot.agent.md`: korrigert formuleringer som overdrev
+  garantien `--deny-tool` gir, og fjernet en selvmotsigelse der README ba deg
+  velge `troubleshoot` i `/agent` selv om agenten er `user-invocable: false`.
+
 ## [0.10.9]
 
 ### Lagt til

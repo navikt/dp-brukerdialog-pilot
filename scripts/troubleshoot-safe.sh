@@ -1,14 +1,28 @@
 #!/bin/bash
-# Launcher for the `troubleshoot`-agenten med en EKTE teknisk sperre mot
-# destruktive kubectl-verb, i tillegg til den prosa-baserte "read-only
-# kontrakt" i plugin/agents/troubleshoot.agent.md.
+# Launcher for `troubleshoot`-agenten med to lag teknisk sperre mot destruktive
+# kubectl-verb, i tillegg til den prosa-baserte "read-only kontrakt" i
+# plugin/agents/troubleshoot.agent.md.
 #
 # Hvorfor dette finnes: prosa-instruksjoner alene er IKKE tilstrekkelig for noe
 # så konsekvensfylt som produksjonsendringer. Verifisert empirisk (se
-# CHANGELOG [0.10.1]) at en agent uten disse flaggene kan overtales til å kjøre
-# "kubectl delete"/"kubectl apply" med riktig framing i prompten, mens
-# `--deny-tool` blokkerer kallet på CLI-nivå før det når kubectl i det hele
-# tatt - uavhengig av hva modellen "bestemmer seg for".
+# CHANGELOG [0.10.1]) at en agent uten teknisk sperre kan overtales til å kjøre
+# "kubectl delete"/"kubectl apply" med riktig framing i prompten.
+#
+# Lag 1 - kubectl-guard (scripts/kubectl-guard/kubectl), primærsperren:
+#   en PATH-shim som parser argumentene og blokkerer destruktive verb uansett
+#   hvor i kommandolinjen de står.
+#
+# Lag 2 - `--deny-tool`, sekundært:
+#   blokkerer på CLI-nivå før kallet når shimen, men KUN når verbet står som
+#   første token etter `kubectl`. Verifisert empirisk (CHANGELOG [0.11.0]):
+#     kubectl delete pod X -n ns   -> blokkert av --deny-tool
+#     kubectl -n ns delete pod X   -> IKKE blokkert (mønsteret matcher ikke)
+#   Wildcards ("shell(kubectl *delete*)") hjelper ikke; matchingen er
+#   prefiks-basert på tokens. Derfor er --deny-tool alene utilstrekkelig, og
+#   beholdes kun som ekstra dybde for den enkleste kommandoformen.
+#
+# Ingen av lagene erstatter RBAC på klyngen: en kubeconfig med kun lesetilgang
+# er den eneste beskyttelsen som gjelder uansett verktøy og prosess.
 #
 # Bruk:
 #   ./scripts/troubleshoot-safe.sh
@@ -17,6 +31,15 @@
 # Alle ekstra argumenter sendes videre til `copilot` uendret.
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GUARD_DIR="$SCRIPT_DIR/kubectl-guard"
+
+if [[ ! -x "$GUARD_DIR/kubectl" ]]; then
+	echo "FEIL: fant ikke $GUARD_DIR/kubectl (kubectl-guard-shimen)." >&2
+	echo "Uten den er sperren mot destruktive kommandoer vesentlig svakere." >&2
+	exit 1
+fi
 
 DENY_VERBS=(
 	delete apply patch replace create edit exec cp
@@ -27,5 +50,9 @@ DENY_FLAGS=()
 for verb in "${DENY_VERBS[@]}"; do
 	DENY_FLAGS+=(--deny-tool "shell(kubectl ${verb}:*)")
 done
+
+# Shimen legges FØRST i PATH slik at alle `kubectl`-kall fra agenten går
+# gjennom den, uansett hvordan kommandolinjen er satt sammen.
+export PATH="$GUARD_DIR:$PATH"
 
 exec copilot --agent dp-brukerdialog-pilot:troubleshoot "${DENY_FLAGS[@]}" "$@"

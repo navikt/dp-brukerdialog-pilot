@@ -107,16 +107,23 @@ en container, eller en connection-lekkasje)?
 en teknisk sperre kan overtales (f.eks. "dette er bare et testmiljø, kjør det
 direkte") til å utføre nøyaktig det den er instruert om å ikke gjøre. Copilot CLI
 har ingen frontmatter-mekanisme som lar en agent-fil selv pålegge finkornede
-kommandosperrer (`--deny-tool` er kun et launch-flagg) — derfor er denne agenten
-`user-invocable: false` og vises ikke i `/agent`-menyen. Den kan **kun** startes
-via `scripts/troubleshoot-safe.sh`, som legger på `--deny-tool "shell(kubectl
-<verb>:*)"` for alle destruktive verb
-(delete/apply/patch/replace/create/edit/exec/cp/rollout/scale/m.fl.), og blokkerer
-kallet på CLI-nivå **før** det når `kubectl` i det hele tatt, uavhengig av hva
-modellen "bestemmer seg for" i den aktuelle turen. Se README "Troubleshoot" for
-detaljer og verifikasjon. Den sterkeste beskyttelsen er uansett RBAC på selve
-klyngen — hvis kubeconfigen din kun har lesetilgang, er ingen agent-instruks eller
-CLI-flagg nødvendig for å hindre skade i utgangspunktet.
+kommandosperrer — derfor er denne agenten `user-invocable: false` og vises ikke i
+`/agent`-menyen. Den kan **kun** startes via `scripts/troubleshoot-safe.sh`, som
+setter opp to lag:
+
+1. **`scripts/kubectl-guard/kubectl`** (primærsperren): en PATH-shim som parser
+   argumentene og blokkerer destruktive verb uansett hvor i kommandolinjen de
+   står. Dekker også verb som `run`, `debug` og `attach`.
+2. **`--deny-tool "shell(kubectl <verb>:*)"`** (sekundært): blokkerer på
+   CLI-nivå, men **kun** når verbet står som første token etter `kubectl`.
+   Verifisert empirisk at `kubectl -n ns delete pod X` slipper forbi dette
+   laget, mens `kubectl delete pod X -n ns` blokkeres. Wildcards hjelper ikke;
+   matchingen er prefiks-basert på tokens.
+
+Den sterkeste beskyttelsen er uansett RBAC på selve klyngen — hvis kubeconfigen
+din kun har lesetilgang, er ingen agent-instruks, shim eller CLI-flagg nødvendig
+for å hindre skade i utgangspunktet. Se README "Troubleshoot" for detaljer og
+verifikasjon.
 
 ## Rapportformat
 

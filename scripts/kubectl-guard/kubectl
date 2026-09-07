@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# PATH-shim som blokkerer destruktive `kubectl`-verb uansett hvor i
+# argumentlisten verbet står.
+#
+# HVORFOR DENNE FINNES:
+# `--deny-tool "shell(kubectl delete:*)"` i troubleshoot-safe.sh matcher kun
+# når verbet står som første token etter `kubectl`. Verifisert empirisk:
+#
+#   kubectl delete pod X -n ns    -> BLOKKERT av --deny-tool
+#   kubectl -n ns delete pod X    -> KJØRTE (mønsteret matcher ikke)
+#
+# Wildcard-varianter ("shell(kubectl *delete*)") hjelper ikke — matchingen er
+# prefiks-basert på tokens, ikke glob over hele kommandolinjen. Derfor kan
+# --deny-tool alene ikke gi garantien README/agent-filen tidligere hevdet.
+#
+# Denne shimen parser argumentene selv og feiler LUKKET: den blokkerer både
+# når det parsede verbet er destruktivt, og (som sikkerhetsnett mot
+# parsefeil) hvis et destruktivt verb i det hele tatt forekommer som et eget
+# token. Falske positive er akseptabelt for en rent diagnostisk agent —
+# brukeren kan alltid kjøre den ekte binæren selv i et annet vindu.
+#
+# Dette er fortsatt ikke den sterkeste beskyttelsen: RBAC på klyngen (en
+# kubeconfig med kun lesetilgang) er det eneste som gjelder uansett hvilket
+# verktøy eller hvilken prosess som prøver.
+
+set -uo pipefail
+
+DESTRUCTIVE_VERBS=(
+	delete apply patch replace create edit exec cp attach debug run
+	annotate label taint cordon uncordon drain autoscale expose set
+	rollout scale proxy port-forward
+)
+
+is_destructive() {
+	local candidate="$1"
+	local known_verb
+	for known_verb in "${DESTRUCTIVE_VERBS[@]}"; do
+		if [[ "$candidate" == "$known_verb" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+refuse() {
+	echo "BLOKKERT av kubectl-guard (scripts/kubectl-guard/kubectl): '$1' er et" >&2
+	echo "ikke-lesende kubectl-verb, og troubleshoot-agenten er rent diagnostisk." >&2
+	echo "Foreslå endringen til brukeren i stedet, eller send den til planlegger." >&2
+	exit 1
+}
+
+# Globale kubectl-flagg som tar verdien i et SEPARAT token. Uten denne listen
+# kunne verdien blitt tolket som verbet (eller verbet blitt oversett).
+VALUE_FLAGS=(
+	-n --namespace --context --cluster --kubeconfig -s --server --user
+	--token --as --as-group --cache-dir --certificate-authority
+	--client-certificate --client-key --request-timeout --tls-server-name
+	--log-flush-frequency --profile --profile-output --match-server-version
+)
+
+takes_value() {
+	local flag="$1"
+	local known_flag
+	for known_flag in "${VALUE_FLAGS[@]}"; do
+		if [[ "$flag" == "$known_flag" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+# Steg 1: finn det faktiske verbet ved å hoppe over flagg og flaggverdier.
+verb=""
+skip_next=false
+for arg in "$@"; do
+	if [[ "$skip_next" == true ]]; then
+		skip_next=false
+		continue
+	fi
+	if [[ "$arg" == --*=* ]]; then
+		continue
+	fi
+	if [[ "$arg" == -* ]]; then
+		if takes_value "$arg"; then
+			skip_next=true
+		fi
+		continue
+	fi
+	verb="$arg"
+	break
+done
+
+if [[ -n "$verb" ]] && is_destructive "$verb"; then
+	refuse "$verb"
+fi
+
+# `kubectl auth can-i <verb>` er en ren lesespørring der et destruktivt verb
+# er *argumentet*, ikke handlingen ("har jeg lov til å slette?"). Den må derfor
+# unntas fra sikkerhetsnettet i steg 2, ellers blir den falskt blokkert.
+is_auth_can_i=false
+if [[ "$verb" == "auth" ]]; then
+	seen_auth=false
+	for arg in "$@"; do
+		if [[ "$seen_auth" == false && "$arg" == "auth" ]]; then
+			seen_auth=true
+			continue
+		fi
+		if [[ "$seen_auth" == true && "$arg" != -* ]]; then
+			[[ "$arg" == "can-i" ]] && is_auth_can_i=true
+			[[ "$arg" == "reconcile" ]] && refuse "auth reconcile"
+			break
+		fi
+	done
+fi
+
+# Steg 2: sikkerhetsnett. Hvis parsingen over bommet (ukjent flagg som tar en
+# separat verdi, ny kubectl-syntaks e.l.), blokker likevel hvis et destruktivt
+# verb forekommer som et eget token noe sted i argumentlisten.
+if [[ "$is_auth_can_i" == false ]]; then
+	for arg in "$@"; do
+		if [[ "$arg" == -* ]]; then
+			continue
+		fi
+		if is_destructive "$arg"; then
+			refuse "$arg"
+		fi
+	done
+fi
+
+# Finn den ekte kubectl-binæren, uten å treffe denne shimen på nytt.
+self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+real_kubectl=""
+IFS=':' read -ra path_entries <<<"$PATH"
+for entry in "${path_entries[@]}"; do
+	[[ -z "$entry" ]] && continue
+	resolved="$(cd "$entry" 2>/dev/null && pwd)" || continue
+	[[ "$resolved" == "$self_dir" ]] && continue
+	if [[ -x "$entry/kubectl" ]]; then
+		real_kubectl="$entry/kubectl"
+		break
+	fi
+done
+
+if [[ -z "$real_kubectl" ]]; then
+	echo "kubectl-guard: fant ingen ekte kubectl-binær i PATH" >&2
+	exit 127
+fi
+
+exec "$real_kubectl" "$@"

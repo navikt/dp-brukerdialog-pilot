@@ -125,7 +125,12 @@ def build_fake_kubectl_env(log_file: Path) -> tuple[dict[str, str], Path]:
     script_path.chmod(0o755)
 
     env = dict(os.environ)
-    env["PATH"] = f"{fake_bin_dir}{os.pathsep}{env.get('PATH', '')}"
+    # kubectl-guard-shimen må ligge FØRST, akkurat som i troubleshoot-safe.sh,
+    # ellers tester denne harnessen kun --deny-tool-laget og ville gitt grønt
+    # lys for kommandoformer som faktisk slipper gjennom (f.eks.
+    # "kubectl -n ns delete pod X", der verbet ikke står først).
+    guard_dir = REPO_ROOT / "scripts" / "kubectl-guard"
+    env["PATH"] = f"{guard_dir}{os.pathsep}{fake_bin_dir}{os.pathsep}{env.get('PATH', '')}"
     env["FAKE_KUBECTL_LOG"] = str(log_file)
     return env, fake_bin_dir
 
