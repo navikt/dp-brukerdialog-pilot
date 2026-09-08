@@ -3,6 +3,26 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.14.0]
+
+### Lagt til
+- Ny agent `sparring` (`user-invocable: true`, `disable-model-invocation: true`):
+  avklarer mål, brukerverdi/gevinst, suksesskriterium og ikke-mål for **én**
+  oppgave/idé av gangen, før den blir en plan. Bevisst smalere enn Grillmester
+  sin `doctor-who`-agent — ingen prioritering på tvers av saker, ingen OKR,
+  ingen team-status i v1.
+- Stiller ett spørsmål om gangen, oppsummerer i et `OPPGAVENOTAT`, og spør
+  eksplisitt om det skal sendes videre til `planlegger` via `Task` — samme
+  ettretnings-delegasjonsmønster som `planlegger`→`koder`, med kun ett gyldig
+  mål (unngår samme uforutsigbare agentvalg som ble avdekket i [0.13.0]).
+- `planlegger` bruker nå feltene i et mottatt `OPPGAVENOTAT` direkte (ny
+  "Mottak fra sparring"-seksjon) i stedet for å avklare mål/gevinst på nytt.
+- `koder`: commit-meldinger skal nå ha en kort body-setning om *hvorfor*
+  (mål/gevinst), ikke bare hva som ble endret, med mindre endringen er triviell.
+- Diskutert, ikke bygget: en fremtidig kobling mot et team-board (f.eks.
+  GitHub Projects) for prioritering på tvers av saker — utsatt til teamet har
+  tatt stilling til det.
+
 ## [0.13.1]
 
 ### Endret (kvalitet)

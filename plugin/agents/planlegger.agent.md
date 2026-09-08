@@ -417,6 +417,14 @@ svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
 - Ved `Reviewer-status: BLOCKED`: ikke fortsett automatisk. Bruk handoff-malen og
   stopp med `STOPPET`, uansett hvor liten endringen ellers virker.
 
+## Mottak fra sparring
+
+Hvis oppgaven kommer inn som et `OPPGAVENOTAT` (fra `sparring`-agenten, se dens
+agent-fil), bruk `Mål`/`Gevinst`/`Suksesskriterium`/`Ikke mål` derfra direkte i
+steg 1 under i stedet for å utlede dem selv — ikke spør brukeren på nytt om noe
+notatet allerede svarer på. Eventuelle `Åpne spørsmål` i notatet teller som
+kandidat til det ene avklarende spørsmålet i steg 2, ikke et ekstra.
+
 ## Arbeidsmåte
 
 1. Oppsummer brukerens mål i 1–2 setninger — inkluder ikke bare *hva* som skal

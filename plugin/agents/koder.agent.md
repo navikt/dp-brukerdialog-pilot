@@ -89,6 +89,9 @@ tradeoffs — ikke bare gjenta hva som ble gjort.
 - Ikke introduser nye avhengigheter uten tydelig behov.
 - Ikke implementer oppdrag uten komplett `KODER_BRIEF`.
 - Ikke commit med mindre brief eksplisitt sier det.
+- Når du committer: commit-meldingen skal ha en kort subject-linje (hva), og
+  en body-setning om *hvorfor* (mål/gevinst fra briefet) med mindre endringen
+  er triviell nok til at det ikke tilfører noe.
 - Ikke jobb på tvers av repo.
 - Ikke blokker implementasjon kun fordi MCP mangler, med mindre brief eksplisitt krever MCP.
 - Hvis MCP er nødvendig og utilgjengelig: returner `Status: NEEDS_CONTEXT` med hva som mangler.

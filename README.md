@@ -1,6 +1,9 @@
 # dp-brukerdialog-pilot
 
-En enkel AI-pilot som **ren Copilot-plugin** med fem agenter:
+En enkel AI-pilot som **ren Copilot-plugin** med seks agenter:
+- `sparring` (synlig for bruker — avklarer mål/brukerverdi/suksesskriterium for
+  én oppgave/idé **før** den blir en plan, kobler seg på `planlegger` etter
+  eksplisitt godkjenning, se "Sparring" under)
 - `planlegger` (synlig for bruker)
 - `koder` (intern, delegert av planlegger — unntak: for svært små, mekaniske
   mikro-endringer på enkel sti kan planlegger gjøre endringen selv, se
@@ -16,7 +19,25 @@ En enkel AI-pilot som **ren Copilot-plugin** med fem agenter:
 
 Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
 
+## Sparring
+
+`sparring` er en liten, avgrenset "produktpartner" for **én** oppgave/idé av
+gangen — ikke en full produktledelse-rolle. Den stiller ett spørsmål om
+gangen (mål, brukerverdi/gevinst, suksesskriterium, ikke-mål), oppsummerer i
+et `OPPGAVENOTAT`, og spør deretter eksplisitt om notatet skal sendes videre
+til `planlegger` via `Task`. `planlegger` bruker feltene i notatet direkte
+fremfor å avklare mål/gevinst på nytt (se "Mottak fra sparring" i
+`plugin/agents/planlegger.agent.md`).
+
+`disable-model-invocation: true` — trigges aldri automatisk av andre agenter,
+kun når bruker eksplisitt starter den. Bevisst utelatt i v1: prioritering på
+tvers av flere saker, OKR-formulering, team-status/retro (jf. Grillmester sin
+`doctor-who`-agent, som dekker en mye bredere produktledelse-rolle) — dette
+kan vurderes senere, blant annet om et team-board (f.eks. GitHub Projects)
+skal kobles på.
+
 ## Copilot-plugin-struktur
+
 
 Plugin-filer:
 
@@ -53,7 +74,7 @@ gjøre `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse op
 ## Modellvalg
 
 Hver agent pinner sin egen modell i frontmatter (`model:` i `.agent.md`), f.eks.
-`planlegger`/`pr-reviewer`/`troubleshoot` på `claude-sonnet-4.6`, `koder` på
+`planlegger`/`sparring`/`pr-reviewer`/`troubleshoot` på `claude-sonnet-4.6`, `koder` på
 `gpt-5.4-mini`, `reviewer` på `gemini-3.7-flash`.
 
 `/model` i Copilot CLI bytter **kun** modellen for agenten du aktivt chatter
@@ -208,7 +229,7 @@ skills lastes alltid inn i modellens picker/discovery-kontekst, uansett om en
 gitt skill faktisk brukes i sesjonen. `scripts/validate_plugin_schema.py`
 summerer disse på tvers av alle filer og feiler hvis summen passerer 8 KiB —
 kalibrert til å tillate om lag en tredobling av dagens faktiske bruk (~2,4 KB
-for 5 agenter + 12 skills), portert fra `grillmester` sin tilsvarende (men
+for 6 agenter + 12 skills), portert fra `grillmester` sin tilsvarende (men
 høyere) grense. Ved brudd viser feilmeldingen de tre filene som bidrar mest,
 slik at det er tydelig om synderen er mange nye skills eller et par som er
 blitt for lange.
