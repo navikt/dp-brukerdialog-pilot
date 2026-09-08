@@ -3,6 +3,24 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.13.1]
+
+### Endret (kvalitet)
+- Presiserte kostnadsforskjellen mellom planreview og ad hoc rubber-ducking i
+  `plugin/agents/planlegger.agent.md`. Planreview skjer i praksis sjelden (kun
+  én gang per komplisert-sti-oppgave), så en tyngre/dyrere spesialisert
+  arkitektur-agent (f.eks. brukerens egen `nav-pilot-opus`) er et akseptabelt
+  valg der. Ad hoc rubber-ducking under koding/review kan derimot trigges
+  flere ganger per oppgave og skal derfor **kun** bruke den lette innebygde
+  `rubber-duck`-agenten, aldri en dyr spesialisert agent.
+- **Ikke empirisk verifisert**: forsøkte å teste om denne kost-instruksen
+  faktisk følges, men klarte ikke å fremtvinge et deterministisk scenario der
+  planlegger trigger ad hoc rubber-ducking i det hele tatt — i testkjøringen
+  svarte den direkte på en avklaringsoppgave uten noe `Task`-kall. Gitt at en
+  tilsvarende "aldri X"-instruks for planreview allerede har vist seg å bli
+  overstyrt to ganger ([0.13.0]), bør denne instruksen anses som uverifisert
+  til den er testet i en ekte kjøring som faktisk trigger stien.
+
 ## [0.13.0]
 
 ### Endret (kvalitet)

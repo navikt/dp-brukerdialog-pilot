@@ -105,7 +105,13 @@ Regler:
   "Reviewer-steg").
 
 **Rubber-duck (ekstra, utenom planreview)**
-- Bruk `rubber-duck` også ad hoc hvis koding eller review avdekker et konkret
+- Bruk **kun** den lette, innebygde `rubber-duck`-agenten her — aldri en dyrere,
+  Nav-spesialisert personlig agent (f.eks. `nav-pilot-opus`). Planreview
+  skjer én gang per komplisert oppgave og tåler en dyrere modell for bedre
+  kvalitet (se "Slik kjøres planreview" over); denne ad hoc-bruken kan
+  derimot trigges flere ganger per oppgave når koding eller review avdekker
+  usikkerhet, og skal derfor holdes billig.
+- Bruk `rubber-duck` ad hoc hvis koding eller review avdekker et konkret
   usikkerhetsmoment underveis, utover den obligatoriske planreview-bruken over.
 - Ikke kombiner planreview og ekstra `rubber-duck`-bruk som standard på små oppgaver.
 
