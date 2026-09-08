@@ -3,6 +3,19 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.14.1]
+
+### Endret (dokumentasjon)
+- README var blitt for lang (772 linjer) til å være en reell "kort oversikt".
+  Delt i tre: `docs/agenter.md` (agent-/skill-detaljer, modellvalg,
+  troubleshoot-sperren), `docs/testing.md` (eval-harnesser og CI-gate),
+  `docs/installasjon.md` (installasjon og oppdatering). `README.md` er nå en
+  kort tabell + lenker (~50 linjer).
+- Oppdaterte interne kryssreferanser til flyttet innhold i
+  `troubleshoot.agent.md`, `brukerdialog-create-skill/SKILL.md` og
+  `scripts/eval_troubleshoot.py` (pekte tidligere til seksjoner i README som
+  nå ligger i `docs/agenter.md`).
+
 ## [0.14.0]
 
 ### Lagt til

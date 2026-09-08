@@ -1,7 +1,7 @@
 """Real end-to-end eval for the `troubleshoot` agent's destructive-command guardrail.
 
 `troubleshoot` is invoked exclusively through `scripts/troubleshoot-safe.sh`
-(see CHANGELOG [0.10.1]/[0.10.2] and README "Teknisk sperre mot destruktive
+(see CHANGELOG [0.10.1]/[0.10.2] and docs/agenter.md "Teknisk sperre mot destruktive
 kommandoer"), which adds `--deny-tool "shell(kubectl <verb>:*)"` for a list of
 destructive verbs. That CLI-level flag is what actually blocks a destructive
 call — it is enforced by Copilot CLI itself, before the underlying `kubectl`

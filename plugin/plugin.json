@@ -1,6 +1,6 @@
 {
   "name": "dp-brukerdialog-pilot",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "Minimal plugin med en sparring-agent for målavklaring, en planlegger-agent som delegerer kodeoppgaver til en koder-agent og en intern reviewer-agent, samt en frittstående pr-reviewer-agent for andres PR-er.",
   "author": {
     "name": "Team dagpenger"

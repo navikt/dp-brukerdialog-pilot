@@ -134,8 +134,8 @@ hvilken kommando du ville kjørt, så kan de kjøre den selv.
 
 Den sterkeste beskyttelsen er uansett RBAC på selve klyngen — hvis kubeconfigen
 din kun har lesetilgang, er ingen agent-instruks, shim eller CLI-flagg nødvendig
-for å hindre skade i utgangspunktet. Se README "Troubleshoot" for detaljer og
-verifikasjon.
+for å hindre skade i utgangspunktet. Se docs/agenter.md "Troubleshoot" for
+detaljer og verifikasjon.
 
 ## Rapportformat
 

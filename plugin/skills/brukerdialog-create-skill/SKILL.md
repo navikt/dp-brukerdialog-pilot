@@ -46,8 +46,8 @@ som mal:
 ## 3. Registrer og valider
 
 - Registrer presetet i `planlegger.agent.md`s preset-tabell.
-- Oppdater README: preset-listen, "Domain-preset-skills"-seksjonen, og
-  agent-/skilltallene andre steder i filen.
+- Oppdater `docs/agenter.md`: preset-listen i "Domain-preset-skills"-seksjonen,
+  og agent-/skilltallene der og i `README.md`.
 - Kjør `python3 scripts/validate_plugin_schema.py` — dette sjekker også at
   det aggregerte discovery-budsjettet (`MAX_DISCOVERY_TEXT_BYTES`) ikke
   sprenges. Hvis det feiler: korter ned `description`, ikke bare hev
