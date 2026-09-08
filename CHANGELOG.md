@@ -3,6 +3,45 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.12.0]
+
+### Endret (sikkerhet)
+- **`gcloud` og `nais` var helt udekket av den tekniske sperren.** Begge ligger
+  på samme `PATH` som `kubectl`, med de samme credentials-ene.
+  `gcloud sql instances delete` kan gjøre langt større skade enn noe
+  `kubectl delete`, og `nais app delete`/`nais postgres migrate` likeså. Sperren
+  dekket kun `kubectl`.
+- `scripts/kubectl-guard/` er omdøpt til `scripts/readonly-guard/` og har nå tre
+  shims: `kubectl`, `gcloud` og `nais`. `scripts/test_kubectl_guard.sh` er
+  tilsvarende omdøpt til `scripts/test_readonly_guard.sh`.
+- **`gcloud`-shimen bruker allowlist, ikke denylist.** Kommandoflaten er for stor
+  og endrer seg for ofte til at en denylist kan gjøres troverdig, så ukjente
+  kommandoer blokkeres (fail-closed). `auth print-access-token` og
+  `container clusters get-credentials` er eksplisitt blokkert — den første lekker
+  credentials, den andre skriver til kubeconfig og bytter aktivt cluster.
+- **`nais`-shimen bruker allowlist per kommandogruppe.** `nais secret` og
+  `nais app env` er blokkert fordi de ville trukket hemmeligheter inn i agentens
+  kontekst; `nais postgres` er kun tillatt for `list`.
+- Prisen for allowlist er falske positive. Det er et bevisst valg: agenten sier
+  fra hvilken kommando den ville kjørt, så kan du kjøre den selv.
+
+### Testing
+- `scripts/test_readonly_guard.sh` utvidet fra 31 til 87 deterministiske caser.
+- Mutasjonstestet hver mekanisme for å bekrefte at den faktisk er load-bearing:
+  - Deaktivert `gcloud`-shim → 14 caser feilet.
+  - Deaktivert `nais`-shim → 17 caser feilet.
+  - Fjernet `WRITE_VERBS`-sjekken i `gcloud` → **0 caser feilet.** Suiten testet
+    altså ikke sjekken i det hele tatt. La til caser der et lese-verb opptrer som
+    ressursnavn (`gcloud compute instances delete list`), som er nettopp klassen
+    av bug den skal fange. Sjekken er nå load-bearing.
+  - Fjernet flaggverdi-hoppingen i `nais` → 2 caser feilet
+    (`nais -t teamdagpenger status` ble feilaktig blokkert).
+  - Fjernet `DESTRUCTIVE_TOKENS`-sjekken i `nais` → 1 case feilet.
+- `--help` slipper gjennom begge shimene, men avdekket et hull underveis:
+  `nais app delete min-app --help` ville sluppet forbi allowlisten, siden
+  hjelpemodus hopper over gruppesjekken. Tettet med en destruktiv-token-sjekk
+  som gjelder også i hjelpemodus.
+
 ## [0.11.0]
 
 ### Endret (sikkerhet)

@@ -111,14 +111,26 @@ kommandosperrer — derfor er denne agenten `user-invocable: false` og vises ikk
 `/agent`-menyen. Den kan **kun** startes via `scripts/troubleshoot-safe.sh`, som
 setter opp to lag:
 
-1. **`scripts/kubectl-guard/kubectl`** (primærsperren): en PATH-shim som parser
-   argumentene og blokkerer destruktive verb uansett hvor i kommandolinjen de
-   står. Dekker også verb som `run`, `debug` og `attach`.
+1. **`scripts/readonly-guard/`** (primærsperren): PATH-shims for `kubectl`,
+   `gcloud` og `nais` som parser argumentene og blokkerer destruktive
+   kommandoer uansett hvor i kommandolinjen de står.
+   - `kubectl`: denylist over destruktive verb, inkludert `run`, `debug` og
+     `attach`.
+   - `gcloud`: allowlist over lesende verb. Kommandoflaten er for stor og
+     endrer seg for ofte til at en denylist kan gjøres troverdig, så ukjente
+     kommandoer blokkeres. `auth print-access-token` og
+     `container clusters get-credentials` er eksplisitt blokkert.
+   - `nais`: allowlist per kommandogruppe. `nais secret` og `nais app env` er
+     blokkert fordi de ville trukket hemmeligheter inn i agentens kontekst.
 2. **`--deny-tool "shell(kubectl <verb>:*)"`** (sekundært): blokkerer på
    CLI-nivå, men **kun** når verbet står som første token etter `kubectl`.
    Verifisert empirisk at `kubectl -n ns delete pod X` slipper forbi dette
    laget, mens `kubectl delete pod X -n ns` blokkeres. Wildcards hjelper ikke;
-   matchingen er prefiks-basert på tokens.
+   matchingen er prefiks-basert på tokens. Dette laget dekker kun `kubectl`.
+
+Konsekvensen av allowlist-tilnærmingen er at legitime lesekommandoer med verb
+shimen ikke kjenner også blir blokkert. Det er med vilje: si fra til brukeren
+hvilken kommando du ville kjørt, så kan de kjøre den selv.
 
 Den sterkeste beskyttelsen er uansett RBAC på selve klyngen — hvis kubeconfigen
 din kun har lesetilgang, er ingen agent-instruks, shim eller CLI-flagg nødvendig

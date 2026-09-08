@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# PATH-shim som holder `nais` read-only for troubleshoot-agenten.
+#
+# HVORFOR: `nais` ligger på PATH sammen med kubectl/gcloud og har betydelig
+# destruktiv flate (`nais app delete/restart/stop`, `nais postgres
+# migrate/grant/psql`, `nais apply`, `nais debug`), pluss kommandoer som
+# eksponerer hemmeligheter (`nais secret`, `nais app env`).
+#
+# STRATEGI: allowlist per kommandogruppe. Alt som ikke er eksplisitt tillatt
+# blokkeres (fail-closed). Grupper som `secret`, `postgres` (utover `list`),
+# `kafka`, `opensearch`, `valkey`, `auth`, `device` og `kubeconfig` er ikke
+# tillatt i det hele tatt — de endrer tilstand, gir DB-tilgang, eller lekker
+# hemmeligheter inn i agentens kontekst.
+
+set -uo pipefail
+
+refuse() {
+	echo "BLOKKERT av readonly-guard (scripts/readonly-guard/nais): $1" >&2
+	echo "troubleshoot-agenten er rent diagnostisk og kjører kun lesende" >&2
+	echo "nais-kommandoer. Kjør den selv hvis den er riktig, eller send" >&2
+	echo "endringen til planlegger." >&2
+	exit 1
+}
+
+# Samle ikke-flagg-tokens. Globale flagg som -t/--team og -e/--environment tar
+# en verdi i eget token, så de må hoppes over for ikke å bli tolket som
+# kommando.
+VALUE_FLAGS=(-t --team -e --environment --config -v --verbose)
+
+takes_value() {
+	local flag="$1"
+	local known
+	for known in "${VALUE_FLAGS[@]}"; do
+		[[ "$flag" == "$known" ]] && return 0
+	done
+	return 1
+}
+
+# Tokens som aldri skal forekomme, heller ikke i en `--help`-kommando. Uten
+# denne ville "nais app delete min-app --help" sluppet forbi allowlisten, siden
+# hjelpemodus hopper over gruppesjekken.
+DESTRUCTIVE_TOKENS=(
+	delete restart stop set trigger run apply debug migrate grant psql
+	proxy revoke secret env files kubeconfig password prepare enable-audit
+	users login logout device labels
+)
+
+# Hjelpetekst er ufarlig, og trengs for at agenten skal kunne orientere seg i
+# kommandoflaten.
+is_help=false
+for arg in "$@"; do
+	case "$arg" in
+		-h | --help | --version) is_help=true ;;
+	esac
+done
+
+tokens=()
+skip_next=false
+for arg in "$@"; do
+	if [[ "$skip_next" == true ]]; then
+		skip_next=false
+		continue
+	fi
+	if [[ "$arg" == --*=* ]]; then
+		continue
+	fi
+	if [[ "$arg" == -* ]]; then
+		takes_value "$arg" && skip_next=true
+		continue
+	fi
+	tokens+=("$arg")
+done
+
+for known_token in "${DESTRUCTIVE_TOKENS[@]}"; do
+	for token in ${tokens[@]+"${tokens[@]}"}; do
+		if [[ "$token" == "$known_token" ]]; then
+			refuse "'$known_token' endrer tilstand eller eksponerer hemmeligheter"
+		fi
+	done
+done
+
+if [[ "$is_help" == true ]]; then
+	tokens=()
+elif [[ ${#tokens[@]} -eq 0 ]]; then
+	refuse "ingen kommando oppgitt"
+fi
+
+group="${tokens[0]:-}"
+sub="${tokens[1]:-}"
+
+allow() {
+	local candidate="$1"
+	shift
+	local option
+	for option in "$@"; do
+		[[ "$candidate" == "$option" ]] && return 0
+	done
+	return 1
+}
+
+case "$group" in
+	# Hjelpetekst: la kommandoen gå gjennom uendret.
+	"") [[ "$is_help" == true ]] || refuse "ingen kommando oppgitt" ;;
+	help | completion)
+		;;
+	# Rene lesekommandoer uten undergrupper vi trenger å skille på.
+	status | validate | activity | vulnerability | members | issues | log)
+		;;
+	app)
+		# `env` og `files` utelatt med vilje: de kan eksponere hemmeligheter.
+		allow "$sub" activity issues list log status \
+			|| refuse "'nais app $sub' er ikke en tillatt lesekommando"
+		;;
+	job)
+		allow "$sub" activity issues list log \
+			|| refuse "'nais job $sub' er ikke en tillatt lesekommando"
+		;;
+	postgres)
+		allow "$sub" list \
+			|| refuse "'nais postgres $sub' gir databasetilgang eller endrer tilstand"
+		;;
+	*)
+		refuse "kommandogruppen 'nais $group' er ikke tillatt for en read-only agent"
+		;;
+esac
+
+self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+real_bin=""
+IFS=':' read -ra path_entries <<<"$PATH"
+for entry in "${path_entries[@]}"; do
+	[[ -z "$entry" ]] && continue
+	resolved="$(cd "$entry" 2>/dev/null && pwd)" || continue
+	[[ "$resolved" == "$self_dir" ]] && continue
+	if [[ -x "$entry/nais" ]]; then
+		real_bin="$entry/nais"
+		break
+	fi
+done
+
+if [[ -z "$real_bin" ]]; then
+	echo "readonly-guard: fant ingen ekte nais-binær i PATH" >&2
+	exit 127
+fi
+
+exec "$real_bin" "$@"

@@ -43,7 +43,7 @@ is_destructive() {
 }
 
 refuse() {
-	echo "BLOKKERT av kubectl-guard (scripts/kubectl-guard/kubectl): '$1' er et" >&2
+	echo "BLOKKERT av readonly-guard (scripts/readonly-guard/kubectl): '$1' er et" >&2
 	echo "ikke-lesende kubectl-verb, og troubleshoot-agenten er rent diagnostisk." >&2
 	echo "Foreslå endringen til brukeren i stedet, eller send den til planlegger." >&2
 	exit 1
@@ -142,7 +142,7 @@ for entry in "${path_entries[@]}"; do
 done
 
 if [[ -z "$real_kubectl" ]]; then
-	echo "kubectl-guard: fant ingen ekte kubectl-binær i PATH" >&2
+	echo "readonly-guard: fant ingen ekte kubectl-binær i PATH" >&2
 	exit 127
 fi
 

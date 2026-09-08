@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# PATH-shim som holder `gcloud` read-only for troubleshoot-agenten.
+#
+# HVORFOR: kubectl-shimen dekket kun kubectl, men `gcloud` ligger også på PATH
+# med de samme credentials-ene. `gcloud sql instances delete` kan gjøre langt
+# større skade enn noe `kubectl delete`, og var helt udekket.
+#
+# STRATEGI: allowlist, ikke denylist. gcloud har en enorm kommandoflate som
+# vokser hele tiden, så det er ikke mulig å ramse opp alt destruktivt. Vi
+# krever i stedet at kommandoen inneholder et kjent LESE-verb, og at den ikke
+# inneholder noe kjent skrive-verb. Ukjente kommandoer blokkeres (fail-closed).
+#
+# Konsekvens: en legitim lesekommando med et verb vi ikke kjenner blir også
+# blokkert. Det er med vilje — brukeren kan alltid kjøre den selv i et annet
+# vindu, og feilmeldingen sier hvilket token som manglet.
+
+set -uo pipefail
+
+# Rene lesekommandoer. `get-credentials` er bevisst IKKE med: den skriver til
+# kubeconfig og bytter hvilket cluster du snakker med.
+READ_VERBS=(
+	list describe info version search tail read status
+	test-iam-permissions get-value get-iam-policy get-server-config
+)
+
+# Eksplisitt blokkert selv om de kan se lesende ut.
+WRITE_VERBS=(
+	delete create update patch set add remove enable disable deploy
+	restart reset stop start import restore rollback promote apply insert
+	undelete purge clear drain resize revoke grant attach detach kill
+	terminate move rename replace upgrade downgrade migrate failover clone
+	login logout ssh scp get-credentials
+	print-access-token print-identity-token
+)
+
+contains_token() {
+	local needle="$1"
+	shift
+	local token
+	for token in "$@"; do
+		[[ "$token" == "$needle" ]] && return 0
+	done
+	return 1
+}
+
+refuse() {
+	echo "BLOKKERT av readonly-guard (scripts/readonly-guard/gcloud): $1" >&2
+	echo "troubleshoot-agenten er rent diagnostisk og kjører kun lesende" >&2
+	echo "gcloud-kommandoer. Kjør den selv hvis den er riktig, eller send" >&2
+	echo "endringen til planlegger." >&2
+	exit 1
+}
+
+# Hjelpetekst og versjon er alltid ufarlig, og trengs for at agenten skal
+# kunne orientere seg i kommandoflaten.
+for arg in "$@"; do
+	case "$arg" in
+		-h | --help) is_help=true ;;
+	esac
+done
+
+# Samle alle ikke-flagg-tokens.
+is_help=${is_help:-false}
+tokens=()
+for arg in "$@"; do
+	[[ "$arg" == -* ]] && continue
+	tokens+=("$arg")
+done
+
+if [[ "$is_help" == false && ${#tokens[@]} -eq 0 ]]; then
+	refuse "ingen kommando oppgitt"
+fi
+
+for verb in "${WRITE_VERBS[@]}"; do
+	if contains_token "$verb" ${tokens[@]+"${tokens[@]}"}; then
+		refuse "'$verb' er en skrivende/credential-eksponerende gcloud-operasjon"
+	fi
+done
+
+found_read=false
+for verb in "${READ_VERBS[@]}"; do
+	if contains_token "$verb" ${tokens[@]+"${tokens[@]}"}; then
+		found_read=true
+		break
+	fi
+done
+
+if [[ "$is_help" == false && "$found_read" == false ]]; then
+	refuse "fant ingen kjent lesekommando (${READ_VERBS[*]}) i '${tokens[*]}'"
+fi
+
+self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+real_bin=""
+IFS=':' read -ra path_entries <<<"$PATH"
+for entry in "${path_entries[@]}"; do
+	[[ -z "$entry" ]] && continue
+	resolved="$(cd "$entry" 2>/dev/null && pwd)" || continue
+	[[ "$resolved" == "$self_dir" ]] && continue
+	if [[ -x "$entry/gcloud" ]]; then
+		real_bin="$entry/gcloud"
+		break
+	fi
+done
+
+if [[ -z "$real_bin" ]]; then
+	echo "readonly-guard: fant ingen ekte gcloud-binær i PATH" >&2
+	exit 127
+fi
+
+exec "$real_bin" "$@"

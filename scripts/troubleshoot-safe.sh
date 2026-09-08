@@ -1,6 +1,6 @@
 #!/bin/bash
 # Launcher for `troubleshoot`-agenten med to lag teknisk sperre mot destruktive
-# kubectl-verb, i tillegg til den prosa-baserte "read-only kontrakt" i
+# kommandoer, i tillegg til den prosa-baserte "read-only kontrakt" i
 # plugin/agents/troubleshoot.agent.md.
 #
 # Hvorfor dette finnes: prosa-instruksjoner alene er IKKE tilstrekkelig for noe
@@ -8,9 +8,12 @@
 # CHANGELOG [0.10.1]) at en agent uten teknisk sperre kan overtales til å kjøre
 # "kubectl delete"/"kubectl apply" med riktig framing i prompten.
 #
-# Lag 1 - kubectl-guard (scripts/kubectl-guard/kubectl), primærsperren:
-#   en PATH-shim som parser argumentene og blokkerer destruktive verb uansett
-#   hvor i kommandolinjen de står.
+# Lag 1 - readonly-guard (scripts/readonly-guard/), primærsperren:
+#   PATH-shims for `kubectl`, `gcloud` og `nais` som parser argumentene og
+#   blokkerer destruktive kommandoer uansett hvor i kommandolinjen de står.
+#   kubectl bruker denylist over destruktive verb; gcloud og nais bruker
+#   allowlist, fordi kommandoflatene deres er for store og for bevegelige til
+#   at en denylist kan gjøres troverdig.
 #
 # Lag 2 - `--deny-tool`, sekundært:
 #   blokkerer på CLI-nivå før kallet når shimen, men KUN når verbet står som
@@ -33,13 +36,15 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GUARD_DIR="$SCRIPT_DIR/kubectl-guard"
+GUARD_DIR="$SCRIPT_DIR/readonly-guard"
 
-if [[ ! -x "$GUARD_DIR/kubectl" ]]; then
-	echo "FEIL: fant ikke $GUARD_DIR/kubectl (kubectl-guard-shimen)." >&2
-	echo "Uten den er sperren mot destruktive kommandoer vesentlig svakere." >&2
-	exit 1
-fi
+for shim in kubectl gcloud nais; do
+	if [[ ! -x "$GUARD_DIR/$shim" ]]; then
+		echo "FEIL: fant ikke $GUARD_DIR/$shim (readonly-guard-shimen)." >&2
+		echo "Uten den er sperren mot destruktive kommandoer vesentlig svakere." >&2
+		exit 1
+	fi
+done
 
 DENY_VERBS=(
 	delete apply patch replace create edit exec cp
@@ -51,8 +56,8 @@ for verb in "${DENY_VERBS[@]}"; do
 	DENY_FLAGS+=(--deny-tool "shell(kubectl ${verb}:*)")
 done
 
-# Shimen legges FØRST i PATH slik at alle `kubectl`-kall fra agenten går
-# gjennom den, uansett hvordan kommandolinjen er satt sammen.
+# Shimene legges FØRST i PATH slik at alle kall fra agenten går gjennom dem,
+# uansett hvordan kommandolinjen er satt sammen.
 export PATH="$GUARD_DIR:$PATH"
 
 exec copilot --agent dp-brukerdialog-pilot:troubleshoot "${DENY_FLAGS[@]}" "$@"

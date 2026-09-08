@@ -32,6 +32,6 @@ jobs:
       - name: Validate plugin schema (agents, skills, manifests)
         run: |
           python3 scripts/validate_plugin_schema.py
-      - name: Test kubectl-guard (deterministisk, krever ingen copilot-binary)
+      - name: Test readonly-guard (deterministisk, krever ingen copilot-binary)
         run: |
-          bash scripts/test_kubectl_guard.sh
+          bash scripts/test_readonly_guard.sh

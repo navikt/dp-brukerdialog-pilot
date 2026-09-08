@@ -312,13 +312,23 @@ Start derfor alltid `troubleshoot` via `scripts/troubleshoot-safe.sh` i stedet f
 
 Scriptet setter opp **to lag** teknisk sperre:
 
-**Lag 1 — `scripts/kubectl-guard/kubectl` (primærsperren).** En PATH-shim som
-legges først i `PATH`, parser argumentene selv og blokkerer destruktive verb
-uansett hvor i kommandolinjen de står. Den feiler lukket: i tillegg til å
-identifisere det faktiske verbet, blokkerer den også hvis et destruktivt verb
-forekommer som et eget token noe sted i argumentlisten (sikkerhetsnett mot
-parsefeil). `kubectl auth can-i <verb>` er eksplisitt unntatt, siden det er en
-ren lesespørring der verbet er argumentet, ikke handlingen.
+**Lag 1 — `scripts/readonly-guard/` (primærsperren).** Tre PATH-shims som legges
+først i `PATH`, parser argumentene selv og blokkerer destruktive kommandoer
+uansett hvor i kommandolinjen de står.
+
+| Shim | Strategi | Merk |
+|------|----------|------|
+| `kubectl` | Denylist over destruktive verb | Feiler lukket: blokkerer også hvis et destruktivt verb forekommer som eget token noe sted i argumentlisten (sikkerhetsnett mot parsefeil). `kubectl auth can-i <verb>` er eksplisitt unntatt, siden verbet der er argumentet, ikke handlingen. |
+| `gcloud` | Allowlist over lesende verb | Kommandoflaten er for stor og for bevegelig til at en denylist kan gjøres troverdig, så ukjente kommandoer blokkeres. `auth print-access-token` og `container clusters get-credentials` er eksplisitt blokkert — den første lekker credentials, den andre skriver til kubeconfig. |
+| `nais` | Allowlist per kommandogruppe | `nais secret` og `nais app env` er blokkert fordi de ville trukket hemmeligheter inn i agentens kontekst. `nais postgres` er kun tillatt for `list`. |
+
+`gcloud` og `nais` ble lagt til fordi de ligger på samme `PATH` med de samme
+credentials-ene: `gcloud sql instances delete` kan gjøre langt større skade enn
+noe `kubectl delete`, og var helt udekket av den opprinnelige kubectl-shimen.
+
+Prisen for allowlist er falske positive — legitime lesekommandoer med ukjente
+verb blir også blokkert. Det er et bevisst valg: du kan alltid kjøre kommandoen
+selv, og feilmeldingen sier hvilket token som manglet.
 
 **Lag 2 — `--deny-tool "shell(kubectl <verb>:*)"` (sekundært).** Copilot CLI
 sitt permission-system blokkerer på CLI-nivå før kallet når shimen. **Men det
@@ -333,13 +343,15 @@ kubectl -n ns delete pod X   -> KJØRTE    (mønsteret matcher ikke)
 Wildcard-varianter (`shell(kubectl *delete*)`, `shell(*kubectl*delete*)`) tetter
 ikke hullet — matchingen er prefiks-basert på tokens, ikke glob over hele
 kommandolinjen. `--deny-tool` er derfor beholdt som ekstra dybde for den enkleste
-kommandoformen, men er **ikke** den sperren garantien hviler på.
+kommandoformen, men er **ikke** den sperren garantien hviler på. Laget dekker
+dessuten kun `kubectl`, ikke `gcloud` eller `nais`.
 
 `--deny-tool`-lista manglet også flere muterende verb helt (`run`, `debug`,
 `attach`, `auth reconcile`); disse dekkes nå av shimen.
 
-Vanlige lesekommandoer (`kubectl get`/`describe`/`logs`/`top`/`auth can-i`) er
-upåvirket og fungerer som normalt.
+Vanlige lesekommandoer er upåvirket og fungerer som normalt:
+`kubectl get`/`describe`/`logs`/`top`/`auth can-i`, `gcloud ... list`/`describe`/
+`logging read`, `nais status`/`app log`/`app list`/`validate`.
 
 **Ingen av lagene erstatter RBAC på klyngen.** En kubeconfig med kun lesetilgang
 er den eneste beskyttelsen som gjelder uansett verktøy, prosess eller
@@ -349,8 +361,8 @@ prompt-formulering — bruk den hvis du kan.
 
 To komplementære tester, fordi de svarer på ulike spørsmål:
 
-- **`bash scripts/test_kubectl_guard.sh`** — deterministisk enhetstest av shimen
-  (31 caser). Kjører uten modell, uten `copilot`-binary og uten auth, og går
+- **`bash scripts/test_readonly_guard.sh`** — deterministisk enhetstest av
+  shimene (87 caser). Kjører uten modell, uten `copilot`-binary og uten auth, og går
   derfor i CI. Dette er testen som faktisk beviser at den tekniske sperren
   virker, inkludert alle kommandoformene `--deny-tool` ikke fanger.
 - **`python3 scripts/eval_troubleshoot.py --run`** — ende-til-ende med ekte
