@@ -50,6 +50,19 @@ Målet i første versjon var en bevisst liten plugin med:
 Vi har siden lagt til 12 domain-preset-/audit-skills (se "Domain-preset-skills" under) for å
 gjøre `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse opp agent-promptet.
 
+## Modellvalg
+
+Hver agent pinner sin egen modell i frontmatter (`model:` i `.agent.md`), f.eks.
+`planlegger`/`pr-reviewer`/`troubleshoot` på `claude-sonnet-4.6`, `koder` på
+`gpt-5.4-mini`, `reviewer` på `gemini-3.7-flash`.
+
+`/model` i Copilot CLI bytter **kun** modellen for agenten du aktivt chatter
+med i den økten — det overstyrer ikke `model:`-feltet i noen agent-fil, og
+`koder`/`reviewer` (interne subagenter delegert av `planlegger`) beholder sin
+egne pinnede modell uansett hva du velger med `/model` for `planlegger`. Skal
+du overstyre en subagents modell, er `/subagents` mekanismen for det, ikke
+`/model`.
+
 ## Installer
 
 Direkte install fra sti/repo/URL er under utfasing i Copilot CLI ("Direct plugin installs
@@ -135,6 +148,12 @@ sluttoppsummering blir unødvendig lang og tokentung.
 - Dette henger sammen med "generer-så-forstå"-mønsteret: målet er at du som
   bruker skal kunne stille kritiske spørsmål til valgene som ble tatt, ikke
   bare akseptere resultatet.
+- For komplisert sti reflekterer `planlegger` internt over *hvorfor*
+  (gevinsten/formålet), ikke bare *hva* som skal endres, som en sjekk på at
+  planen faktisk tjener formålet — og fyller ut et `Gevinst`-felt i
+  `KODER_BRIEF`. Feltet utelates på enkel sti for å unngå unødvendig friksjon,
+  og blir kun et faktisk spørsmål til deg hvis hvorfor er reelt uklart og ville
+  endret løsningen (samme terskel som andre avklarende spørsmål).
 
 `koder` og `planlegger` kan også flagge (aldri fikse selv) hvis en endring
 gjør repoets **egen** dokumentasjon (README, AGENTS.md, CONTRIBUTING eller
@@ -183,6 +202,16 @@ Alle 12 skills er prefikset `brukerdialog-` (matcher `grillmester`s konvensjon
 plugin, prosjekt, builtin) til én flat liste uten automatisk namespacing — uten
 prefiks kunne f.eks. en skill kalt `nais` fra en annen kilde kollidert i navn med
 vår `nais-deploy`-skill.
+
+**Discovery-budsjett:** `name`+`description`-frontmatter for alle agenter og
+skills lastes alltid inn i modellens picker/discovery-kontekst, uansett om en
+gitt skill faktisk brukes i sesjonen. `scripts/validate_plugin_schema.py`
+summerer disse på tvers av alle filer og feiler hvis summen passerer 8 KiB —
+kalibrert til å tillate om lag en tredobling av dagens faktiske bruk (~2,4 KB
+for 5 agenter + 12 skills), portert fra `grillmester` sin tilsvarende (men
+høyere) grense. Ved brudd viser feilmeldingen de tre filene som bidrar mest,
+slik at det er tydelig om synderen er mange nye skills eller et par som er
+blitt for lange.
 
 ## Diagnostikk
 
