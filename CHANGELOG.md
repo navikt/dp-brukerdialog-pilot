@@ -3,6 +3,35 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.13.0]
+
+### Endret (kvalitet)
+- **`planreview` var en udefinert mekanisme.** Agent-filen sa bare "kjør
+  planreview før delegasjon" uten å spesifisere hvordan. Verifisert empirisk:
+  planlegger valgte selv en personlig egendefinert arkitektur-agent
+  (`nav-pilot-opus`, tilgjengelig i denne brukerens lokale miljø) i stedet for
+  noe pluginen faktisk kontrollerer eller garanterer. Ingen test verifiserte
+  at et review i det hele tatt skjedde — kun at feltet
+  `Krever planreview: ja/nei` ble satt riktig.
+- Definerte planreview eksplisitt som et synkront `Task`-kall til en ekte
+  review-agent (`rubber-duck` som standard), som skal vurdere både (1) om
+  planen faktisk løser det oppgitte målet/gevinsten, og (2) om
+  arkitekturen/tilnærmingen er sunn.
+- **Verifisert at selv en eksplisitt "bruk aldri en personlig agent"-instruks
+  ikke er nok**: planlegger valgte `nav-pilot-opus` på nytt i en ny testkjøring.
+  Samme klasse begrensning som gjorde `--deny-tool` alene utilstrekkelig for
+  `troubleshoot` ([0.11.0]) — det finnes ingen teknisk sperre for hvilken
+  `agent_type` en agent-fil kan velge i et `Task`-kall. Justerte kravet til det
+  som faktisk kan håndheves: et ekte delegert review-kall skjedde og et
+  verdikt ble rapportert, ikke nøyaktig hvilken agent som gjorde det.
+- Ny hard sperre "Planreview-steg" (speiler eksisterende "Reviewer-steg"):
+  planlegger har ikke lov til å delegere til `koder` på komplisert sti før den
+  har kalt en ekte review-agent og skrevet en `Planreview: <verdikt>`-linje.
+- `scripts/eval_integration.py`: ny `expect_planreview_reported`-sjekk, samme
+  prinsipp som `expect_reviewer_verdict_if_changed` — verifiserer at en
+  `Planreview:`-linje faktisk finnes i sluttoutputen på komplisert sti, ikke
+  bare at planen påsto at review skulle kjøres.
+
 ## [0.12.0]
 
 ### Endret (sikkerhet)

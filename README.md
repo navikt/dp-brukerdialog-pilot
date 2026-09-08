@@ -570,13 +570,16 @@ Dette:
 
 Testene defineres i `eval/integration-tests.json` med `fixture` (filer som
 seedes), `prompt` (det ekte oppdraget) og
-`expect_contains`/`expect_no_commit`/`expect_no_file_changes`/`expect_output_contains`.
+`expect_contains`/`expect_no_commit`/`expect_no_file_changes`/`expect_output_contains`/
+`expect_planreview_reported`.
 
 Suiten dekker fire reelle scenarioer:
 - `smoke` (id 1): enkel sti, direkte filendring uten planreview.
 - `policy` (id 2): komplisert sti (offentlig API-kontraktendring) — verifiserer
   at oppgaven fortsatt fullføres korrekt end-to-end selv når den krever et
-  ekstra planreview-steg internt.
+  ekstra planreview-steg internt, og at et ekte `Planreview: <verdikt>`-svar
+  faktisk blir rapportert (`expect_planreview_reported`), ikke bare at
+  `Krever planreview: ja` ble skrevet i briefet.
 - `policy` (id 3): persondata-stopp-punkt (fødselsnummer-endepunkt) —
   verifiserer at `planlegger` ikke gjør noen filendringer i det hele tatt når
   den treffer et stopp-punkt den ikke kan få bekreftet (harnessen kjører med

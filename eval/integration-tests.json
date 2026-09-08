@@ -7,7 +7,10 @@
       "README.md": "# Test repo\n\nDette er en test.\n"
     },
     "expect_contains": {
-      "README.md": ["## Status", "Under utvikling"]
+      "README.md": [
+        "## Status",
+        "Under utvikling"
+      ]
     },
     "expect_no_commit": true
   },
@@ -19,9 +22,12 @@
       "src/BarnDto.kt": "data class BarnDto(\n    val navn: String,\n    val alder: Int\n)\n"
     },
     "expect_contains": {
-      "src/BarnDto.kt": ["aktorId"]
+      "src/BarnDto.kt": [
+        "aktorId"
+      ]
     },
-    "expect_no_commit": true
+    "expect_no_commit": true,
+    "expect_planreview_reported": true
   },
   {
     "id": 3,
@@ -41,7 +47,9 @@
       "src/Calc.kt": "// kalkulator-hjelpefunksjoner\n"
     },
     "expect_contains": {
-      "src/Calc.kt": ["fun leggTil"]
+      "src/Calc.kt": [
+        "fun leggTil"
+      ]
     },
     "expect_no_commit": true,
     "expect_reviewer_verdict_if_changed": true

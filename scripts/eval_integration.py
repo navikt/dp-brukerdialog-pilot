@@ -20,7 +20,12 @@ Each test case describes:
 - expect_output_contains: substrings that must appear in planlegger's final
   response text (e.g. its required `Reviewer: <status>` summary line), used
   to verify the reviewer-step actually ran as part of the real flow
+- expect_planreview_reported: same principle, but for the planreview gate on
+  komplisert sti -- verifies a `Planreview: <verdikt>` line is present,
+  proving a real review call happened and was reported instead of silently
+  skipped (see "Slik kjøres planreview" in planlegger.agent.md)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -146,6 +151,20 @@ def check_test(test: dict[str, Any], scratch: Path, output: str = "") -> list[st
             failures.append(
                 "filer ble endret, men output mangler et ekte reviewer-verdikt "
                 "(APPROVED/NEEDS_CHANGES/BLOCKED)"
+            )
+
+    if test.get("expect_planreview_reported"):
+        # Samme prinsipp som expect_reviewer_verdict_if_changed: planlegger skal
+        # aldri kunne skrive "Krever planreview=ja" og bare fortsette uten å
+        # rapportere et faktisk verdikt fra det delegerte review-kallet. Sjekker
+        # kun at kontrakten (en Planreview-linje finnes) holdes, ikke hvilken
+        # agent som ble kalt -- se "Slik kjøres planreview" i planlegger.agent.md
+        # for hvorfor akkurat hvilken agent ikke kan tvinges/testes pålitelig.
+        output_plain = output.replace("*", "")
+        if "Planreview:" not in output_plain and "Planreview-status:" not in output_plain:
+            failures.append(
+                "oppgaven skal utløse planreview på komplisert sti, men output "
+                "mangler en 'Planreview: <verdikt>'-linje"
             )
 
     return failures

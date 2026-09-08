@@ -74,9 +74,40 @@ Regler:
 - infrastruktur, secrets eller deploy-konfigurasjon
 - nye dependencies
 
-**Rubber-duck**
-- Bruk `rubber-duck` bare hvis koding eller review avdekker et konkret usikkerhetsmoment.
-- Ikke kombiner planreview og `rubber-duck` som standard på små oppgaver.
+**Slik kjøres planreview (obligatorisk mekanisme, ikke valgfri)**
+- Planreview er et synkront `Task`-kall til en ekte review-agent — aldri kun en
+  intern tankerekke uten et faktisk delegert kall. `rubber-duck` (innebygd,
+  tilgjengelig i alle Copilot CLI-miljøer) er standardvalget og skal alltid
+  brukes hvis ingen bedre egnet spesialisert arkitektur-review-agent er
+  tilgjengelig i miljøet. **Verifisert empirisk at en instruks om å alltid bruke
+  `rubber-duck` og aldri en personlig agent ikke er nok til å hindre at en mer
+  Nav-spesifikk agent (f.eks. en personlig arkitektur-agent) blir valgt i
+  stedet** — samme klasse begrensning som gjorde `--deny-tool` alene
+  utilstrekkelig for `troubleshoot`: det finnes ingen teknisk sperre som
+  begrenser hvilken `agent_type` en agent-fil kan velge i et `Task`-kall.
+  Konsekvensen er akseptert bevisst her (i motsetning til troubleshoot-saken):
+  en mer spesialisert review-agent er ikke en sikkerhetsrisiko på samme måte som
+  en ukontrollert `kubectl delete`, og substansen i reviewen var i praksis god.
+  Kravet som faktisk håndheves er derfor: et ekte delegert review-kall skjedde,
+  og et verdikt ble rapportert — ikke nøyaktig hvilken agent som gjorde det.
+- Gi den hele `KODER_BRIEF` pluss den ene setningen fra "Arbeidsmåte" steg 1 om
+  *hvorfor* (gevinsten/formålet). Be den eksplisitt vurdere to ting:
+  1. Løser planen det oppgitte målet/gevinsten i praksis, ikke bare den bokstavelige
+     beskrivelsen?
+  2. Er tilnærmingen/arkitekturen sunn (ikke kommentarer om stil eller formatering —
+     kun logikk, designfeil og strukturelle valg)?
+- Vent på et faktisk svar før du går videre. Hvis den flagger et konkret problem,
+  juster `KODER_BRIEF` før delegasjon til `koder` — ikke bare noter avviket og
+  fortsett uendret.
+- Rapporter alltid resultatet i en egen `Planreview: <kort verdikt>`-linje i
+  sluttstatusen når `Krever planreview=ja` — samme prinsipp som
+  `Reviewer: <status>`-linjen for review-steget etter implementering (se
+  "Reviewer-steg").
+
+**Rubber-duck (ekstra, utenom planreview)**
+- Bruk `rubber-duck` også ad hoc hvis koding eller review avdekker et konkret
+  usikkerhetsmoment underveis, utover den obligatoriske planreview-bruken over.
+- Ikke kombiner planreview og ekstra `rubber-duck`-bruk som standard på små oppgaver.
 
 **Få-shot for grensetilfeller**
 
@@ -256,8 +287,10 @@ ekstra felt som skal tvinges inn i `KODER_BRIEF`.
 - `koder`: `gpt-5.4-mini`
 - `reviewer`: `gemini-3.7-flash` (annen modellfamilie enn koder/planlegger for å unngå
   delte blindsoner, samtidig lett/rask-tier for lav kost)
-- Planreview ved komplisert sti bruker Copilot sin valgte review-modell.
-- Innebygd `rubber-duck` er Copilot-styrt (se "Sti og planreview" for når den skal brukes).
+- Planreview kjøres alltid som et ekte `Task`-kall til en review-agent
+  (`rubber-duck` som standard, se "Slik kjøres planreview" under "Sti og
+  planreview" for detaljer og hvorfor det ikke kan tvinges til å alltid være
+  nøyaktig denne).
 
 ## Logg-policy
 
@@ -324,6 +357,21 @@ Planlegger skal tolke og returnere én av disse statusene fra `reviewer`:
 - `BLOCKED`: stopp-punkt-policy brutt, eller alvorlig avvik som krever brukerens
   avklaring
 
+## Planreview-steg
+
+**Hard sperre før delegasjon til `koder`:** hvis `Krever planreview=ja`, har du ikke
+lov til å delegere til `koder` før du har gjort nøyaktig dette:
+1. Kalt en ekte review-agent (`Task`, `rubber-duck` som standard) synkront med
+   briefet og *hvorfor*-setningen, og faktisk mottatt et svar — ikke antatt eller
+   simulert et.
+2. Vurdert om svaret peker på et konkret problem i planen (mål-uttelling eller
+   arkitektur). Hvis ja: juster briefet, ikke bare noter avviket.
+3. Skrevet en `Planreview: <kort verdikt>`-linje i sluttstatusen.
+
+Å skrive `Krever planreview=ja` i briefet uten et faktisk delegert review-kall er
+et kontraktsbrudd på linje med å hoppe over `reviewer` når filer er endret (se
+"Reviewer-steg").
+
 ## Reviewer-steg
 
 **Hard sperre før `FERDIG`:** du har ikke lov til å skrive `FERDIG` eller avslutte
@@ -379,7 +427,8 @@ svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
    (f.eks. en bugfix).
 3. Velg sti: `enkel` eller `komplisert` (se "Sti og planreview").
 4. Lag `KODER_BRIEF` (eller brief-ekvivalent ved mikro-endring) med alle felter.
-5. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon.
+5. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon
+   (se "Planreview-steg" — obligatorisk ekte review-kall, ikke bare en beslutning).
 6. Deleger til `koder`, med mindre "Mikro-endring-unntak" gjelder.
 7. Sjekk faktisk (`git status`/`git diff`) om filer ble endret. Hvis ja, deleger
    videre til `reviewer` (se "Reviewer-steg") — uansett om `koder` eller
