@@ -19,7 +19,7 @@ og oppdatering etter endringer.
 
 | Agent | Synlig for bruker | Kort |
 |---|---|---|
-| `sparring` | Ja | Avklarer mål, brukerverdi og suksesskriterium for én oppgave/idé, før den blir en plan. Kobler seg på `planlegger` etter eksplisitt godkjenning. |
+| `sparring` | Ja | Avklarer problem, ønsket effekt og brukerverdi for én oppgave/idé, før den blir en plan. Kobler seg på `planlegger` etter eksplisitt godkjenning. |
 | `planlegger` | Ja | Hovedagenten. Avklarer mål/sti, lager `KODER_BRIEF`, kjører planreview ved behov, delegerer til `koder`. |
 | `koder` | Nei (intern) | Implementerer avgrensede kodeendringer fra `planlegger`s brief. |
 | `reviewer` | Nei (intern) | Kvalitetssjekker `koder`s faktiske diff før `planlegger` rapporterer ferdig. |

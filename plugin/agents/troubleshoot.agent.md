@@ -1,7 +1,7 @@
 ---
 name: troubleshoot
 description: "Feilsøker produksjonsproblemer på Nais (pod-krasj, auth-feil, Kafka-lag, DB-tilkobling, treg respons) ved å kjøre kubectl/curl mot klynge og observability-stacken. Rent diagnostisk, gjør aldri endringer selv."
-model: "claude-sonnet-4.6"
+model: "claude-sonnet-5"
 user-invocable: false
 disable-model-invocation: true
 ---
