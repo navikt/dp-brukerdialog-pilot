@@ -1,7 +1,7 @@
 ---
 name: pr-reviewer
 description: "Reviewer en PR eller branch fra andre (diff mot main/base) og flagger sikkerhet, infra og kodekvalitet-funn for et menneske. Blokkerer aldri."
-model: "claude-sonnet-4.6"
+model: "claude-sonnet-5"
 user-invocable: true
 ---
 

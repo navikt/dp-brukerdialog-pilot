@@ -5,12 +5,12 @@ Se [README](../README.md) for kort oversikt. Denne siden går i detalj per agent
 ## Sparring
 
 `sparring` er en liten, avgrenset "produktpartner" for **én** oppgave/idé av
-gangen — ikke en full produktledelse-rolle. Den stiller ett spørsmål om
-gangen (mål, brukerverdi/gevinst, suksesskriterium, ikke-mål), oppsummerer i
-et `OPPGAVENOTAT`, og spør deretter eksplisitt om notatet skal sendes videre
-til `planlegger` via `Task`. `planlegger` bruker feltene i notatet direkte
-fremfor å avklare mål/gevinst på nytt (se "Mottak fra sparring" i
-`plugin/agents/planlegger.agent.md`).
+gangen — ikke en full produktledelse-rolle. Den avklarer problemet bak oppgaven,
+ønsket effekt, brukerverdi, antakelser og avgrensning. Deretter gjør den en kort
+vurdering av om den foreslåtte løsningen ser ut til å treffe problemet, før den
+oppsummerer i et `OPPGAVENOTAT` og spør eksplisitt om notatet skal sendes videre
+til `planlegger` via `Task`. `planlegger` bruker notatet som grunnlag for teknisk
+planlegging (se "Mottak fra sparring" i `plugin/agents/planlegger.agent.md`).
 
 `disable-model-invocation: true` — trigges aldri automatisk av andre agenter,
 kun når bruker eksplisitt starter den. Bevisst utelatt i v1: prioritering på
@@ -27,6 +27,7 @@ Plugin-filer:
 ```text
 .github/plugin/marketplace.json
 plugin/plugin.json
+plugin/agents/sparring.agent.md
 plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
 plugin/agents/reviewer.agent.md
@@ -57,7 +58,7 @@ gjøre `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse op
 ## Modellvalg
 
 Hver agent pinner sin egen modell i frontmatter (`model:` i `.agent.md`), f.eks.
-`planlegger`/`sparring`/`pr-reviewer`/`troubleshoot` på `claude-sonnet-4.6`, `koder` på
+`planlegger`/`sparring`/`pr-reviewer`/`troubleshoot` på `claude-sonnet-5`, `koder` på
 `gpt-5.4-mini`, `reviewer` på `gemini-3.7-flash`.
 
 `/model` i Copilot CLI bytter **kun** modellen for agenten du aktivt chatter
@@ -389,4 +390,3 @@ stoler på noen av de andre lagene.
 > eller `kubectl`/`curl`-kall slik dette dokumentet beskriver. Sjekk dette selv i
 > ditt miljø før du stoler på beskrivelsen over hvis du bruker "cplt" i stedet for
 > `copilot` direkte.
-

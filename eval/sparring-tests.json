@@ -1,0 +1,78 @@
+[
+  {
+    "id": 1,
+    "suite": "smoke",
+    "prompt": "Problemet er at drift ikke har en stabil måte å se om appen svarer. Målet er at de oppdager utilgjengelighet tidligere. Gevinsten er kortere feilperioder. Tegn på ønsket effekt er at overvåkingen varsler når appen er utilgjengelig. Foreslått løsning er et /isalive-endepunkt. Ikke mål er å endre andre endepunkter.",
+    "expected": {
+      "spurte_om_problem": "nei",
+      "spurte_om_effekt": "nei",
+      "antall_spørsmål": 0,
+      "håndoff": "nei",
+      "notat_contains": [
+        "Problem/observasjon",
+        "Tegn på ønsket effekt",
+        "Foreslått løsning",
+        "Antakelser og åpne spørsmål",
+        "Kort vurdering"
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "suite": "policy",
+    "prompt": "Vi trenger en ny knapp på forsida. Jeg vet ikke helt hva den skal løse ennå.",
+    "expected": {
+      "spurte_om_problem": "ja",
+      "spurte_om_effekt": "nei",
+      "antall_spørsmål": 1,
+      "håndoff": "nei"
+    }
+  },
+  {
+    "id": 3,
+    "suite": "policy",
+    "prompt": "Vi vil gjøre det enklere for brukerne å ettersende dokumentasjon. Jeg vet ikke hvordan vi måler om det virker, og vet ikke om løsningen bør være en knapp eller bedre veiledning.",
+    "expected": {
+      "spurte_om_problem": "nei",
+      "håndoff": "nei",
+      "requires_effect_handling": true
+    }
+  },
+  {
+    "id": 4,
+    "suite": "policy",
+    "prompt": "Problemet er at brukerne ikke finner hvor de skal ettersende dokumentasjon. Målet er at flere finner riktig sted. Jeg vet ikke hva som vil være et godt målepunkt. Vet du?",
+    "expected": {
+      "spurte_om_problem": "nei",
+      "håndoff": "nei",
+      "requires_effect_handling": true
+    }
+  },
+  {
+    "id": 5,
+    "suite": "smoke",
+    "prompt": "Problemet er at brukerne ikke finner dokumentasjonsflyten. Målet er at flere finner den. Gevinsten er mindre friksjon. Tegn på ønsket effekt er økt andel brukere som starter flyten. Foreslått løsning er bedre lenketekst. Ikke mål er å endre backend. Ja, send notatet videre til planlegger.",
+    "expected": {
+      "spurte_om_problem": "nei",
+      "spurte_om_effekt": "nei",
+      "antall_spørsmål": 0,
+      "håndoff": "ja",
+      "notat_contains": [
+        "Problem/observasjon",
+        "Tegn på ønsket effekt",
+        "Kort vurdering"
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "suite": "policy",
+    "prompt": "Prioriter disse tre sakene mot hverandre og lag en OKR for teamet denne måneden.",
+    "expected": {
+      "spurte_om_problem": "nei",
+      "spurte_om_effekt": "nei",
+      "antall_spørsmål": 0,
+      "håndoff": "nei"
+    }
+  }
+]

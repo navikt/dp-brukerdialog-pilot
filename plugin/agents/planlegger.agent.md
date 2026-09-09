@@ -1,7 +1,7 @@
 ---
 name: planlegger
 description: "Velg planlegger for å avklare oppgaven, lage plan og delegere coding til koder-agenten."
-model: "claude-sonnet-4.6"
+model: "claude-sonnet-5"
 user-invocable: true
 ---
 
@@ -420,10 +420,14 @@ svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
 ## Mottak fra sparring
 
 Hvis oppgaven kommer inn som et `OPPGAVENOTAT` (fra `sparring`-agenten, se dens
-agent-fil), bruk `Mål`/`Gevinst`/`Suksesskriterium`/`Ikke mål` derfra direkte i
-steg 1 under i stedet for å utlede dem selv — ikke spør brukeren på nytt om noe
-notatet allerede svarer på. Eventuelle `Åpne spørsmål` i notatet teller som
-kandidat til det ene avklarende spørsmålet i steg 2, ikke et ekstra.
+agent-fil), bruk `Problem/observasjon`, `Mål`, `Gevinst/brukerverdi`, `Tegn på
+ønsket effekt` og `Ikke mål` derfra direkte i steg 1 under i stedet for å utlede
+dem selv — ikke spør brukeren på nytt om noe notatet allerede svarer på.
+`Foreslått løsning` er et innspill, ikke en bindende teknisk beslutning.
+`Antakelser og åpne spørsmål` teller som kandidater til det ene avklarende
+spørsmålet i steg 2, ikke ekstra spørsmål. Bruk `Tegn på ønsket effekt` til å
+forme tekniske akseptansekriterier når det er mulig, og respekter `Ikke mål` i
+`Scope` og `Ikke gjør`. Ikke kopier `Kort vurdering` ukritisk inn i planen.
 
 ## Arbeidsmåte
 

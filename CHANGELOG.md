@@ -3,6 +3,22 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.15.0]
+
+### Endret
+- `sparring` avklarer nå problemet bak oppgaven, ønsket effekt,
+  brukerverdi, antakelser og avgrensning. Den skiller teknisk leveranse fra
+  ønsket effekt og gjør en kort vurdering av om foreslått løsning treffer
+  problemet.
+- Nytt `OPPGAVENOTAT` med feltene `Problem/observasjon`, `Mål`,
+  `Gevinst/brukerverdi`, `Tegn på ønsket effekt`, `Foreslått løsning`,
+  `Ikke mål`, `Antakelser og åpne spørsmål` og `Kort vurdering`.
+- `planlegger` bruker de nye feltene direkte og behandler foreslått løsning
+  som et innspill, ikke en bindende teknisk beslutning.
+- La til kontraktstest og ekte scratch-repo-test for `sparring`.
+- Oppdaterte agentmodellene fra utilgjengelige `claude-sonnet-4.6` til
+  `claude-sonnet-5`.
+
 ## [0.14.1]
 
 ### Endret (dokumentasjon)

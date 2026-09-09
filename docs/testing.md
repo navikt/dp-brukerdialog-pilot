@@ -14,6 +14,33 @@ Bruk `--keep-sessions` for å beholde sesjonene (f.eks. for å feilsøke en enke
 python3 scripts/eval_planlegger.py --run --keep-sessions
 ```
 
+## Sparring-harness
+
+Valider kontrakten til `sparring` med faste prompts:
+
+```bash
+python3 scripts/eval_sparring.py --run --repeats 3
+```
+
+Testmatrisen (`eval/sparring-tests.json`) dekker:
+
+- komplett informasjon uten unødvendige spørsmål
+- løsningsforslag uten problemforståelse
+- manglende effektmål
+- «vet ikke» som åpent spørsmål eller antakelse
+- forskjellen mellom teknisk leveranse og ønsket effekt
+- eksplisitt håndoff og avgrensning av prioritering/OKR
+
+Kjør også den ekte scratch-repo-testen:
+
+```bash
+python3 scripts/eval_sparring_integration.py --run
+```
+
+Den verifiserer at `sparring` ikke endrer filer eller lager commits når brukeren
+ikke har godkjent håndoff. Håndoffen til `planlegger` testes i en separat live
+kjøring, fordi den starter en ny agentflyt og kan kreve videre avklaringer.
+
 ## Eval-harness
 
 Kjør faste prompts mot `planlegger` og score beslutningene automatisk:
@@ -145,14 +172,14 @@ Suiten dekker fire reelle scenarioer:
 > Denne harnessen tar vesentlig lengre tid enn de andre (ekte agentkjøring med
 > verktøy), så den er ikke ment å kjøres med høy `--repeats` som de andre.
 
-> **Kjent flakiness:** scenario id 2 (komplisert sti) kan av og til feile fordi
+> **Historisk kjent flakiness:** scenario id 2 (komplisert sti) kunne av og til feile fordi
 > modellen enten stopper med et unødvendig avklaringsspørsmål eller hevder å ha
 > gjort en endring uten faktisk å ha kalt verktøyet. Dette er bekreftet
 > modell-agnostisk: reprodusert med både `gpt-5.4` (falt tilbake til `auto`,
-> brukt før `planlegger` ble pinnet) og med `claude-sonnet-4.6`/`claude-sonnet-5`
-> i direkte A/B-testing (se CHANGELOG [0.4.1]/[0.4.2]). `planlegger` er nå
-> pinnet til `claude-sonnet-4.6` for å unngå udokumentert `auto`-fallback, men
-> det løser ikke denne kategorien flakiness — kun modellvalg-usikkerheten.
+> brukt før modellpinnen ble oppdatert) og med `claude-sonnet-4.6`/`claude-sonnet-5`
+> i direkte A/B-testing (se CHANGELOG [0.4.1]/[0.4.2]). Agentene bruker nå
+> `claude-sonnet-5`, som er tilgjengelig i miljøet. Den historiske testen
+> dokumenterer tidligere oppførsel, ikke dagens modellvalg.
 >
 > **Løst (tidligere kjent flakiness):** scenario id 3 (persondata-stopp-punkt)
 > viste tidligere samme mønster — sa i prosa at den stoppet (`NEEDS_DECISION`)
@@ -301,4 +328,3 @@ python3 scripts/eval_integration.py --run
 python3 scripts/eval_pr_review.py --run
 python3 scripts/eval_troubleshoot.py --run
 ```
-
