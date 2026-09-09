@@ -1,6 +1,6 @@
 # dp-brukerdialog-pilot
 
-En enkel AI-pilot som **ren Copilot-plugin** med seks agenter. Dette dokumentet
+En enkel AI-pilot som **ren Copilot-plugin** med sju agenter. Dette dokumentet
 er en kort oversikt — se lenkene under for detaljer.
 
 Se [CHANGELOG.md](./CHANGELOG.md) for versjonshistorikk.
@@ -23,6 +23,7 @@ og oppdatering etter endringer.
 | `planlegger` | Ja | Hovedagenten. Avklarer mål/sti, lager `KODER_BRIEF`, kjører planreview ved behov, delegerer til `koder`. |
 | `koder` | Nei (intern) | Implementerer avgrensede kodeendringer fra `planlegger`s brief. |
 | `reviewer` | Nei (intern) | Kvalitetssjekker `koder`s faktiske diff før `planlegger` rapporterer ferdig. |
+| `dybde-reviewer` | Nei (intern) | Gjør en ekstra, grundig kontroll av store, repeterende eller risikofylte endringer. |
 | `pr-reviewer` | Ja | Frittstående — reviewer **andres** PR-er/branches på forespørsel. Read-only, blokkerer aldri. |
 | `troubleshoot` | Nei (kun via script) | Frittstående — feilsøker produksjonsproblemer på Nais. Startes kun via `scripts/troubleshoot-safe.sh`, se hvorfor i [docs/agenter.md](./docs/agenter.md#troubleshoot). |
 

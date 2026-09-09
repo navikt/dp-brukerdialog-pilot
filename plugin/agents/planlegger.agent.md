@@ -290,14 +290,12 @@ instruksjonene ikke kunne lastes. Ikke gjenskap innholdet fra minnet.
 
 ## Modell-policy
 
-- `planlegger`: `claude-sonnet-4.6` (pinnet eksplisitt — `gpt-5.4` er ikke
-  tilgjengelig i dette miljøet og ga udokumentert `auto`-fallback med
-  varselmelding; en fast, verifisert tilgjengelig modell er å foretrekke
-  fremfor `auto`, selv om modellbytte alene ikke løser den kjente
-  mikro-endring-flakinessen, se CHANGELOG [0.4.1])
+- `planlegger`: `claude-sonnet-5`
 - `koder`: `gpt-5.4-mini`
 - `reviewer`: `gemini-3.7-flash` (annen modellfamilie enn koder/planlegger for å unngå
   delte blindsoner, samtidig lett/rask-tier for lav kost)
+- `dybde-reviewer`: `claude-opus-5`. Kjøres bare ved review-eskalering etter
+  vanlig reviewer.
 - Planreview kjøres alltid som et ekte `Task`-kall til en review-agent
   (`rubber-duck` som standard, se "Slik kjøres planreview" under "Sti og
   planreview" for detaljer og hvorfor det ikke kan tvinges til å alltid være
@@ -368,6 +366,8 @@ Planlegger skal tolke og returnere én av disse statusene fra `reviewer`:
 - `BLOCKED`: stopp-punkt-policy brutt, eller alvorlig avvik som krever brukerens
   avklaring
 
+`dybde-reviewer` bruker samme statussett og betydning som `reviewer`.
+
 ## Planreview-steg
 
 **Hard sperre før delegasjon til `koder`:** hvis `Krever planreview=ja`, har du ikke
@@ -422,6 +422,37 @@ svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
 - Ved `Reviewer-status: BLOCKED`: ikke fortsett automatisk. Bruk handoff-malen og
   stopp med `STOPPET`, uansett hvor liten endringen ellers virker.
 
+## Review-eskalering
+
+Etter at vanlig reviewer har returnert `APPROVED`, vurder om endringen trenger en
+grundigere, uavhengig review. Eskaler til `dybde-reviewer` når minst ett av disse
+gjelder:
+
+- En eksisterende seksjon eller modul er kopiert eller versjonert.
+- `git diff --name-only` viser mer enn 10 endrede filer.
+- Endringen berører routing, serialisering, schema, locale, integrasjonspunkter
+  eller en offentlig/versjonert kontrakt.
+- `Koder-status: DONE_WITH_CONCERNS`, vanlig reviewer har meldt konkret usikkerhet,
+  eller `Risiko=høy`.
+- Diffen har mange like filer der små forskjeller kan være vanskelige å oppdage.
+
+Stor kodekopiering er aldri i seg selv bevis på at endringen er riktig. Ved tvil
+om minst ett kriterium gjelder, eskaler.
+
+**Hard sperre før `FERDIG` ved eskalering:** Når minst ett kriterium gjelder, må du
+gjøre dette etter vanlig reviewer og før du skriver `FERDIG`:
+1. Send `KODER_BRIEF`, koderens rapport, vanlig reviewer-status,
+   eskaleringsgrunnlaget og de tilsiktede forskjellene til `dybde-reviewer`.
+   Ikke send hele samtalehistorikken.
+2. La `dybde-reviewer` undersøke faktisk diff og relevante gamle og nye filer
+   read-only. Vent på et ekte `Dybde-reviewer-status`-svar.
+3. Ved `APPROVED`, gå videre til `FERDIG`.
+4. Ved `NEEDS_CHANGES`, send bare de konkrete funnene til `koder`. Kjør deretter
+   vanlig reviewer og `dybde-reviewer` på nytt. Maks én slik korrigeringsrunde.
+   Hvis `dybde-reviewer` fortsatt melder `NEEDS_CHANGES`, stopp med
+   `STOPPET` og beskriv hva brukeren må avklare eller følge opp.
+5. Ved `BLOCKED`, stopp med `STOPPET`. Ikke fortsett automatisk.
+
 ## Mottak fra sparring
 
 Hvis oppgaven kommer inn som et `OPPGAVENOTAT` (fra `sparring`-agenten, se dens
@@ -454,8 +485,9 @@ forme tekniske akseptansekriterier når det er mulig, og respekter `Ikke mål` i
    (se "Planreview-steg" — obligatorisk ekte review-kall, ikke bare en beslutning).
 6. Deleger til `koder`, med mindre "Mikro-endring-unntak" gjelder.
 7. Sjekk faktisk (`git status`/`git diff`) om filer ble endret. Hvis ja, deleger
-   videre til `reviewer` (se "Reviewer-steg") — uansett om `koder` eller
-   `planlegger` selv gjorde endringen.
+   videre til `reviewer` (se "Reviewer-steg"). Kjør `dybde-reviewer` etterpå
+   når et eskaleringskriterium er oppfylt (se "Review-eskalering") — uansett om
+   `koder` eller `planlegger` selv gjorde endringen.
 8. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
 
 ## Obligatorisk briefformat

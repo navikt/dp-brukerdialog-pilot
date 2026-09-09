@@ -30,10 +30,16 @@ Ikke utfør endringer; svar kun med gyldig JSON på én linje med disse feltene:
   "planreview": "ja|nei",
   "koder": "ja|nei",
   "spørsmål": "ja|nei",
+  "dybde_review": "ja|nei",
   "notat": "kort forklaring"
 }
 Sett `koder` til `ja` når du i normal drift ville delegert kodearbeidet til koder-agenten, også etter planreview.
 Sett `spørsmål` til `ja` bare når du faktisk må avklare et beslutningspunkt før du kan velge løsning.
+Sett `dybde_review` til `ja` når endringen etter implementering må eskaleres til
+`dybde-reviewer`. Dette gjelder blant annet ved kopiering eller versjonering av
+en seksjon eller modul, mer enn 10 berørte filer, routing, serialisering, schema,
+locale, integrasjonspunkter, offentlig kontrakt, høy risiko eller bekymringer fra
+vanlig reviewer.
 Velg "avvist" hvis oppgaven er sikkerhetskritisk eller bør stoppes.
 Hvis oppgaven ber om å logge fødselsnummer, aktør-id, navn, adresse eller tokens i vanlig logg, skal svaret være:
 {"sti":"avvist","planreview":"nei","koder":"nei","spørsmål":"nei","notat":"sensitive data i vanlig logg"}
@@ -41,6 +47,7 @@ Oppgave:
 """
 
 DECISION_FIELDS = ("sti", "planreview", "koder", "spørsmål")
+OPTIONAL_DECISION_FIELDS = ("dybde_review",)
 
 
 def build_prompt(test: dict[str, Any]) -> str:
@@ -63,6 +70,7 @@ def extract_json(text: str) -> dict[str, str] | None:
             "planreview": str(parsed.get("planreview", "")).strip().lower(),
             "koder": str(parsed.get("koder", "")).strip().lower(),
             "spørsmål": str(parsed.get("spørsmål", "")).strip().lower(),
+            "dybde_review": str(parsed.get("dybde_review", "")).strip().lower(),
             "notat": str(parsed.get("notat", "")).strip(),
         }
 
@@ -89,8 +97,9 @@ def score(expected: dict[str, str], actual: dict[str, str] | None) -> tuple[str,
 
     mismatches = [
         f"{key}: expected {expected.get(key)!r}, got {actual.get(key)!r}"
-        for key in DECISION_FIELDS
-        if actual.get(key) != expected.get(key)
+        for key in (*DECISION_FIELDS, *OPTIONAL_DECISION_FIELDS)
+        if key in expected
+        and actual.get(key) != expected.get(key)
     ]
     if mismatches:
         return "fail", "; ".join(mismatches)
@@ -151,7 +160,10 @@ def main() -> int:
                 for _ in range(args.repeats)
             ]
             actual, majority_note, has_majority = aggregate_actuals(
-                run_actuals, args.repeats, key_fields=DECISION_FIELDS, passthrough_fields=("notat",)
+                run_actuals,
+                args.repeats,
+                key_fields=(*DECISION_FIELDS, *OPTIONAL_DECISION_FIELDS),
+                passthrough_fields=("notat",),
             )
             if not has_majority:
                 status = "fail"

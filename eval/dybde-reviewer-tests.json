@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "suite": "smoke",
+    "prompt": "KODER_BRIEF\nMål: Legg til seksjonen InntektV2 ved å kopiere Inntekt\nSti: komplisert\nScope: src/sections/Inntekt.tsx, src/sections/InntektV2.tsx, src/routes.ts, locales/nb.json, locales/nn.json\nAkseptkriterier:\n- InntektV2 er tilgjengelig på egen rute\n- InntektV2 bruker nye locale-nøkler\n- Bare ny rute, seksjonsnavn og locale-nøkler skal avvike fra Inntekt\n\nKoders rapport:\nStatus: DONE\nEndrede filer:\n- src/sections/InntektV2.tsx\n- src/routes.ts\n- locales/nb.json\n- locales/nn.json\nVanlig reviewer-status: APPROVED\nEskalering: eksisterende seksjon er kopiert og versjonert\nTilsiktede forskjeller: ny rute, seksjonsnavn og locale-nøkler.\n\nFaktisk diff: InntektV2.tsx importerer fortsatt `inntekt`-nøklene. `locales/nn.json` inneholder ingen `inntektV2`-nøkler.",
+    "expected": {
+      "status": "needs_changes"
+    }
+  },
+  {
+    "id": 2,
+    "suite": "policy",
+    "prompt": "KODER_BRIEF\nMål: Legg til seksjonen InntektV2 ved å kopiere Inntekt\nSti: komplisert\nScope: src/sections/Inntekt.tsx, src/sections/InntektV2.tsx, src/routes.ts, locales/nb.json, locales/nn.json\nAkseptkriterier:\n- InntektV2 er tilgjengelig på egen rute\n- InntektV2 bruker nye locale-nøkler\n- Bare ny rute, seksjonsnavn og locale-nøkler skal avvike fra Inntekt\n\nKoders rapport:\nStatus: DONE\nVanlig reviewer-status: APPROVED\nEskalering: eksisterende seksjon er kopiert og versjonert\nTilsiktede forskjeller: ny rute, seksjonsnavn og locale-nøkler.\n\nFaktisk diff: InntektV2.tsx bruker `inntektV2`-nøklene. Begge locale-filer har samme `inntektV2`-nøkler. Ruten peker på InntektV2. Ingen andre forskjeller fra Inntekt er funnet.",
+    "expected": {
+      "status": "approved"
+    }
+  }
+]

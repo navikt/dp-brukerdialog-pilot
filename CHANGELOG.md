@@ -3,6 +3,18 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.16.0]
+
+### Lagt til
+- Ny intern `dybde-reviewer` med `claude-opus-5` for store, repeterende eller
+  risikofylte endringer. Den sammenligner faktisk diff med brief og tilsiktede
+  forskjeller, med en særskilt parity-sjekk ved kopiering eller versjonering.
+- `planlegger` eskalerer obligatorisk etter vanlig reviewer ved kopierte eller
+  versjonerte moduler, mer enn 10 endrede filer, routing, serialisering,
+  schema, locale, integrasjonspunkter, versjonerte kontrakter, høy risiko eller
+  konkrete bekymringer.
+- Kontrakttest for `dybde-reviewer`.
+
 ## [0.15.0]
 
 ### Endret
