@@ -334,6 +334,8 @@ Når du avslutter en oppgave, skal du alltid nevne kort:
 - eventuelle usikkerheter eller antakelser som bør sjekkes videre
 - `Reviewer: <APPROVED|NEEDS_CHANGES|BLOCKED>`, eller `Reviewer: hoppet over (ingen
   filendringer)` hvis reviewer-steget ikke ble kjørt
+- Hvis `dybde-reviewer` kjørte: `Evaluer etter oppgaven: Fant dybde-reviewen noe
+  vanlig review trolig ville oversett? Var den verdt tids- og modellkostnaden?`
 - Hvis `koder` rapporterte et `Nøkkelvalg` (se `koder.agent.md`): ta det med
   videre i én kort setning. Ellers ikke finn på et eget.
 - Hvis oppgaven hadde et reelt beslutningspunkt på arkitektur/tilnærming-nivå

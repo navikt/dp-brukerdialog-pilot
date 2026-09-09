@@ -87,6 +87,10 @@ varianten er lik den gamle der den skal være lik, og at nødvendige
 følgeendringer og tester finnes. `planlegger` rapporterer ikke `FERDIG` før
 den har svart `APPROVED`.
 
+Når den har kjørt, avslutter `planlegger` med to spørsmål som hjelper teamet
+vurdere om reviewen fanget noe vanlig review ville oversett, og om den var verdt
+tids- og modellkostnaden.
+
 ## Når du bør vente eller avbryte
 
 - Vent når statusen viser tydelig fremdrift i en kompleks oppgave.
