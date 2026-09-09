@@ -129,6 +129,22 @@ Dette sjekker at reviewer:
 - blokkerer ved rapportert stopp-punkt-brudd, f.eks. fødselsnummer logget i
   vanlig logg (`BLOCKED`), uansett hvor liten endringen ellers virker
 
+## Dybde-reviewer-harness
+
+Valider `dybde-reviewer` med samme harness. Den kjører bare for eskalerte
+endringer, og skal kontrollere at avvik fra en kopiert eller versjonert modul
+blir oppdaget:
+
+```bash
+python3 scripts/eval_reviewer.py --agent dp-brukerdialog-pilot:dybde-reviewer \
+  --tests eval/dybde-reviewer-tests.json --run --repeats 1
+```
+
+Dette er en syntetisk kontrakttest. Den ekte agenten bruker `git diff` og
+relevante gamle og nye filer når `planlegger` eskalerer en faktisk endring.
+`eval/planlegger-tests.json` dekker også at en kopiert eller versjonert seksjon
+utløser eskalering til `dybde-reviewer`.
+
 ## Ekte integrasjonstest (scratch-repo)
 
 De andre harnessene er simulerte kontrakttester ("ikke bruk verktøy, ikke gjør

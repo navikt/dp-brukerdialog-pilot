@@ -31,6 +31,7 @@ plugin/agents/sparring.agent.md
 plugin/agents/planlegger.agent.md
 plugin/agents/koder.agent.md
 plugin/agents/reviewer.agent.md
+plugin/agents/dybde-reviewer.agent.md
 plugin/agents/pr-reviewer.agent.md
 plugin/agents/troubleshoot.agent.md
 plugin/skills/brukerdialog-api-kafka/SKILL.md
@@ -59,7 +60,8 @@ gjøre `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse op
 
 Hver agent pinner sin egen modell i frontmatter (`model:` i `.agent.md`), f.eks.
 `planlegger`/`sparring`/`pr-reviewer`/`troubleshoot` på `claude-sonnet-5`, `koder` på
-`gpt-5.4-mini`, `reviewer` på `gemini-3.7-flash`.
+`gpt-5.4-mini`, `reviewer` på `gemini-3.7-flash` og `dybde-reviewer` på
+`claude-opus-5`.
 
 `/model` i Copilot CLI bytter **kun** modellen for agenten du aktivt chatter
 med i den økten — det overstyrer ikke `model:`-feltet i noen agent-fil, og
@@ -70,6 +72,24 @@ du overstyre en subagents modell, er `/subagents` mekanismen for det, ikke
 
 Se [docs/installasjon.md](./installasjon.md) for installasjon og hvordan du
 oppdaterer etter endringer.
+
+## Dybde-reviewer
+
+`dybde-reviewer` er en intern, read-only kontroll etter den vanlige
+`reviewer`-agenten. `planlegger` bruker den bare når en endring er stor,
+repeterende eller risikofylt: blant annet ved kopiering eller versjonering av
+en seksjon/modul, mer enn 10 endrede filer, routing, serialisering, schema,
+locale, integrasjonspunkter eller offentlig kontrakt.
+
+Den sammenligner faktisk diff med `KODER_BRIEF` og oppgitte tilsiktede
+forskjeller. Ved kopiering eller versjonering kontrollerer den at den nye
+varianten er lik den gamle der den skal være lik, og at nødvendige
+følgeendringer og tester finnes. `planlegger` rapporterer ikke `FERDIG` før
+den har svart `APPROVED`.
+
+Når den har kjørt, avslutter `planlegger` med to spørsmål som hjelper teamet
+vurdere om reviewen fanget noe vanlig review ville oversett, og om den var verdt
+tids- og modellkostnaden.
 
 ## Når du bør vente eller avbryte
 

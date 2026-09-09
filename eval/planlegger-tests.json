@@ -1,5 +1,17 @@
 [
   {
+    "id": 25,
+    "suite": "policy",
+    "prompt": "Lag en ny versjon av inntektsseksjonen ved å kopiere den eksisterende seksjonen. Oppdater rute, locale-filer og komponenttester for den nye versjonen.",
+    "expected": {
+      "sti": "komplisert",
+      "planreview": "ja",
+      "koder": "ja",
+      "spørsmål": "nei",
+      "dybde_review": "ja"
+    }
+  },
+  {
     "id": 1,
     "suite": "smoke",
     "prompt": "Legg til en ny behovløser for en enkel boolsk avklaring i samme stil som eksisterende løsere. Endringen skal være liten (maks 2 filer), lav risiko, uten nye dependencies og uten auth/persondata.",
