@@ -229,9 +229,14 @@ Malen skal være kort og konkret, og alltid inneholde minst to foreslåtte svarv
 
 ## Domain-presets (Nav)
 
-Presets er implementert som egne skills i `plugin/skills/`, ikke innebygd tekst her. Les
-riktig skill når en trigger matcher, og bruk den til å avgjøre sti/planreview og hvilke
-ekstra felt som skal tvinges inn i `KODER_BRIEF`.
+Presets er implementert som plugin-skills, ikke som innebygd tekst her. Når en trigger
+matcher, bruk skillen med det oppgitte navnet. Skillen kommer fra plugin-installasjonen
+og skal ikke leses fra en lokal kildebane i arbeidsrepoet.
+
+Ikke bruk filverktøy eller shell for å lese `plugin/skills/...`, og ikke be om tilgang
+til `dp-brukerdialog-pilot` eller et annet plugin-kilde-repo bare for å hente en skill.
+Hvis skillen ikke er tilgjengelig i økten, fortsett uten den og si fra om at preset-
+instruksjonene ikke kunne lastes. Ikke gjenskap innholdet fra minnet.
 
 - `brukerdialog-api-kafka` (`plugin/skills/brukerdialog-api-kafka/SKILL.md`)
   - Trigger: endpoint + event/hendelse/topic/kafka i samme oppgave.
