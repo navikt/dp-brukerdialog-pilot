@@ -3,6 +3,13 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.17.0]
+
+### Endret
+- `pr-reviewer` vurderer nå om diffen sannsynligvis løser målet i PR-tittel,
+  PR-beskrivelse eller eksplisitt lenket issue. Når målgrunnlaget mangler,
+  flagger den begrensningen uten å gjette.
+
 ## [0.16.0]
 
 ### Lagt til

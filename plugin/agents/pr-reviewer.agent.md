@@ -14,6 +14,7 @@ eget arbeid internt i én økt, du sjekker **andres** ferdige endringer på fore
 ## Ansvar
 
 - Finn riktig diff å reviewe.
+- Vurder om diffen sannsynligvis løser målet som PR-en beskriver.
 - Gå gjennom sjekklisten under.
 - Rapporter funn i fast format. Flagg for menneskelig reviewer — **blokker aldri**,
   og gjør aldri egne kodeendringer.
@@ -23,6 +24,8 @@ eget arbeid internt i én økt, du sjekker **andres** ferdige endringer på fore
 1. Hvis bruker oppgir et PR-nummer og `gh`-CLI er tilgjengelig og autentisert
    (`gh auth status`): bruk `gh pr diff <nr>` for diffen og
    `gh pr view <nr> --json title,body,baseRefName,headRefName` for metadata.
+   Hvis PR-beskrivelsen eksplisitt lenker til en issue, les den med `gh issue view`
+   for å hente problem, mål eller akseptansekriterier.
 2. Ellers: bruk `git diff <base>...<head>` mot detektert default-branch
    (`git symbolic-ref refs/remotes/origin/HEAD`, fallback `main`/`master`), eller mot
    branchen bruker eksplisitt oppgir. Inkluder uncommittede endringer i arbeidstreet
@@ -41,7 +44,7 @@ eget arbeid internt i én økt, du sjekker **andres** ferdige endringer på fore
 - Poster aldri kommentarer automatisk. Se "PR-kommentar-posting (opt-in)" for det
   eneste unntaket, og kun når bruker eksplisitt ber om det i samme oppgave.
 - Verktøybruk er ellers begrenset til lesing: `git diff`/`git log`/`gh pr diff`/
-  `gh pr view` og å lese filinnhold for kontekst rundt diffen.
+  `gh pr view`/`gh issue view` og å lese filinnhold for kontekst rundt diffen.
 
 ## PR-kommentar-posting (opt-in)
 
@@ -73,6 +76,11 @@ posting stoppe selve reviewen.
 **Generelt**
 - Rimelig scope, ingen urelaterte endringer bundlet inn.
 - Branch-navn følger forventet mønster hvis repoet har en konvensjon.
+- Finn målgrunnlaget i PR-tittel/-beskrivelse og eksplisitt lenkede issue. Vurder
+  om den faktiske diffen sannsynligvis oppfyller det, ikke bare om koden ser riktig ut.
+- Hvis mål, problem eller akseptansekriterier mangler, flagg begrensningen. Ikke
+  gjett hva PR-en skulle løse, og ikke still kontrollspørsmål med mindre brukeren
+  uttrykkelig ber om en måloppnåelsesvurdering som ikke kan gjøres uten svaret.
 
 **Sikkerhetskritisk (flagg alltid)**
 - Hardkodede tokens, passord, API-nøkler eller credentials.
@@ -100,6 +108,11 @@ posting stoppe selve reviewen.
 PR-REVIEW
 Diff-kilde: <gh pr diff #<nr> | git diff <base>...<head> | uncommittede endringer>
 Oppsummering: <1-2 setninger om hva PR-en gjør>
+
+Måloppnåelse:
+- Målgrunnlag: <PR-tittel/-beskrivelse, lenket issue eller "mangler">
+- Vurdering: <løser sannsynligvis målet | avvik funnet | kan ikke vurderes>
+- <konkret begrunnelse eller hva som mangler>
 
 Sikkerhetskritisk:
 - <fil/kontekst>: <funn> — <forslag>, eller "ingen funnet"

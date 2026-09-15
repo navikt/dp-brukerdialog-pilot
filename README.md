@@ -24,7 +24,7 @@ og oppdatering etter endringer.
 | `koder` | Nei (intern) | Implementerer avgrensede kodeendringer fra `planlegger`s brief. |
 | `reviewer` | Nei (intern) | Kvalitetssjekker `koder`s faktiske diff før `planlegger` rapporterer ferdig. |
 | `dybde-reviewer` | Nei (intern) | Gjør en ekstra, grundig kontroll av store, repeterende eller risikofylte endringer. |
-| `pr-reviewer` | Ja | Frittstående — reviewer **andres** PR-er/branches på forespørsel. Read-only, blokkerer aldri. |
+| `pr-reviewer` | Ja | Frittstående — reviewer **andres** PR-er/branches på forespørsel. Sjekker kode, risiko og om diffen sannsynligvis løser PR-ens mål. Read-only, blokkerer aldri. |
 | `troubleshoot` | Nei (kun via script) | Frittstående — feilsøker produksjonsproblemer på Nais. Startes kun via `scripts/troubleshoot-safe.sh`, se hvorfor i [docs/agenter.md](./docs/agenter.md#troubleshoot). |
 
 Se [docs/agenter.md](./docs/agenter.md) for fullstendig beskrivelse av hver
