@@ -10,7 +10,8 @@
       "src/Calc.kt": "// kalkulator-hjelpefunksjoner\nfun leggTil(a: Int, b: Int): Int = a + b\n"
     },
     "expect_output_contains": [
-      "PR-REVIEW"
+      "PR-REVIEW",
+      "Måloppnåelse"
     ]
   },
   {
@@ -25,7 +26,8 @@
     },
     "expect_output_contains": [
       "PR-REVIEW",
-      "fødselsnummer"
+      "fødselsnummer",
+      "Måloppnåelse"
     ]
   },
   {

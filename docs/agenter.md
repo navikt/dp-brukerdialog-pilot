@@ -232,6 +232,11 @@ dokumentasjon/skills i repoene agentene jobber i, se "Repo-dokumentasjon" i
 PR-er/branches — uavhengig av `planlegger`→`koder`→`reviewer`-kjeden, som kun
 kvalitetssikrer vårt eget arbeid internt i én økt.
 
+Den bruker PR-tittel/-beskrivelse og eksplisitt lenkede issue som målgrunnlag.
+Reviewen vurderer om diffen sannsynligvis løser oppgaven, i tillegg til kode,
+sikkerhet og kvalitet. Når målgrunnlag eller akseptansekriterier mangler, flagger
+den begrensningen i stedet for å gjette eller be om avklaringer som standard.
+
 Bruk den ved å velge `pr-reviewer` i `/agent` og be den reviewe en PR eller branch, f.eks.:
 
 ```text
