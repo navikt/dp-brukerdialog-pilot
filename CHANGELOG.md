@@ -3,6 +3,22 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.18.0]
+
+### Endret
+- `reviewer` og `dybde-reviewer` skiller nå mellom funn innenfor briefets
+  `Akseptkriterier`/`Scope` og reelle observasjoner utenfor scope. Sistnevnte
+  havner i et eget felt (`Utenfor scope (forslag, ikke blokkerende)`) og
+  utløser aldri `NEEDS_CHANGES` alene. `planlegger` sender kun
+  scope-relaterte funn videre til `koder`; utenfor-scope-forslag listes i
+  sluttoppsummeringen for brukeren å vurdere selv, i stedet for å bli
+  implementert underveis.
+- `planlegger` tar nå et `BASELINE`-snapshot (`git status --porcelain`) rett
+  før delegasjon til `koder`. Reviewer-steget og review-eskalering vurderer
+  bare endringer utover denne baselinen, slik at brukerens egne, allerede
+  uncommittede manuelle endringer aldri blir gjenstand for koders eller
+  reviewerens vurdering.
+
 ## [0.17.0]
 
 ### Endret

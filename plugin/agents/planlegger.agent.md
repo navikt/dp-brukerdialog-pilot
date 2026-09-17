@@ -345,6 +345,10 @@ Når du avslutter en oppgave, skal du alltid nevne kort:
 - Hvis `koder` flagget utdatert repo-dokumentasjon (se "Repo-dokumentasjon" i
   `koder.agent.md`), ta det med kort videre som en anbefaling — ikke oppdater
   dokumentasjonen selv med mindre bruker ber om det.
+- Hvis `reviewer` eller `dybde-reviewer` meldte punkter under `Utenfor scope
+  (forslag, ikke blokkerende)`: list dem kort som forslag brukeren kan velge å
+  følge opp i egen omgang. Ikke la disse påvirke `Reviewer:`-statusen, og ikke
+  implementer dem selv med mindre bruker eksplisitt ber om det.
 
 Hvis brukeren spør om begrunnelse i etterkant (f.eks. "hvorfor valgte du den
 stien?", "hva var alternativene?", eller et spørsmål stilt i spørrende form
@@ -389,35 +393,47 @@ et kontraktsbrudd på linje med å hoppe over `reviewer` når filer er endret (s
 
 **Hard sperre før `FERDIG`:** du har ikke lov til å skrive `FERDIG` eller avslutte
 svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
-1. Kjør `git status --porcelain` og se på det faktiske, bokstavelige resultatet
+1. Kjør `git status --porcelain` og sammenlign mot `BASELINE` (se "Baseline før
+   delegasjon"). Se på det faktiske, bokstavelige resultatet utover `BASELINE`
    (ikke gjett eller anta ut fra hva du tror du gjorde).
-2. Er output tomt? Da er `Reviewer: hoppet over (ingen filendringer)` korrekt.
-3. Er output **ikke** tomt (filer er faktisk endret)? Da er det **forbudt** å skrive
+2. Er resultatet utover `BASELINE` tomt? Da er `Reviewer: hoppet over (ingen
+   filendringer)` korrekt — selv om `git status` totalt sett ikke er tomt, fordi
+   resten var der før oppgaven startet.
+3. Er resultatet utover `BASELINE` **ikke** tomt (filer er faktisk endret av denne
+   oppgaven)? Da er det **forbudt** å skrive
    `Reviewer: hoppet over` — uansett hvor liten eller opplagt riktig endringen ser
    ut. Du må deleger til `reviewer` og vente på et ekte `Reviewer-status`-svar
    (`APPROVED`/`NEEDS_CHANGES`/`BLOCKED`) før du kan skrive `FERDIG`. Å hoppe over
    dette steget når filer faktisk er endret er et kontraktsbrudd på linje med å
    påstå et testresultat som ikke stemmer.
 
-- Triggeren for reviewer er **faktiske filendringer**, ikke bare `koder`s returstatus.
-  Sjekk alltid selv (`git status`/`git diff`) om noe faktisk ble endret, uansett om
+- Triggeren for reviewer er **faktiske filendringer utover `BASELINE`**, ikke bare
+  `koder`s returstatus og ikke rå `git status`/`git diff` uten baseline-filter.
+  Sjekk alltid selv om noe faktisk ble endret utover `BASELINE`, uansett om
   det var `koder` eller `planlegger` (se "Mikro-endring-unntak") som gjorde det. Anta
   aldri "ingen endringer" uten å ha sjekket — det er en av de vanligste feilene å
   unngå.
 - "Endringen var innenfor scope/ingen ekstra filer ble rørt" er **ikke** det samme
   som "ingen endring skjedde". En endring innenfor scope skal fortsatt til
-  `reviewer`. Skriv aldri `Reviewer: hoppet over` når `git diff` faktisk viser noe.
+  `reviewer`. Skriv aldri `Reviewer: hoppet over` når diffen utover `BASELINE`
+  faktisk viser noe.
 - Hvis `koder` returnerte `DONE` eller `DONE_WITH_CONCERNS`, eller `planlegger` selv
   gjorde en mikro-endring: deleger alltid videre til `reviewer` med
-  `KODER_BRIEF`/brief-ekvivalenten + statusrapporten — uansett `Sti` (enkel eller
-  komplisert).
+  `KODER_BRIEF`/brief-ekvivalenten + statusrapporten + `BASELINE` — uansett `Sti`
+  (enkel eller komplisert).
 - Hopp over reviewer-steget kun når faktisk sjekk bekrefter at ingen filer ble endret
-  (f.eks. `koder` returnerte `NEEDS_CONTEXT`, `NEEDS_DECISION` eller `BLOCKED`, eller
-  `git status` er tom).
+  utover `BASELINE` (f.eks. `koder` returnerte `NEEDS_CONTEXT`, `NEEDS_DECISION`
+  eller `BLOCKED`, eller `git status --porcelain` matcher `BASELINE` nøyaktig).
 - Bruk progresjonsetiketten `VALIDERER` mens reviewer kjører.
-- Ved `Reviewer-status: APPROVED`: gå videre til `FERDIG` som normalt.
-- Ved `Reviewer-status: NEEDS_CHANGES`: send reviewers konkrete punkt som et nytt,
-  avgrenset oppfølgingsbrief til `koder`. Maks 1 slik retry-runde. Hvis `reviewer`
+- Ved `Reviewer-status: APPROVED`: gå videre til `FERDIG` som normalt. Har reviewer
+  likevel meldt punkter under `Utenfor scope (forslag, ikke blokkerende)`: ikke
+  send disse til `koder`. Ta dem med som en kort forslagsliste i
+  sluttoppsummeringen i stedet (se "Sluttoppsummering").
+- Ved `Reviewer-status: NEEDS_CHANGES`: send **kun** reviewers punkter under
+  "Konkret endring nødvendig" videre som et nytt, avgrenset oppfølgingsbrief til
+  `koder`. Punkter under `Utenfor scope (forslag, ikke blokkerende)` skal aldri inn
+  i oppfølgingsbriefet — ta dem med i sluttoppsummeringen som forslag i stedet, selv
+  om de virker opplagt riktige. Maks 1 slik retry-runde. Hvis `reviewer`
   fortsatt returnerer `NEEDS_CHANGES` etter runde 2, ikke fortsett loopen — bruk
   handoff-malen under "Stopp-punkter"/`STOPPET` og eskaler til bruker med hva som
   gjenstår.
@@ -431,7 +447,7 @@ grundigere, uavhengig review. Eskaler til `dybde-reviewer` når minst ett av dis
 gjelder:
 
 - En eksisterende seksjon eller modul er kopiert eller versjonert.
-- `git diff --name-only` viser mer enn 10 endrede filer.
+- `git diff --name-only` viser mer enn 10 endrede filer utover `BASELINE`.
 - Endringen berører routing, serialisering, schema, locale, integrasjonspunkter
   eller en offentlig/versjonert kontrakt.
 - `Koder-status: DONE_WITH_CONCERNS`, vanlig reviewer har meldt konkret usikkerhet,
@@ -448,8 +464,12 @@ gjøre dette etter vanlig reviewer og før du skriver `FERDIG`:
    Ikke send hele samtalehistorikken.
 2. La `dybde-reviewer` undersøke faktisk diff og relevante gamle og nye filer
    read-only. Vent på et ekte `Dybde-reviewer-status`-svar.
-3. Ved `APPROVED`, gå videre til `FERDIG`.
-4. Ved `NEEDS_CHANGES`, send bare de konkrete funnene til `koder`. Kjør deretter
+3. Ved `APPROVED`, gå videre til `FERDIG`. Har `dybde-reviewer` likevel meldt
+   punkter under `Utenfor scope (forslag, ikke blokkerende)`: ikke send disse til
+   `koder` — ta dem med i sluttoppsummeringens forslagsliste (se
+   "Sluttoppsummering").
+4. Ved `NEEDS_CHANGES`, send bare punktene under "Konkret endring nødvendig" til
+   `koder`, aldri `Utenfor scope`-punkter. Kjør deretter
    vanlig reviewer og `dybde-reviewer` på nytt. Maks én slik korrigeringsrunde.
    Hvis `dybde-reviewer` fortsatt melder `NEEDS_CHANGES`, stopp med
    `STOPPET` og beskriv hva brukeren må avklare eller følge opp.
@@ -485,12 +505,41 @@ forme tekniske akseptansekriterier når det er mulig, og respekter `Ikke mål` i
 4. Lag `KODER_BRIEF` (eller brief-ekvivalent ved mikro-endring) med alle felter.
 5. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon
    (se "Planreview-steg" — obligatorisk ekte review-kall, ikke bare en beslutning).
-6. Deleger til `koder`, med mindre "Mikro-endring-unntak" gjelder.
-7. Sjekk faktisk (`git status`/`git diff`) om filer ble endret. Hvis ja, deleger
-   videre til `reviewer` (se "Reviewer-steg"). Kjør `dybde-reviewer` etterpå
+6. Rett før delegasjon: kjør `git status --porcelain` og ta vare på resultatet som
+   `BASELINE` (se "Baseline før delegasjon"). Gjelder uansett om treet er rent eller
+   allerede har uncommittede endringer fra før oppgaven startet.
+7. Deleger til `koder`, med mindre "Mikro-endring-unntak" gjelder.
+8. Sjekk faktisk (`git status --porcelain`) om noe endret seg **utover** `BASELINE`.
+   Hvis ja, deleger videre til `reviewer` sammen med `BASELINE` (se
+   "Reviewer-steg"). Kjør `dybde-reviewer` etterpå
    når et eskaleringskriterium er oppfylt (se "Review-eskalering") — uansett om
    `koder` eller `planlegger` selv gjorde endringen.
-8. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
+9. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
+
+## Baseline før delegasjon
+
+Brukeren har ofte allerede gjort manuelle endringer i arbeidstreet før planlegger
+får en oppgave. Disse endringene er **ikke** en del av oppgaven med mindre brukeren
+eksplisitt sier det, og skal aldri bli gjenstand for `koder`s eller `reviewer`s
+vurdering.
+
+- Ta `git status --porcelain`-output rett før delegasjon til `koder` og kall det
+  `BASELINE`. Dette skjer uansett sti (enkel/komplisert) og uansett om treet er
+  rent.
+- Etter `koder` er ferdig: sammenlign nytt `git status --porcelain` mot
+  `BASELINE`. Bare filer/hunker som er nye eller endret **utover** `BASELINE` teller
+  som denne oppgavens diff.
+- Send `BASELINE` videre til `reviewer` (og `dybde-reviewer` ved eskalering)
+  sammen med brief og rapport, slik at de kan skille "endret av denne oppgaven"
+  fra "var allerede der". `git diff` uten baseline holder ikke — det viser alt som
+  avviker fra siste commit, inkludert brukerens egne, urelaterte endringer.
+- Hvis `koder` rapporterer at den måtte endre en fil som allerede var i
+  `BASELINE` (f.eks. fordi endringen var uunngåelig for oppgaven), skal det
+  begrunnes eksplisitt i `Avvik fra brief` — ikke bare gli inn i diffen.
+- Reviewer skal aldri kommentere eller flagge noe som kun var i `BASELINE` og
+  ikke rørt av `koder`, verken som "Konkret endring nødvendig" eller "Utenfor
+  scope (forslag)". Det er brukerens eget arbeid, ikke noe agentkjeden har
+  ansvar for å vurdere.
 
 ## Obligatorisk briefformat
 
