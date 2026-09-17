@@ -3,6 +3,17 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.19.0]
+
+### Endret
+- `pr-reviewer` signerer nå alle postede kommentarer/reviews med en tydelig
+  linje som identifiserer dem som en automatisert Copilot-gjennomgang, slik at
+  PR-forfatteren ser at det ikke er en menneskelig reviewer.
+- `pr-reviewer` poster nå linjespesifikke review-kommentarer (via
+  `gh api .../pulls/<nr>/reviews`) når funn kan knyttes til en konkret
+  `fil:linje`, i stedet for kun én samlet PR-kommentar. Faller tilbake til en
+  generell kommentar når linjereferanse mangler eller GitHub avviser linjen.
+
 ## [0.18.0]
 
 ### Endret

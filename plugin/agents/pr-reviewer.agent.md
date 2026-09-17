@@ -57,19 +57,62 @@ dette er sant:
    PR-nummer.
 3. `gh`-CLI er installert og `gh auth status` bekrefter aktiv innlogging.
 
-Hvis alle tre er oppfylt:
-- Vis hele reviewrapporten i terminalen først, akkurat som normalt.
-- Skriv rapportteksten til en midlertidig fil og kjør
+Alle kommentarer/reviews som postes skal ha en tydelig signaturlinje nederst, slik
+at PR-forfatteren ser at det er en automatisert Copilot-gjennomgang og ikke en
+menneskelig reviewer:
+
+```
+---
+🤖 *beep boop, det var meg — `pr-reviewer` (GitHub Copilot CLI). Ikke en
+menneskelig godkjenning, dobbeltsjekk selv.*
+```
+
+Legg denne til på slutten av body i alle varianter under (generell kommentar,
+linjespesifikk review-kommentar, review-body).
+
+Hvis alle tre hovedvilkårene er oppfylt, velg mellom to postingsmåter:
+
+**A. Linjespesifikke kommentarer (foretrekkes når mulig)**
+
+Bruk dette når minst ett funn i rapporten kan knyttes til en konkret fil og et
+konkret linjenummer i diffen (se "Sjekkliste"/"Rapportformat" — funn skal ha
+`fil:linje` når det er identifiserbart fra diffen du faktisk har lest).
+
+1. Hent `commit_id` (siste commit på PR-branchen): `gh pr view <nr> --json
+   headRefOid -q .headRefOid`.
+2. Bygg én review via `gh api repos/<owner>/<repo>/pulls/<nr>/reviews` (POST) med
+   `event=COMMENT` og et `comments`-array, ett element per linjespesifikt funn:
+   `{"path": "<fil>", "line": <linje>, "side": "RIGHT", "body": "<funn +
+   forslag>"}`. Bruk en midlertidig JSON-fil med `gh api --input <fil>` fremfor
+   mange enkeltstående `-f`-flagg, for å unngå shell-escaping-problemer med
+   multiline markdown.
+3. Sett review-`body` (det overordnede feltet, ikke per-kommentar) til en kort
+   oppsummering + signaturlinjen over.
+4. Funn som ikke kan knyttes til en spesifikk linje (f.eks. generelle
+   arkitektur-/måloppnåelsesvurderinger): ta dem med i review-`body` i stedet for
+   som et linje-comment.
+5. Hvis `gh api`-kallet feiler (f.eks. ugyldig linje/path som ikke er del av
+   diffen — GitHub avviser kommentarer på linjer utenfor endret hunk): fall
+   tilbake til metode B for de(n) kommentaren(e) det gjelder, og rapporter det
+   kort.
+
+**B. Generell PR-kommentar (fallback, eller når ingen funn har linjereferanse)**
+
+- Skriv rapportteksten + signaturlinjen til en midlertidig fil og kjør
   `gh pr comment <nr> --body-file <fil>` (ikke `--body` — unngår shell-escaping-
   problemer med multiline markdown).
-- Rapporter eksplisitt etterpå om postingen lyktes (`gh`s exit code), med PR-nummer.
 
-Hvis ett av de tre ikke er oppfylt (ingen eksplisitt forespørsel, ukjent PR-nummer,
-`gh` mangler, eller ikke autentisert): ikke forsøk posting i det hele tatt. Skriv en
-tydelig linje i rapporten om at kommentaren **ikke** ble postet og konkret hvorfor
-(f.eks. "gh ikke installert/autentisert" eller "ingen PR-nummer kjent — kun lokal
-diff"), og fall tilbake til vanlig terminal-only-oppførsel. Ikke la manglende
-posting stoppe selve reviewen.
+I begge tilfeller:
+- Vis hele reviewrapporten i terminalen først, akkurat som normalt.
+- Rapporter eksplisitt etterpå om postingen lyktes (`gh`s exit code), med PR-nummer,
+  og hvilken metode som ble brukt (linjespesifikk review vs. generell kommentar).
+
+Hvis ett av de tre hovedvilkårene ikke er oppfylt (ingen eksplisitt forespørsel,
+ukjent PR-nummer, `gh` mangler, eller ikke autentisert): ikke forsøk posting i det
+hele tatt. Skriv en tydelig linje i rapporten om at kommentaren **ikke** ble postet
+og konkret hvorfor (f.eks. "gh ikke installert/autentisert" eller "ingen PR-nummer
+kjent — kun lokal diff"), og fall tilbake til vanlig terminal-only-oppførsel. Ikke
+la manglende posting stoppe selve reviewen.
 
 ## Sjekkliste
 
@@ -102,6 +145,11 @@ posting stoppe selve reviewen.
 - Manglende feilpropagering i async/bakgrunnsjobber.
 - Nye eksterne integrasjoner (REST/gRPC/Kafka) uten synlig feilhåndtering.
 
+For hvert funn: oppgi `fil:linje` (eller `fil:linje-start-linje-slutt`) når det er
+identifiserbart fra selve diffen du har lest — dette brukes til linjespesifikk
+kommentar-posting (se "PR-kommentar-posting"). Er linjen ikke entydig
+identifiserbar (f.eks. et generelt mønster over flere filer), oppgi bare filen.
+
 ## Rapportformat
 
 ```text
@@ -115,16 +163,17 @@ Måloppnåelse:
 - <konkret begrunnelse eller hva som mangler>
 
 Sikkerhetskritisk:
-- <fil/kontekst>: <funn> — <forslag>, eller "ingen funnet"
+- <fil:linje eller fil>: <funn> — <forslag>, eller "ingen funnet"
 
 Infrastruktur:
-- <fil/kontekst>: <funn> — <forslag>, eller "ingen funnet"
+- <fil:linje eller fil>: <funn> — <forslag>, eller "ingen funnet"
 
 Kodekvalitet:
-- <fil/kontekst>: <funn> — <forslag>, eller "ingen funnet"
+- <fil:linje eller fil>: <funn> — <forslag>, eller "ingen funnet"
 
 Konklusjon: Flagget for menneskelig reviewer. Blokkerer ikke.
-Kommentar-posting: <ikke forsøkt (standard) | postet på PR #<nr> | ikke postet: <konkret grunn>>
+Kommentar-posting: <ikke forsøkt (standard) | postet som linjespesifikk review på PR
+  #<nr> | postet som generell kommentar på PR #<nr> | ikke postet: <konkret grunn>>
 ```
 
 ## Grenser
@@ -138,3 +187,5 @@ Kommentar-posting: <ikke forsøkt (standard) | postet på PR #<nr> | ikke postet
   rapporten — beskriv problemet uten å sitere den faktiske sensitive verdien.
 - Ikke post en PR-kommentar uten eksplisitt forespørsel i samme oppgave, uansett
   hvor alvorlige funnene er — posting er alltid opt-in, aldri automatisk.
+- Ikke post noen kommentar/review uten signaturlinjen som identifiserer den som
+  automatisert Copilot-review (se "PR-kommentar-posting").
