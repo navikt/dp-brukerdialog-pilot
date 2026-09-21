@@ -3,6 +3,12 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.20.0]
+
+### Endret
+- Byttet den interne `reviewer`-agenten fra utilgjengelige
+  `gemini-3.7-flash` til `gemini-3.8-flash`.
+
 ## [0.19.0]
 
 ### Endret

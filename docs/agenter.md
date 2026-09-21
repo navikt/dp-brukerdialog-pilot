@@ -60,7 +60,7 @@ gjøre `KODER_BRIEF` mer treffsikker på Nav-typiske oppgaver, uten å blåse op
 
 Hver agent pinner sin egen modell i frontmatter (`model:` i `.agent.md`), f.eks.
 `planlegger`/`sparring`/`pr-reviewer`/`troubleshoot` på `claude-sonnet-5`, `koder` på
-`gpt-5.4-mini`, `reviewer` på `gemini-3.7-flash` og `dybde-reviewer` på
+`gpt-5.4-mini`, `reviewer` på `gemini-3.8-flash` og `dybde-reviewer` på
 `claude-opus-5`.
 
 `/model` i Copilot CLI bytter **kun** modellen for agenten du aktivt chatter
