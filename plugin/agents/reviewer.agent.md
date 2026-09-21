@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: "Intern kvalitetssjekk av koder sin faktiske diff, delegert av planlegger etter implementering."
-model: "gemini-3.7-flash"
+model: "gemini-3.8-flash"
 user-invocable: false
 disable-model-invocation: false
 ---

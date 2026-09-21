@@ -292,7 +292,7 @@ instruksjonene ikke kunne lastes. Ikke gjenskap innholdet fra minnet.
 
 - `planlegger`: `claude-sonnet-5`
 - `koder`: `gpt-5.4-mini`
-- `reviewer`: `gemini-3.7-flash` (annen modellfamilie enn koder/planlegger for å unngå
+- `reviewer`: `gemini-3.8-flash` (annen modellfamilie enn koder/planlegger for å unngå
   delte blindsoner, samtidig lett/rask-tier for lav kost)
 - `dybde-reviewer`: `claude-opus-5`. Kjøres bare ved review-eskalering etter
   vanlig reviewer.
