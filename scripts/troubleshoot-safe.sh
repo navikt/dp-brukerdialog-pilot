@@ -9,8 +9,9 @@
 # "kubectl delete"/"kubectl apply" med riktig framing i prompten.
 #
 # Lag 1 - readonly-guard (scripts/readonly-guard/), primærsperren:
-#   PATH-shims for `kubectl`, `gcloud` og `nais` som parser argumentene og
-#   blokkerer destruktive kommandoer uansett hvor i kommandolinjen de står.
+#   PATH-shims for `kubectl`, `gcloud`, `nais` og GKE-autentiseringspluginen.
+#   De parser argumentene og blokkerer destruktive kommandoer eller token-output
+#   uansett hvor i kommandolinjen de står.
 #   kubectl bruker denylist over destruktive verb; gcloud og nais bruker
 #   allowlist, fordi kommandoflatene deres er for store og for bevegelige til
 #   at en denylist kan gjøres troverdig.
@@ -38,7 +39,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GUARD_DIR="$SCRIPT_DIR/readonly-guard"
 
-for shim in kubectl gcloud nais; do
+for shim in kubectl gcloud nais gke-gcloud-auth-plugin; do
 	if [[ ! -x "$GUARD_DIR/$shim" ]]; then
 		echo "FEIL: fant ikke $GUARD_DIR/$shim (readonly-guard-shimen)." >&2
 		echo "Uten den er sperren mot destruktive kommandoer vesentlig svakere." >&2

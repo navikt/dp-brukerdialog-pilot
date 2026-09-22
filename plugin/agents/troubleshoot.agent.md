@@ -112,7 +112,7 @@ kommandosperrer — derfor er denne agenten `user-invocable: false` og vises ikk
 setter opp to lag:
 
 1. **`scripts/readonly-guard/`** (primærsperren): PATH-shims for `kubectl`,
-   `gcloud` og `nais` som parser argumentene og blokkerer destruktive
+   `gcloud`, `nais` og `gke-gcloud-auth-plugin` som parser argumentene og blokkerer destruktive
    kommandoer uansett hvor i kommandolinjen de står.
    - `kubectl`: denylist over destruktive verb, inkludert `run`, `debug` og
      `attach`.
@@ -120,6 +120,12 @@ setter opp to lag:
      endrer seg for ofte til at en denylist kan gjøres troverdig, så ukjente
      kommandoer blokkeres. `auth print-access-token` og
      `container clusters get-credentials` er eksplisitt blokkert.
+     `config config-helper` er bare tillatt som intern underprosess fra
+     `gke-gcloud-auth-plugin`, slik at lokal GKE-autentisering virker uten at
+     agenten får tilgang til token-output.
+   - `gke-gcloud-auth-plugin`: tillates bare som underprosess fra `kubectl`,
+     slik at agenten ikke kan starte den direkte og skrive token-output til
+     samtalen.
    - `nais`: allowlist per kommandogruppe. `nais secret` og `nais app env` er
      blokkert fordi de ville trukket hemmeligheter inn i agentens kontekst.
 2. **`--deny-tool "shell(kubectl <verb>:*)"`** (sekundært): blokkerer på

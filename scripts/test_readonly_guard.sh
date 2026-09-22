@@ -18,7 +18,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GUARD_DIR="$REPO_ROOT/scripts/readonly-guard"
 
 FAKE_REAL_DIR="$(mktemp -d)"
-for tool in kubectl gcloud nais; do
+for tool in kubectl gcloud nais gke-gcloud-auth-plugin; do
 	cat >"$FAKE_REAL_DIR/$tool" <<'EOS'
 #!/usr/bin/env bash
 echo "PASSTHROUGH: $*"
@@ -136,6 +136,10 @@ blocked gcloud auth print-identity-token
 blocked gcloud container clusters get-credentials dev-gcp --region europe-north1
 blocked gcloud auth login
 blocked gcloud auth revoke
+blocked gcloud config config-helper
+
+# --- GKE-auth-pluginen skal aldri kunne lekke token-output til agenten ---
+blocked gke-gcloud-auth-plugin
 
 # --- Lese-verb som ressursnavn skal ikke gjøre kommandoen lesende ---
 # Uten WRITE_VERBS-sjekken ville allowlisten sett "list"/"describe" og sluppet

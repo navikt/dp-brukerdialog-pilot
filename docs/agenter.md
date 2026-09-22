@@ -341,14 +341,15 @@ Start derfor alltid `troubleshoot` via `scripts/troubleshoot-safe.sh` i stedet f
 
 Scriptet setter opp **to lag** teknisk sperre:
 
-**Lag 1 — `scripts/readonly-guard/` (primærsperren).** Tre PATH-shims som legges
+**Lag 1 — `scripts/readonly-guard/` (primærsperren).** Fire PATH-shims som legges
 først i `PATH`, parser argumentene selv og blokkerer destruktive kommandoer
 uansett hvor i kommandolinjen de står.
 
 | Shim | Strategi | Merk |
 |------|----------|------|
 | `kubectl` | Denylist over destruktive verb | Feiler lukket: blokkerer også hvis et destruktivt verb forekommer som eget token noe sted i argumentlisten (sikkerhetsnett mot parsefeil). `kubectl auth can-i <verb>` er eksplisitt unntatt, siden verbet der er argumentet, ikke handlingen. |
-| `gcloud` | Allowlist over lesende verb | Kommandoflaten er for stor og for bevegelig til at en denylist kan gjøres troverdig, så ukjente kommandoer blokkeres. `auth print-access-token` og `container clusters get-credentials` er eksplisitt blokkert — den første lekker credentials, den andre skriver til kubeconfig. |
+| `gcloud` | Allowlist over lesende verb | Kommandoflaten er for stor og for bevegelig til at en denylist kan gjøres troverdig, så ukjente kommandoer blokkeres. `auth print-access-token` og `container clusters get-credentials` er eksplisitt blokkert. `config config-helper` slipper bare gjennom som underprosess fra `gke-gcloud-auth-plugin`, som trenger den for lokal GKE-autentisering. |
+| `gke-gcloud-auth-plugin` | Foreldreprosess-sjekk | Slipper bare gjennom når `kubectl` starter den. Dette lar `kubectl` bruke kubeconfig-autentiseringen, men hindrer agenten i å starte pluginen direkte og få token-output. |
 | `nais` | Allowlist per kommandogruppe | `nais secret` og `nais app env` er blokkert fordi de ville trukket hemmeligheter inn i agentens kontekst. `nais postgres` er kun tillatt for `list`. |
 
 `gcloud` og `nais` ble lagt til fordi de ligger på samme `PATH` med de samme
@@ -380,7 +381,9 @@ dessuten kun `kubectl`, ikke `gcloud` eller `nais`.
 
 Vanlige lesekommandoer er upåvirket og fungerer som normalt:
 `kubectl get`/`describe`/`logs`/`top`/`auth can-i`, `gcloud ... list`/`describe`/
-`logging read`, `nais status`/`app log`/`app list`/`validate`.
+`logging read`, `nais status`/`app log`/`app list`/`validate`. Underliggende
+GKE-autentisering virker også: `gke-gcloud-auth-plugin` kan kjøre sin interne
+`gcloud config config-helper`, mens samme kommando fortsatt blokkeres fra agenten.
 
 **Ingen av lagene erstatter RBAC på klyngen.** En kubeconfig med kun lesetilgang
 er den eneste beskyttelsen som gjelder uansett verktøy, prosess eller
@@ -391,7 +394,7 @@ prompt-formulering — bruk den hvis du kan.
 To komplementære tester, fordi de svarer på ulike spørsmål:
 
 - **`bash scripts/test_readonly_guard.sh`** — deterministisk enhetstest av
-  shimene (87 caser). Kjører uten modell, uten `copilot`-binary og uten auth, og går
+  shimene (89 caser). Kjører uten modell, uten `copilot`-binary og uten auth, og går
   derfor i CI. Dette er testen som faktisk beviser at den tekniske sperren
   virker, inkludert alle kommandoformene `--deny-tool` ikke fanger.
 - **`python3 scripts/eval_troubleshoot.py --run`** — ende-til-ende med ekte

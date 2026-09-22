@@ -16,6 +16,8 @@
 
 set -uo pipefail
 
+self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Rene lesekommandoer. `get-credentials` er bevisst IKKE med: den skriver til
 # kubeconfig og bytter hvilket cluster du snakker med.
 READ_VERBS=(
@@ -41,6 +43,24 @@ contains_token() {
 		[[ "$token" == "$needle" ]] && return 0
 	done
 	return 1
+}
+
+is_gke_auth_plugin() {
+	local entry expected_plugin parent_executable resolved
+	expected_plugin=""
+	IFS=':' read -ra path_entries <<<"$PATH"
+	for entry in "${path_entries[@]}"; do
+		[[ -z "$entry" ]] && continue
+		resolved="$(cd "$entry" 2>/dev/null && pwd)" || continue
+		[[ "$resolved" == "$self_dir" ]] && continue
+		if [[ -x "$entry/gke-gcloud-auth-plugin" ]]; then
+			expected_plugin="$entry/gke-gcloud-auth-plugin"
+			break
+		fi
+	done
+	[[ -n "$expected_plugin" ]] || return 1
+	parent_executable="$(readlink -f "/proc/$PPID/exe" 2>/dev/null)" || return 1
+	[[ "$parent_executable" == "$(readlink -f "$expected_plugin")" ]]
 }
 
 refuse() {
@@ -71,6 +91,16 @@ if [[ "$is_help" == false && ${#tokens[@]} -eq 0 ]]; then
 	refuse "ingen kommando oppgitt"
 fi
 
+# `gke-gcloud-auth-plugin` kjører denne kommandoen selv for å hente lokal
+# kubeconfig-autentisering før kubectl kan kontakte GKE. Agenten skal aldri
+# få kjøre den direkte: output kan inneholde et access token. Sjekk derfor
+# både eksakt kommandoform og foreldreprosessens kjørbare fil.
+if [[ "${tokens[*]}" == "config config-helper" ]] && is_gke_auth_plugin; then
+	exec_allowed=true
+else
+	exec_allowed=false
+fi
+
 for verb in "${WRITE_VERBS[@]}"; do
 	if contains_token "$verb" ${tokens[@]+"${tokens[@]}"}; then
 		refuse "'$verb' er en skrivende/credential-eksponerende gcloud-operasjon"
@@ -85,11 +115,10 @@ for verb in "${READ_VERBS[@]}"; do
 	fi
 done
 
-if [[ "$is_help" == false && "$found_read" == false ]]; then
+if [[ "$is_help" == false && "$found_read" == false && "$exec_allowed" == false ]]; then
 	refuse "fant ingen kjent lesekommando (${READ_VERBS[*]}) i '${tokens[*]}'"
 fi
 
-self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 real_bin=""
 IFS=':' read -ra path_entries <<<"$PATH"
 for entry in "${path_entries[@]}"; do
