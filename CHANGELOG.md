@@ -3,6 +3,16 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.21.0]
+
+### Fikset
+- `troubleshoot-safe.sh` tillater nå at `gke-gcloud-auth-plugin` kjører sin
+  interne, lokale `gcloud config config-helper`-kommando. Dette gjør at
+  `kubectl` kan bruke eksisterende GKE-innlogging uten at agenten selv får
+  kjøre kommandoen eller se token-output.
+- La til en guard for `gke-gcloud-auth-plugin`, så autentiseringspluginen bare
+  kan startes som underprosess fra `kubectl`.
+
 ## [0.20.0]
 
 ### Endret

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# PATH-shim som hindrer troubleshoot-agenten i å starte GKE-autentiserings-
+# pluginen direkte. Pluginens output inneholder et access token, men kubectl
+# trenger den som en underprosess for å autentisere lesende API-kall.
+
+set -uo pipefail
+
+refuse() {
+	echo "BLOKKERT av readonly-guard (scripts/readonly-guard/gke-gcloud-auth-plugin):" >&2
+	echo "autentiseringspluginen kan bare startes som underprosess fra kubectl." >&2
+	exit 1
+}
+
+self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+real_kubectl=""
+IFS=':' read -ra path_entries <<<"$PATH"
+for entry in "${path_entries[@]}"; do
+	[[ -z "$entry" ]] && continue
+	resolved="$(cd "$entry" 2>/dev/null && pwd)" || continue
+	[[ "$resolved" == "$self_dir" ]] && continue
+	if [[ -x "$entry/kubectl" ]]; then
+		real_kubectl="$entry/kubectl"
+		break
+	fi
+done
+
+[[ -n "$real_kubectl" ]] || refuse
+parent_executable="$(readlink -f "/proc/$PPID/exe" 2>/dev/null)" || refuse
+[[ "$parent_executable" == "$(readlink -f "$real_kubectl")" ]] || refuse
+
+real_plugin=""
+for entry in "${path_entries[@]}"; do
+	[[ -z "$entry" ]] && continue
+	resolved="$(cd "$entry" 2>/dev/null && pwd)" || continue
+	[[ "$resolved" == "$self_dir" ]] && continue
+	if [[ -x "$entry/gke-gcloud-auth-plugin" ]]; then
+		real_plugin="$entry/gke-gcloud-auth-plugin"
+		break
+	fi
+done
+
+[[ -n "$real_plugin" ]] || refuse
+exec "$real_plugin" "$@"
