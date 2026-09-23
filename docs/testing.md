@@ -76,7 +76,8 @@ python3 scripts/eval_planlegger.py --emit-prompts
 ```
 
 Harnessen forventer at `planlegger` svarer med kort JSON i eval-modus, og sjekker
-om sti, planreview, koder og spørsmål matcher forventet resultat.
+om sti, planreview, koder, spørsmål og eventuell anbefalt delt plan matcher
+forventet resultat.
 
 Testmatrisen (`eval/planlegger-tests.json`) dekker også operasjonsmoduser
 (f.eks. at en sikkerhetstrigger krever planreview selv i `hurtig`-modus via

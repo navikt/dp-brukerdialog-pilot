@@ -31,6 +31,7 @@ Ikke utfør endringer; svar kun med gyldig JSON på én linje med disse feltene:
   "koder": "ja|nei",
   "spørsmål": "ja|nei",
   "dybde_review": "ja|nei",
+  "delt_plan": "ja|nei",
   "notat": "kort forklaring"
 }
 Sett `koder` til `ja` når du i normal drift ville delegert kodearbeidet til koder-agenten, også etter planreview.
@@ -40,6 +41,10 @@ Sett `dybde_review` til `ja` når endringen etter implementering må eskaleres t
 en seksjon eller modul, mer enn 10 berørte filer, routing, serialisering, schema,
 locale, integrasjonspunkter, offentlig kontrakt, høy risiko eller bekymringer fra
 vanlig reviewer.
+Sett `delt_plan` til `ja` når oppgaven bør foreslås delt i flere mindre PR-er
+før implementering. Bare flere filer er ikke nok.
+Når `delt_plan` er `ja`, skal `spørsmål` være `ja`: planlegger må vente på
+brukerens godkjenning av delingen før den implementerer første leveranse.
 Velg "avvist" hvis oppgaven er sikkerhetskritisk eller bør stoppes.
 Hvis oppgaven ber om å logge fødselsnummer, aktør-id, navn, adresse eller tokens i vanlig logg, skal svaret være:
 {"sti":"avvist","planreview":"nei","koder":"nei","spørsmål":"nei","notat":"sensitive data i vanlig logg"}
@@ -47,7 +52,7 @@ Oppgave:
 """
 
 DECISION_FIELDS = ("sti", "planreview", "koder", "spørsmål")
-OPTIONAL_DECISION_FIELDS = ("dybde_review",)
+OPTIONAL_DECISION_FIELDS = ("dybde_review", "delt_plan")
 
 
 def build_prompt(test: dict[str, Any]) -> str:
@@ -71,6 +76,7 @@ def extract_json(text: str) -> dict[str, str] | None:
             "koder": str(parsed.get("koder", "")).strip().lower(),
             "spørsmål": str(parsed.get("spørsmål", "")).strip().lower(),
             "dybde_review": str(parsed.get("dybde_review", "")).strip().lower(),
+            "delt_plan": str(parsed.get("delt_plan", "")).strip().lower(),
             "notat": str(parsed.get("notat", "")).strip(),
         }
 
