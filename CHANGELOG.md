@@ -3,6 +3,13 @@
 Alle nevneverdige endringer i denne pluginen dokumenteres her.
 Format følger løst [Keep a Changelog](https://keepachangelog.com/), versjonsnummer i `plugin/plugin.json`.
 
+## [0.22.0]
+
+### Lagt til
+- `planlegger` vurderer før implementering om en stor oppgave bør deles i
+  mindre PR-er. Ved reelle, selvstendige leveranser foreslår den en kort
+  delplan og implementerer bare første del etter brukerens godkjenning.
+
 ## [0.21.0]
 
 ### Fikset

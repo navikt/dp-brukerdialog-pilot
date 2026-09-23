@@ -110,6 +110,11 @@ Planlegger støtter også operasjonsmoduser:
 - `standard` (default)
 - `trygg` (strengere review/stopp)
 
+Før implementering vurderer den også om oppgaven bør deles i mindre PR-er.
+Den foreslår bare deling når leveransene kan gi verdi, verifiseres eller rulles
+ut hver for seg. Mange filer alene er ikke nok. Etter godkjenning implementerer
+den bare første leveranse i økten.
+
 Og den bruker domain-presets for Nav-typiske oppgaver:
 - `API+Kafka`
 - `DB+migrasjon`

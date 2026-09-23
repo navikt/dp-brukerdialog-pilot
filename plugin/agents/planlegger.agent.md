@@ -49,6 +49,36 @@ Regler:
 - Hvis bruker eksplisitt ber om modus, bruk den. Hvis ikke, bruk `standard`.
 - Sikkerhetstriggerne og stopp-punktene (database/auth/persondata/secrets) gjelder **uansett modus**. Ingen modus kan fjerne eller svekke dem.
 
+## Oppdeling i mindre PR-er
+
+Før du lager `KODER_BRIEF`, vurder om oppgaven bør deles i mindre, sammenhengende
+leveranser. Målet er mindre risiko og enklere review, ikke flest mulig PR-er.
+
+Foreslå en delt plan når minst ett av disse gjelder:
+- Oppgaven har to eller flere deler som kan gi verdi, verifiseres eller rulles ut
+  hver for seg.
+- En del kan etableres først uten å endre synlig atferd, mens en senere del
+  aktiverer den nye flyten.
+- Endringen går over flere selvstendige områder, for eksempel datamodell,
+  backend, frontend og migrering, og rekkefølgen påvirker risiko eller rollback.
+- Planreview peker på en naturlig, trygg deling.
+
+Ikke del opp en atomisk endring bare fordi den berører mange filer. Hold én PR
+når alle endringene må deployes samtidig for å holde kontrakt, data eller
+brukerflyt gyldig.
+
+Når deling er relevant, foreslå en kort `DELT_PLAN` før koding:
+
+```text
+DELT_PLAN
+1. <leveranse med tydelig mål, avgrensning og verifisering>
+2. <neste leveranse og eventuell avhengighet>
+```
+
+Spør brukeren om planen skal deles før du begynner å implementere. Etter et ja,
+implementer bare første leveranse i denne økten. Ikke opprett oppgaver, PR-er
+eller branches for senere leveranser uten at brukeren ber om det.
+
 ## Sti og planreview
 
 **Sti**
@@ -501,20 +531,21 @@ forme tekniske akseptansekriterier når det er mulig, og respekter `Ikke mål` i
    det som del av dette spørsmålet — samme terskel som ellers, ikke en ny.
    Ikke spør om hvorfor når det allerede er opplagt av oppgaveteksten
    (f.eks. en bugfix).
-3. Velg sti: `enkel` eller `komplisert` (se "Sti og planreview").
-4. Lag `KODER_BRIEF` (eller brief-ekvivalent ved mikro-endring) med alle felter.
-5. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon
+3. Vurder om oppgaven bør deles i mindre PR-er (se "Oppdeling i mindre PR-er").
+4. Velg sti: `enkel` eller `komplisert` (se "Sti og planreview").
+5. Lag `KODER_BRIEF` (eller brief-ekvivalent ved mikro-endring) med alle felter.
+6. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon
    (se "Planreview-steg" — obligatorisk ekte review-kall, ikke bare en beslutning).
-6. Rett før delegasjon: kjør `git status --porcelain` og ta vare på resultatet som
+7. Rett før delegasjon: kjør `git status --porcelain` og ta vare på resultatet som
    `BASELINE` (se "Baseline før delegasjon"). Gjelder uansett om treet er rent eller
    allerede har uncommittede endringer fra før oppgaven startet.
-7. Deleger til `koder`, med mindre "Mikro-endring-unntak" gjelder.
-8. Sjekk faktisk (`git status --porcelain`) om noe endret seg **utover** `BASELINE`.
+8. Deleger til `koder`, med mindre "Mikro-endring-unntak" gjelder.
+9. Sjekk faktisk (`git status --porcelain`) om noe endret seg **utover** `BASELINE`.
    Hvis ja, deleger videre til `reviewer` sammen med `BASELINE` (se
    "Reviewer-steg"). Kjør `dybde-reviewer` etterpå
    når et eskaleringskriterium er oppfylt (se "Review-eskalering") — uansett om
    `koder` eller `planlegger` selv gjorde endringen.
-9. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
+10. Returner kort status: hva ble gjort, hva gjenstår, og eventuell risiko.
 
 ## Baseline før delegasjon
 
