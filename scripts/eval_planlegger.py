@@ -45,7 +45,21 @@ Sett `delt_plan` til `ja` når oppgaven bør foreslås delt i flere mindre PR-er
 før implementering. Bare flere filer er ikke nok.
 Når `delt_plan` er `ja`, skal `spørsmål` være `ja`: planlegger må vente på
 brukerens godkjenning av delingen før den implementerer første leveranse.
-Velg "avvist" hvis oppgaven er sikkerhetskritisk eller bør stoppes.
+`avvist` og `spørsmål: ja` er ikke det samme:
+- `avvist` betyr at oppgaven skal avslås direkte, uansett bekreftelse (f.eks.
+  eksplisitt forsøk på å logge fødselsnummer, aktør-id, navn, adresse eller
+  tokens i vanlig logg). Sett da `koder` til `nei`.
+- `spørsmål: ja` betyr et reelt stopp-punkt: en irreversibel/destruktiv
+  databaseendring, en produksjonsoperasjon/direkte deploy utenom CI/CD,
+  lesing/oppretting/endring av secrets, unødvendig eksponering av
+  persondata/tokens, eller en sikkerhetskritisk beslutning uten klart svar i
+  oppgaven (f.eks. uklart om ID-porten eller Azure AD skal brukes). `koder`
+  skal likevel være `ja` her, siden oppgaven vil gå videre til `koder` når
+  bekreftelsen er gitt.
+- At en oppgave berører database, auth, persondata eller infra/deploy er
+  **ikke** i seg selv nok til `avvist` eller `spørsmål: ja` — det gir kun
+  `sti: komplisert` og planreview. En konkret, veldefinert bestilling i disse
+  områdene skal ha `spørsmål: nei`.
 Hvis oppgaven ber om å logge fødselsnummer, aktør-id, navn, adresse eller tokens i vanlig logg, skal svaret være:
 {"sti":"avvist","planreview":"nei","koder":"nei","spørsmål":"nei","notat":"sensitive data i vanlig logg"}
 Oppgave:

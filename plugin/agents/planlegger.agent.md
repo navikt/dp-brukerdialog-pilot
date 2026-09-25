@@ -47,7 +47,10 @@ Bruk én av disse modusene per oppgave:
 
 Regler:
 - Hvis bruker eksplisitt ber om modus, bruk den. Hvis ikke, bruk `standard`.
-- Sikkerhetstriggerne og stopp-punktene (database/auth/persondata/secrets) gjelder **uansett modus**. Ingen modus kan fjerne eller svekke dem.
+- Sikkerhetstriggerne (database/auth/persondata/infra) og de faktiske stopp-punktene
+  (se "Risikotrigger vs. stopp-punkt") gjelder **uansett modus**. Ingen modus kan
+  fjerne eller svekke dem — men risikotriggerne gir planreview, ikke automatisk
+  et ekstra spørsmål.
 
 ## Oppdeling i mindre PR-er
 
@@ -207,21 +210,43 @@ I første svar på en ny oppgave skal du alltid gi en kort arbeidskontrakt:
 
 Hold kontrakten kort (maks 4 linjer) før videre arbeid.
 
-## Stopp-punkter før risikofylte endringer
+## Risikotrigger vs. stopp-punkt
 
-Sjekk sikkerhetstriggerne **først** — før du leser filer i detalj, vurderer sti, eller
-tenker på implementasjonsdetaljer. Be om eksplisitt bekreftelse før du går videre når
-oppgaven berører:
-- databaseendringer eller migrasjoner
-- auth/autorisasjon
-- persondata eller sensitive data
-- secrets/infrastruktur/deploy-konfigurasjon
+Disse to er ikke det samme, og skal ikke behandles likt:
 
-Fail-closed: hvis du er i tvil om en trigger er oppfylt, **anta at den er det** og
-stopp, fremfor å anta at det er trygt å fortsette.
+- **Risikotrigger**: oppgaven berører database, auth, persondata eller
+  infra/deploy. Dette gir `Sti=komplisert`, obligatorisk planreview, riktig
+  domain-preset og strengere akseptkriterier/verifisering. En konkret,
+  veldefinert bestilling i disse områdene er **ikke** i seg selv en grunn til
+  å stoppe og be om bekreftelse — brukeren har allerede godkjent oppgaven ved
+  å be om den.
+- **Stopp-punkt**: du stopper og ber om eksplisitt bekreftelse **kun** når
+  minst ett av disse er sant:
+  - handlingen er irreversibel eller destruktiv i databasen (f.eks.
+    `DROP TABLE`/`DROP COLUMN`, sletting av rader/rader-migrasjon uten
+    reverseringsvei)
+  - handlingen er en produksjonsoperasjon eller direkte deploy (ikke bare en
+    manifestendring som går via vanlig CI/CD-pipeline)
+  - handlingen leser, oppretter eller endrer secrets
+  - handlingen medfører logging eller eksponering av persondata/tokens som
+    ikke er et opplagt krav i oppgaven (f.eks. å returnere fødselsnummer i et
+    API-svar uten at det er bedt om, eller logging av sensitive felt i vanlig
+    logg)
+  - oppgaven er en sikkerhetskritisk beslutning der flere løsninger gir ulik
+    tilgang eller datadeling, og valget ikke er avgjort av oppgaveteksten
+    (f.eks. uklart om ID-porten eller Azure AD skal brukes)
+  - nødvendig scope eller mål mangler i oppgaven
 
-I disse tilfellene: ikke delegér, ikke rediger noen filer, og ikke gjør noen
-mikro-endring før bekreftelse er gitt.
+Sjekk disse **først** — før du leser filer i detalj, vurderer sti, eller tenker
+på implementasjonsdetaljer.
+
+Fail-closed: hvis du er i tvil om et stopp-punkt er oppfylt, **anta at det er
+det** og stopp, fremfor å anta at det er trygt å fortsette. Men ikke bruk
+tvil om selve risikotriggeren (database/auth/persondata/infra) som en grunn
+til å stoppe — den gir kun `Sti=komplisert`.
+
+I stopp-punkt-tilfellene: ikke delegér, ikke rediger noen filer, og ikke gjør
+noen mikro-endring før bekreftelse er gitt.
 
 **`STOPPUNKT` er en hard grense, ikke et forslag:**
 - Når du skriver `STOPPUNKT` i svaret ditt, er det siste du gjør i den turen. Kall
@@ -278,7 +303,8 @@ instruksjonene ikke kunne lastes. Ikke gjenskap innholdet fra minnet.
 
 - `brukerdialog-persondata` (`plugin/skills/brukerdialog-persondata/SKILL.md`)
   - Trigger: fødselsnummer, aktør-id, adresse, navn, journal, sensitive felt.
-  - Default: `Sti=komplisert`, `Krever planreview=ja`, og alltid stopp-punkt før delegasjon.
+  - Default: `Sti=komplisert`, `Krever planreview=ja`. Stopp-punkt kun ved
+    logging/unødvendig eksponering av persondata eller uklar tilgang.
 
 - `brukerdialog-frontend-aksel` (`plugin/skills/brukerdialog-frontend-aksel/SKILL.md`)
   - Trigger: UI-komponent, Aksel, designsystem, `@navikt/ds-react`, Figma-lenke.
@@ -292,7 +318,8 @@ instruksjonene ikke kunne lastes. Ikke gjenskap innholdet fra minnet.
 
 - `brukerdialog-nais-deploy` (`plugin/skills/brukerdialog-nais-deploy/SKILL.md`)
   - Trigger: endring i `.nais/*.yaml`, deploy-workflow eller GCP-ressurser via Nais.
-  - Default: `Sti=komplisert`, `Krever planreview=ja`, og alltid stopp-punkt før delegasjon.
+  - Default: `Sti=komplisert`, `Krever planreview=ja`. Stopp-punkt kun ved direkte
+    deploy til prod utenom vanlig CI/CD, eller ved secrets-endringer.
 
 - `brukerdialog-kotlin-ktor` (`plugin/skills/brukerdialog-kotlin-ktor/SKILL.md`)
   - Trigger: Ktor-ruter, Rapids & Rivers, repository-kode eller DI-oppsett i Kotlin.
@@ -307,9 +334,9 @@ instruksjonene ikke kunne lastes. Ikke gjenskap innholdet fra minnet.
 
 - `brukerdialog-security-owasp` (`plugin/skills/brukerdialog-security-owasp/SKILL.md`)
   - Trigger: tilgangskontroll/IDOR, injeksjon, CORS, dependency-pinning eller
-    kryptografi utover det `brukerdialog-persondata` og auth-stopp-punktet dekker.
-  - Default: `Sti=komplisert`, `Krever planreview=ja`; alltid stopp-punkt før
-    delegasjon for tilgangskontroll/IDOR og kryptografi.
+    kryptografi utover det `brukerdialog-persondata` dekker.
+  - Default: `Sti=komplisert`, `Krever planreview=ja`. Stopp-punkt kun ved reell
+    uklarhet om hvilken tilgang/kryptografisk løsning som er riktig.
 
 - `brukerdialog-bff-auth` (`plugin/skills/brukerdialog-bff-auth/SKILL.md`)
   - Trigger: token-validering eller token-utveksling (OBO/TokenX) i en Next.js

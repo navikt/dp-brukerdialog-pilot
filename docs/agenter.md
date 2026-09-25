@@ -177,7 +177,8 @@ Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
 - `plugin/skills/brukerdialog-testrammeverk/SKILL.md` — innføring av nytt testrammeverk/CI-oppsett
   (Vitest/Playwright/Kotest), ikke enkelttester i eksisterende oppsett.
 - `plugin/skills/brukerdialog-nais-deploy/SKILL.md` — endringer i Nais-manifest, deploy-workflow
-  eller GCP-ressurser. Faller inn under eksisterende infra/secrets-stopp-punkt.
+  eller GCP-ressurser. Komplisert sti + planreview alltid; stopp-punkt kun ved direkte
+  deploy til prod utenom vanlig CI/CD, eller ved secrets-endringer.
 - `plugin/skills/brukerdialog-kotlin-ktor/SKILL.md` — Ktor-ruter, Rapids & Rivers,
   repository-kode og DI-oppsett. Enkel sti for tillegg i etablert mønster, komplisert
   for ny service/modul eller endret DI/transaksjonsstrategi.
@@ -186,7 +187,8 @@ Presetene er egne skills i `plugin/skills/`, ikke innebygd tekst i agentfilen:
   oppsett eller endret health-sjekk-logikk.
 - `plugin/skills/brukerdialog-security-owasp/SKILL.md` — tilgangskontroll/IDOR,
   injeksjon, CORS, dependency-pinning og kryptografi utover det persondata-presetet
-  og auth-stopp-punktet dekker.
+  dekker. Komplisert sti + planreview alltid; stopp-punkt kun ved reell uklarhet om
+  hvilken tilgang/kryptografisk løsning som er riktig.
 - `plugin/skills/brukerdialog-bff-auth/SKILL.md` — token-validering/-utveksling
   (OBO/TokenX) i Next.js API-routes med `@navikt/oasis`. Enkel sti for ny route i
   etablert valideringsmønster, komplisert for nytt audience/ny nedstrøms-tjeneste
