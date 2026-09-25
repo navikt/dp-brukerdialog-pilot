@@ -31,11 +31,13 @@ Oppgaven berører **minst én** av:
 
 - `Sti=komplisert`
 - `Krever planreview=ja`
-- **Alltid stopp-punkt før delegasjon** når oppgaven gjelder tilgangskontroll/IDOR
-  eller kryptografi — dette faller inn under planleggers eksisterende
-  auth/autorisasjon-stopp-punkt. For injeksjon/CORS/supply chain uten en
-  tilgangskontroll-komponent holder det med planreview (ikke nødvendigvis
-  stopp-punkt), men vurder fail-closed hvis usikker.
+
+En konkret bestilling om å legge til eierskapssjekk (IDOR), parameteriserte
+spørringer, CORS-scope eller dependency-pinning er **ikke** i seg selv et
+stopp-punkt — planreview og sjekklisten under dekker det. Stopp og be om
+bekreftelse (se planleggers "Risikotrigger vs. stopp-punkt") kun når det er
+reell uklarhet om hvilken tilgang/kryptografisk løsning som er riktig, ikke
+bare fordi oppgaven berører tilgangskontroll eller kryptografi.
 
 ## Obligatoriske brief-felt (i tillegg til standardfeltene)
 

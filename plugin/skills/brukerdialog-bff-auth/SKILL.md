@@ -29,8 +29,7 @@ Oppgaven nevner **noe av**:
   token-valideringsmønster i samme kodebase (samme audience-type, samme feilhåndtering).
 - **Komplisert, `Krever planreview=ja`**: ny nedstrøms-tjeneste/nytt audience som ikke
   finnes fra før, endring av hvilken token-type som valideres (ID-porten ↔ Azure AD),
-  eller endringer i `accessPolicy` i Nais-manifestet (se også `brukerdialog-nais-deploy`,
-  som alltid krever stopp-punkt).
+  eller endringer i `accessPolicy` i Nais-manifestet (se også `brukerdialog-nais-deploy`).
 
 ## Obligatoriske brief-felt (i tillegg til standardfeltene)
 

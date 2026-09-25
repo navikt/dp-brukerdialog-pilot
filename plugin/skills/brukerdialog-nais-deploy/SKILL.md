@@ -26,9 +26,12 @@ Oppgaven endrer en av:
 
 - `Sti=komplisert`
 - `Krever planreview=ja`
-- **Alltid stopp-punkt før delegasjon** (dette faller allerede inn under
-  "infrastruktur, secrets eller deploy-konfigurasjon" i planleggers
-  "Stopp-punkter før risikofylte endringer" — bruker må bekrefte eksplisitt).
+
+En konkret manifestendring med tydelig scope (f.eks. legge til en navngitt
+`outbound`-regel, øke `replicas` med begrunnelse) er **ikke** i seg selv et
+stopp-punkt. Stopp og be om bekreftelse (se planleggers "Risikotrigger vs.
+stopp-punkt") kun ved direkte deploy til prod utenom vanlig CI/CD-pipeline,
+eller ved endringer som leser/oppretter/endrer secrets.
 
 Feil i denne kategorien påvirker ofte produksjonstilgjengelighet direkte og kan være
 vanskelige å reversere raskt (f.eks. `accessPolicy` som stenger ute en avhengighet, eller

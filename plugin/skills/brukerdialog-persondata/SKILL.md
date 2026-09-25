@@ -21,8 +21,14 @@ Oppgaven nevner fødselsnummer, aktør-id, adresse, navn, journal eller sensitiv
 
 - `Sti=komplisert`
 - `Krever planreview=ja`
-- **Alltid stopp-punkt før delegasjon** (bruker må bekrefte eksplisitt, se planleggers
-  "Stopp-punkter før risikofylte endringer").
+
+En konkret bestilling om å lagre, lese eller behandle persondata på en tydelig
+beskrevet måte er **ikke** i seg selv et stopp-punkt — planreview og
+sjekklisten under dekker det. Stopp og be om bekreftelse (se planleggers
+"Risikotrigger vs. stopp-punkt") kun når oppgaven faktisk medfører logging
+eller unødvendig eksponering av persondata (f.eks. å returnere fødselsnummer
+i et API-svar uten at oppgaven ber om det), eller når det er uklart hvem som
+skal ha tilgang.
 
 ## Obligatoriske brief-felt (i tillegg til standardfeltene)
 

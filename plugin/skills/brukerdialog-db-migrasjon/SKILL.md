@@ -21,6 +21,12 @@ Oppgaven nevner kolonne, tabell, migrasjon, backfill eller Flyway.
 - `Sti=komplisert`
 - `Krever planreview=ja`
 
+En additiv migrasjon (ny kolonne/tabell) med tydelig scope er **ikke** i seg
+selv et stopp-punkt. Stopp og be om bekreftelse (se planleggers
+"Risikotrigger vs. stopp-punkt") ved destruktive/irreversible endringer
+(`DROP TABLE`, `DROP COLUMN`, sletting av rader) uten at det er eksplisitt
+bedt om og begrunnet i oppgaven.
+
 Skjemaendringer er default komplisert fordi feil her er vanskelig å rulle tilbake og kan
 påvirke andre konsumenter av samme tabell.
 
