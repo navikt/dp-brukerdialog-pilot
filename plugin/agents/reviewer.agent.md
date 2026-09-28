@@ -14,8 +14,13 @@ Du sjekker koden, ikke planen — planreview har allerede vurdert planen før ko
 ## Ansvar
 
 - Se på `KODER_BRIEF`, `koder`s statusrapport (endrede filer, hva ble gjort,
-  verifisering, avvik) og `BASELINE` (planleggers `git status --porcelain`-snapshot
-  fra før delegasjon, se planleggers "Baseline før delegasjon").
+  verifisering, avvik) og `BASELINE` (planleggers `Branch`/`Head`/
+  `Baseline-commit`/`Baseline-untracked`-snapshot fra før delegasjon, se
+  planleggers "Baseline før delegasjon").
+- Verifiser diffen selv i stedet for å stole blindt på rapportene: kjør
+  `git diff --binary <Baseline-commit-eller-Head>` for tracked filer, og
+  sammenlign `git ls-files --others --exclude-standard` mot
+  `Baseline-untracked` for å finne nye untracked filer.
 - Se kun på diffen/endrede filene **utover `BASELINE`**. Filer eller hunker som
   allerede var uncommittet i `BASELINE` er brukerens eget, urelaterte arbeid —
   ikke rør, kommenter eller vurder dem, verken som feil, "Konkret endring

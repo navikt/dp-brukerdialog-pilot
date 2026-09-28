@@ -166,11 +166,17 @@ Dette:
   `--keep-sessions` for å beholde dem ved feilsøking)
 
 Testene defineres i `eval/integration-tests.json` med `fixture` (filer som
-seedes), `prompt` (det ekte oppdraget) og
-`expect_contains`/`expect_no_commit`/`expect_no_file_changes`/`expect_output_contains`/
-`expect_planreview_reported`.
+committes som repoets startpunkt), `dirty` (filer som overskrives rett etter
+commit, uten å committes — simulerer brukerens egne, uncommittede endringer i
+en allerede tracket fil), `untracked` (helt nye, aldri committede filer —
+simulerer brukerens egen untracked arbeid), `prompt` (det ekte oppdraget) og
+`expect_contains`/`expect_unchanged`/`expect_no_commit`/`expect_no_file_changes`/
+`expect_output_contains`/`expect_planreview_reported`. `expect_unchanged`
+sjekker at en fil forblir byte-for-byte lik det oppgitte innholdet — brukes for
+å bevise at agentkjeden aldri rører brukerens eget, urelaterte arbeid som
+`BASELINE` skal skjerme.
 
-Suiten dekker fire reelle scenarioer:
+Suiten dekker disse reelle scenarioene:
 - `smoke` (id 1): enkel sti, direkte filendring uten planreview.
 - `policy` (id 2): komplisert sti (offentlig API-kontraktendring) — verifiserer
   at oppgaven fortsatt fullføres korrekt end-to-end selv når den krever et
@@ -189,6 +195,25 @@ Suiten dekker fire reelle scenarioer:
 - `smoke` (id 4): verifiserer at reviewer-steget faktisk trigges i den ekte
   flyten, ved å sjekke at planleggers sluttsvar inneholder den obligatoriske
   `Reviewer: <status>`-linjen.
+- `policy` (id 5): baseline-scenario — brukeren har allerede en uncommittet,
+  ufullstendig endring i `src/A.kt` (`dirty`) før oppgaven starter. Oppgaven
+  ber om en endring i `src/B.kt`. Verifiserer at `src/A.kt` forblir helt
+  uendret (`expect_unchanged`) mens `src/B.kt` får den nye endringen.
+- `policy` (id 6): baseline-scenario, samme fil — brukeren har allerede endret
+  en linje i `src/Config.kt` (`dirty`) før oppgaven ber om en tilleggslinje
+  nederst i samme fil. Verifiserer at begge endringene består i sluttresultatet
+  (brukerens hunk overskrives ikke av agentens).
+- `policy` (id 7): baseline-scenario, untracked fil som allerede fantes —
+  brukeren har en untracked `notater.txt` (`untracked`) før oppgaven ber om en
+  tilleggslinje i akkurat den filen. Dette er den kjente begrensningen i
+  baseline-mekanismen (se docs/agenter.md): siden filen fantes i
+  `Baseline-untracked` fra før, kan ikke stilistesjekken alene bevise at
+  *innholdet* endret seg. Testen verifiserer at selve endringen likevel utføres
+  korrekt (`expect_contains`), ikke at reviewer-steget nødvendigvis trigges.
+- `policy` (id 8): ingen endring utover baseline — oppgaven ber om noe som
+  allerede er oppfylt (teksten finnes fra før). Verifiserer at `planlegger`
+  korrekt rapporterer `Reviewer: hoppet over (ingen filendringer)` og ikke
+  gjør noen endringer.
 
 > Denne harnessen tar vesentlig lengre tid enn de andre (ekte agentkjøring med
 > verktøy), så den er ikke ment å kjøres med høy `--repeats` som de andre.

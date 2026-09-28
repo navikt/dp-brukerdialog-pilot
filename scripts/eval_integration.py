@@ -8,9 +8,19 @@ for. This is the only harness that exercises real tool use (file edits, git),
 so it catches things the simulated contract tests structurally cannot.
 
 Each test case describes:
-- fixture: files to seed in a throwaway git repo
+- fixture: files to seed in a throwaway git repo (committed as the initial state)
+- dirty: files to overwrite AFTER the commit, WITHOUT committing -- simulates
+  the user's own pre-existing uncommitted edits to an already-tracked file
+  (used for testing the content-based BASELINE mechanism: see
+  "Baseline før delegasjon" in planlegger.agent.md)
+- untracked: brand new files that are never committed -- simulates the user's
+  own untracked work-in-progress present before the agent starts
 - prompt: the real task given to planlegger
 - expect_contains: substrings that must appear in named files afterwards
+- expect_unchanged: exact file content (path -> full expected content) that
+  must remain byte-for-byte identical afterwards -- used to prove the agent
+  chain never touched the user's own dirty/untracked work that BASELINE was
+  supposed to shield
 - expect_no_commit: if true, assert no new commit was made (since the prompt
   doesn't ask for one, and agent policy says no auto-commit unless asked)
 - expect_no_file_changes: if true, assert the working tree is completely
@@ -55,7 +65,12 @@ def run_git(args: list[str], cwd: Path) -> str:
     return completed.stdout.strip()
 
 
-def setup_scratch_repo(fixture: dict[str, str]) -> Path:
+def setup_scratch_repo(fixture: dict[str, str], dirty: dict[str, str] | None = None, untracked: dict[str, str] | None = None) -> Path:
+    """Set up a scratch repo. `fixture` files are committed as the repo's initial
+    state. `dirty` overwrites already-committed files afterwards WITHOUT
+    committing (simulates the user's own uncommitted edits before the agent
+    starts). `untracked` adds brand new, never-committed files (simulates the
+    user's own untracked work-in-progress)."""
     scratch = Path(tempfile.mkdtemp(prefix="dp-brukerdialog-pilot-eval-"))
     run_git(["init", "-q"], scratch)
     run_git(["config", "user.email", "eval@example.com"], scratch)
@@ -66,6 +81,14 @@ def setup_scratch_repo(fixture: dict[str, str]) -> Path:
         target.write_text(content, encoding="utf-8")
     run_git(["add", "-A"], scratch)
     run_git(["commit", "-q", "-m", "init"], scratch)
+    for rel_path, content in (dirty or {}).items():
+        target = scratch / rel_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+    for rel_path, content in (untracked or {}).items():
+        target = scratch / rel_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
     return scratch
 
 
@@ -114,6 +137,21 @@ def check_test(test: dict[str, Any], scratch: Path, output: str = "") -> list[st
         for needle in needles:
             if needle not in content:
                 failures.append(f"{rel_path} mangler forventet innhold: {needle!r}")
+
+    for rel_path, expected_content in test.get("expect_unchanged", {}).items():
+        # Brukes for filer som allerede var endret av brukeren (dirty/untracked)
+        # før agenten startet: verifiserer at agentkjeden ikke rørte brukerens
+        # eget, urelaterte arbeid ved en feiltakelse.
+        target = scratch / rel_path
+        if not target.exists():
+            failures.append(f"{rel_path} finnes ikke (skulle vært uendret brukerinnhold)")
+            continue
+        actual = target.read_text(encoding="utf-8")
+        if actual != expected_content:
+            failures.append(
+                f"{rel_path} ble endret selv om det skulle forbli brukerens uendrede "
+                f"innhold: forventet {expected_content!r}, fant {actual!r}"
+            )
 
     if test.get("expect_no_commit", True):
         commit_count = run_git(["rev-list", "--count", "HEAD"], scratch)
@@ -213,8 +251,10 @@ def main() -> int:
         test_id = int(test["id"])
         prompt = str(test["prompt"])
         fixture = dict(test.get("fixture", {}))
+        dirty = dict(test.get("dirty", {}))
+        untracked = dict(test.get("untracked", {}))
 
-        scratch = setup_scratch_repo(fixture)
+        scratch = setup_scratch_repo(fixture, dirty=dirty, untracked=untracked)
         try:
             ok, output = run_real_task(args.copilot_bin, agent, prompt, scratch, args.timeout, args.keep_sessions)
             if not ok:
