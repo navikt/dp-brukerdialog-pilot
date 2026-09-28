@@ -73,6 +73,50 @@ du overstyre en subagents modell, er `/subagents` mekanismen for det, ikke
 Se [docs/installasjon.md](./installasjon.md) for installasjon og hvordan du
 oppdaterer etter endringer.
 
+## Baseline: hvordan agentkjeden skiller egne endringer fra brukerens
+
+Før `planlegger` delegerer til `koder`, tar den et innholdsbasert snapshot
+(`BASELINE`) av arbeidstreet: gjeldende branch, `HEAD`-sha, en flytende
+`git stash create`-commit som representerer tracked filers innhold, og en
+stiliste over untracked filer. Dette skjer uansett om treet er rent eller
+allerede har brukerens egne, uncommittede endringer.
+
+Grunnen til at `git status --porcelain` alene ikke er godt nok: den viser bare
+*hvilke filer* som er endret, ikke innholdet. Har brukeren allerede endret en
+fil før oppgaven starter, og `koder` endrer samme fil (i en annen del av den),
+kan ikke `git status` skille de to endringene fra hverandre. Med
+`Baseline-commit` kan `reviewer` og `dybde-reviewer` selv kjøre
+`git diff --binary <Baseline-commit>` og se nøyaktig hva som er lagt til
+utover baseline, uavhengig av hva `koder` rapporterer i prosa.
+
+Kjent begrensning: mekanismen sammenligner kun *stier* for untracked filer, ikke
+innhold. Hvis brukeren allerede hadde en untracked fil før oppgaven, og `koder`
+kun endrer *innholdet* i den samme filen (uten å opprette en ny), fanger ikke
+baseline-sjekken opp den endringen som "utover baseline". Dette er en bevisst,
+akseptert forenkling: full innholdsbackup av untracked filer i selve
+agentmekanismen ville krevd en flerlinjers kopieringsløkke som er skjørt for en
+agent å gjenskape presist fra prosa-instruksjoner hver gang, mot en svært
+sjelden situasjon. Nye untracked filer og alle endringer i tracked filer dekkes
+fullt ut.
+
+`scripts/capture-worktree-baseline.py` og `scripts/diff-from-baseline.py`
+implementerer samme mekanisme (inkludert full innholdsbackup av untracked
+filer) som et uavhengig verifiseringsverktøy for eval-harnessen. Disse
+scriptene shippes **ikke** med pluginen (se "Hvorfor scripts ikke kan brukes av
+agentene selv" under) og er ikke noe agentene kaller i produksjon — agentene
+utfører mekanismen som inline bash-kommandoer de kjører selv, se
+"Baseline før delegasjon" i `planlegger.agent.md`.
+
+### Hvorfor scripts ikke kan brukes av agentene selv
+
+Pluginen distribuerer kun `agents/` og `skills/` (se `plugin/plugin.json` og
+`scripts/validate_plugin_schema.py`). En agent som kjører i et vilkårlig
+target-repo kan derfor ikke avhenge av at en scriptfil fra denne
+plugin-kildereponen er tilgjengelig på disk. `git stash create` og
+`git ls-files --others --exclude-standard` er trygge, deterministiske
+enkeltkommandoer som ikke krever noen ekstern fil, og er derfor det agentene
+faktisk bruker.
+
 ## Dybde-reviewer
 
 `dybde-reviewer` er en intern, read-only kontroll etter den vanlige

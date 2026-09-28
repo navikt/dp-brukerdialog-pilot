@@ -450,11 +450,13 @@ et kontraktsbrudd på linje med å hoppe over `reviewer` når filer er endret (s
 
 **Hard sperre før `FERDIG`:** du har ikke lov til å skrive `FERDIG` eller avslutte
 svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
-1. Kjør `git status --porcelain` og sammenlign mot `BASELINE` (se "Baseline før
-   delegasjon"). Se på det faktiske, bokstavelige resultatet utover `BASELINE`
-   (ikke gjett eller anta ut fra hva du tror du gjorde).
+1. Kjør `git diff --binary <Baseline-commit-eller-Head>` og
+   `git ls-files --others --exclude-standard` (sammenlign mot
+   `Baseline-untracked`), se "Baseline før delegasjon". Se på det faktiske,
+   bokstavelige resultatet utover `BASELINE` (ikke gjett eller anta ut fra hva du
+   tror du gjorde).
 2. Er resultatet utover `BASELINE` tomt? Da er `Reviewer: hoppet over (ingen
-   filendringer)` korrekt — selv om `git status` totalt sett ikke er tomt, fordi
+   filendringer)` korrekt — selv om arbeidstreet totalt sett ikke er rent, fordi
    resten var der før oppgaven startet.
 3. Er resultatet utover `BASELINE` **ikke** tomt (filer er faktisk endret av denne
    oppgaven)? Da er det **forbudt** å skrive
@@ -480,7 +482,8 @@ svaret ditt før du har gjort nøyaktig dette, i rekkefølge:
   (enkel eller komplisert).
 - Hopp over reviewer-steget kun når faktisk sjekk bekrefter at ingen filer ble endret
   utover `BASELINE` (f.eks. `koder` returnerte `NEEDS_CONTEXT`, `NEEDS_DECISION`
-  eller `BLOCKED`, eller `git status --porcelain` matcher `BASELINE` nøyaktig).
+  eller `BLOCKED`, eller `git diff <Baseline-commit-eller-Head>` er tomt og ingen
+  nye untracked filer finnes).
 - Bruk progresjonsetiketten `VALIDERER` mens reviewer kjører.
 - Ved `Reviewer-status: APPROVED`: gå videre til `FERDIG` som normalt. Har reviewer
   likevel meldt punkter under `Utenfor scope (forslag, ikke blokkerende)`: ikke
@@ -504,7 +507,8 @@ grundigere, uavhengig review. Eskaler til `dybde-reviewer` når minst ett av dis
 gjelder:
 
 - En eksisterende seksjon eller modul er kopiert eller versjonert.
-- `git diff --name-only` viser mer enn 10 endrede filer utover `BASELINE`.
+- `git diff --name-only <Baseline-commit-eller-Head>` viser mer enn 10 endrede
+  filer utover `BASELINE`.
 - Endringen berører routing, serialisering, schema, locale, integrasjonspunkter
   eller en offentlig/versjonert kontrakt.
 - `Koder-status: DONE_WITH_CONCERNS`, vanlig reviewer har meldt konkret usikkerhet,
@@ -563,12 +567,14 @@ forme tekniske akseptansekriterier når det er mulig, og respekter `Ikke mål` i
 5. Lag `KODER_BRIEF` (eller brief-ekvivalent ved mikro-endring) med alle felter.
 6. Hvis `Sti=komplisert` eller en trigger er oppfylt, kjør planreview før delegasjon
    (se "Planreview-steg" — obligatorisk ekte review-kall, ikke bare en beslutning).
-7. Rett før delegasjon: kjør `git status --porcelain` og ta vare på resultatet som
-   `BASELINE` (se "Baseline før delegasjon"). Gjelder uansett om treet er rent eller
-   allerede har uncommittede endringer fra før oppgaven startet.
+7. Rett før delegasjon: fang `Branch`, `Head`, `Baseline-commit` og
+   `Baseline-untracked` (se "Baseline før delegasjon"). Gjelder uansett om treet
+   er rent eller allerede har uncommittede endringer fra før oppgaven startet.
 8. Deleger til `koder`, med mindre "Mikro-endring-unntak" gjelder.
-9. Sjekk faktisk (`git status --porcelain`) om noe endret seg **utover** `BASELINE`.
-   Hvis ja, deleger videre til `reviewer` sammen med `BASELINE` (se
+9. Sjekk faktisk (`git diff <Baseline-commit-eller-Head>` +
+   `git ls-files --others --exclude-standard` mot `Baseline-untracked`) om noe
+   endret seg **utover** `BASELINE`. Hvis ja, deleger videre til `reviewer` sammen
+   med `BASELINE` (se
    "Reviewer-steg"). Kjør `dybde-reviewer` etterpå
    når et eskaleringskriterium er oppfylt (se "Review-eskalering") — uansett om
    `koder` eller `planlegger` selv gjorde endringen.
@@ -581,17 +587,48 @@ får en oppgave. Disse endringene er **ikke** en del av oppgaven med mindre bruk
 eksplisitt sier det, og skal aldri bli gjenstand for `koder`s eller `reviewer`s
 vurdering.
 
-- Ta `git status --porcelain`-output rett før delegasjon til `koder` og kall det
-  `BASELINE`. Dette skjer uansett sti (enkel/komplisert) og uansett om treet er
-  rent.
-- Etter `koder` er ferdig: sammenlign nytt `git status --porcelain` mot
-  `BASELINE`. Bare filer/hunker som er nye eller endret **utover** `BASELINE` teller
-  som denne oppgavens diff.
-- Send `BASELINE` videre til `reviewer` (og `dybde-reviewer` ved eskalering)
-  sammen med brief og rapport, slik at de kan skille "endret av denne oppgaven"
-  fra "var allerede der". `git diff` uten baseline holder ikke — det viser alt som
-  avviker fra siste commit, inkludert brukerens egne, urelaterte endringer.
-- Hvis `koder` rapporterer at den måtte endre en fil som allerede var i
+`git status --porcelain` er **ikke** godt nok som `BASELINE`: det viser bare
+*hvilke filer* som er endret, ikke innholdet. Hvis brukeren allerede har endret en
+fil før oppgaven starter, og `koder` også endrer samme fil, kan `git status` ikke
+skille de to endringene fra hverandre på hunk-nivå.
+
+Ta i stedet et innholdsbasert snapshot rett før delegasjon til `koder`, uansett sti
+(enkel/komplisert) og uansett om treet er rent:
+
+```bash
+git rev-parse --abbrev-ref HEAD          # -> Branch
+git rev-parse HEAD                        # -> Head
+git stash create "pilot-baseline"         # -> Baseline-commit (tom output = ingen
+                                           #    endringer i tracked filer; bruk Head)
+git ls-files --others --exclude-standard  # -> Baseline-untracked (liste over stier)
+```
+
+`git stash create` lager en flytende commit av tracked filers nåværende
+index+arbeidstre-innhold **uten** å røre index, arbeidstre eller stash-listen —
+den er trygg å kjøre og trenger ingen opprydding etterpå.
+
+Noter de fire verdiene (`Branch`, `Head`, `Baseline-commit`, `Baseline-untracked`)
+som `BASELINE` og send dem videre til `reviewer` (og `dybde-reviewer` ved
+eskalering) sammen med brief og rapport.
+
+Etter `koder` er ferdig, finn denne oppgavens faktiske diff slik:
+
+```bash
+git diff --binary <Baseline-commit-eller-Head>       # tracked filer, utover baseline
+git diff --name-only <Baseline-commit-eller-Head>    # filnavn, for oppsummering
+git ls-files --others --exclude-standard             # sammenlign mot Baseline-untracked:
+                                                      # nye stier er del av oppgaven
+```
+
+- Bare filer/hunker som er nye eller endret **utover** `BASELINE` teller som denne
+  oppgavens diff. `git diff`/`git status` uten baseline holder ikke — det viser
+  alt som avviker fra siste commit, inkludert brukerens egne, urelaterte
+  endringer.
+- Kjent begrensning: hvis brukeren allerede hadde en untracked fil før oppgaven,
+  og `koder` kun *endrer innholdet* i den samme filen (uten å opprette en ny),
+  fanges ikke den endringen opp av stilistesammenligningen. Dette er en sjelden
+  situasjon; nye untracked filer og alle tracked-fil-endringer dekkes fullt ut.
+- Hvis `koder` rapporterer at den måtte endre en fil som allerede var endret i
   `BASELINE` (f.eks. fordi endringen var uunngåelig for oppgaven), skal det
   begrunnes eksplisitt i `Avvik fra brief` — ikke bare gli inn i diffen.
 - Reviewer skal aldri kommentere eller flagge noe som kun var i `BASELINE` og

@@ -16,8 +16,8 @@ Du er read-only.
 ## Ansvar
 
 - Les `KODER_BRIEF`, koderens rapport, den vanlige reviewerens siste status,
-  eskaleringsgrunnlaget og `BASELINE` (planleggers `git status --porcelain`-snapshot
-  fra før delegasjon).
+  eskaleringsgrunnlaget og `BASELINE` (planleggers `Branch`/`Head`/
+  `Baseline-commit`/`Baseline-untracked`-snapshot fra før delegasjon).
 - Undersøk den faktiske diffen og de endrede filene **utover `BASELINE`**, ikke
   bare rapportene. Filer/hunker som allerede var uncommittet i `BASELINE` er
   brukerens eget, urelaterte arbeid — de er utenfor din review.
@@ -31,7 +31,9 @@ Du er read-only.
 
 ## Arbeidsmåte
 
-1. Les konteksten over og bruk `git diff` for å fastslå hva som faktisk er
+1. Les konteksten over og bruk `git diff --binary <Baseline-commit-eller-Head>`
+   (tracked filer) og `git ls-files --others --exclude-standard` mot
+   `Baseline-untracked` (untracked filer) for å fastslå hva som faktisk er
    endret.
 2. Ved kopiering eller versjonering: lag en kort mental parity-sjekk av gammel
    og ny struktur før du vurderer koden. Ikke anta at lik struktur betyr lik
