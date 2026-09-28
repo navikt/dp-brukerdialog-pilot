@@ -54,6 +54,7 @@ from eval_common import (
     require_copilot_bin,
     resolve_agent,
     resolve_tests_path,
+    run_parallel,
     select_tests,
 )
 
@@ -228,6 +229,14 @@ def main() -> int:
         action="store_true",
         help="Don't delete the scratch git repo after each run (default: delete); useful for debugging",
     )
+    parser.add_argument(
+        "--parallel",
+        type=int,
+        default=1,
+        help="Run this many test cases concurrently (default: 1, sequential). "
+        "Each test case is an independent scratch repo/session, so this is safe; "
+        "it mainly cuts wall-clock time since each real agent run can take minutes.",
+    )
     args = parser.parse_args()
 
     if not args.run:
@@ -244,10 +253,9 @@ def main() -> int:
         return 1
 
     agent = resolve_agent(args.agent, plugin_name)
-    passed = 0
-    failed = 0
 
-    for test in tests:
+    def run_one(test: dict[str, Any]) -> tuple[int, bool, str, str | None]:
+        """Returns (test_id, passed, message, kept_scratch_path_or_None)."""
         test_id = int(test["id"])
         prompt = str(test["prompt"])
         fixture = dict(test.get("fixture", {}))
@@ -255,25 +263,40 @@ def main() -> int:
         untracked = dict(test.get("untracked", {}))
 
         scratch = setup_scratch_repo(fixture, dirty=dirty, untracked=untracked)
+        kept_path = str(scratch) if args.keep_scratch else None
         try:
             ok, output = run_real_task(args.copilot_bin, agent, prompt, scratch, args.timeout, args.keep_sessions)
             if not ok:
-                print(f"[FAIL ] {test_id}: copilot-kjøring feilet: {output[:300]}")
-                failed += 1
-                continue
+                return test_id, False, f"copilot-kjøring feilet: {output[:300]}", kept_path
 
             failures = check_test(test, scratch, output)
             if failures:
-                print(f"[FAIL ] {test_id}: {'; '.join(failures)}")
-                failed += 1
-            else:
-                print(f"[PASS ] {test_id}: scratch-repo matchet forventet resultat")
-                passed += 1
+                return test_id, False, "; ".join(failures), kept_path
+            return test_id, True, "scratch-repo matchet forventet resultat", kept_path
         finally:
-            if not args.keep_scratch:
-                shutil.rmtree(scratch, ignore_errors=True)
+            if args.keep_scratch:
+                pass  # kept path reported below, directory not removed
             else:
-                print(f"  scratch-repo beholdt: {scratch}")
+                shutil.rmtree(scratch, ignore_errors=True)
+
+    def on_progress(done: int, total: int, test: dict[str, Any], result: tuple[int, bool, str, str | None]) -> None:
+        test_id, passed, message, kept_path = result
+        status_label = "PASS " if passed else "FAIL "
+        print(f"  ({done}/{total}) [{status_label}] {test_id}: {message}")
+        if kept_path:
+            print(f"    scratch-repo beholdt: {kept_path}")
+
+    results = run_parallel(tests, run_one, args.parallel, on_progress=on_progress)
+    results.sort(key=lambda r: r[0])
+
+    passed = sum(1 for _, ok, _, _ in results if ok)
+    failed = len(results) - passed
+
+    print()
+    for test_id, ok, message, kept_path in results:
+        print(f"[{'PASS ' if ok else 'FAIL '}] {test_id}: {message}")
+        if kept_path:
+            print(f"  scratch-repo beholdt: {kept_path}")
 
     print(f"\nSummary: {passed} passed, {failed} failed")
     return 0 if failed == 0 else 1

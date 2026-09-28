@@ -19,6 +19,7 @@ from eval_common import (  # noqa: E402
     resolve_agent,
     resolve_tests_path,
     run_copilot,
+    run_parallel,
     select_tests,
 )
 
@@ -144,6 +145,14 @@ def main() -> int:
         action="store_true",
         help="Don't delete the local copilot sessions created by each run (default: delete)",
     )
+    parser.add_argument(
+        "--parallel",
+        type=int,
+        default=1,
+        help="Run this many test cases concurrently (default: 1, sequential). "
+        "Test cases are independent copilot invocations, so this is safe; it "
+        "mainly cuts wall-clock time for large --repeats runs.",
+    )
     parser.add_argument("--suite", choices=("all", "smoke", "policy"), default="all", help="Test suite selector")
     args = parser.parse_args()
 
@@ -169,8 +178,7 @@ def main() -> int:
 
     agent = resolve_agent(args.agent, plugin_name)
 
-    results: list[EvalResult] = []
-    for test in tests:
+    def run_one(test: dict[str, Any]) -> EvalResult:
         test_id = int(test["id"])
         prompt = build_prompt(test)
         expected = {k: str(v) for k, v in test["expected"].items()}
@@ -196,7 +204,14 @@ def main() -> int:
             status = "error"
             notes = str(error)
 
-        results.append(EvalResult(test_id=test_id, status=status, notes=notes, expected=expected, actual=actual))
+        return EvalResult(test_id=test_id, status=status, notes=notes, expected=expected, actual=actual)
+
+    def on_progress(done: int, total: int, test: dict[str, Any], result: EvalResult) -> None:
+        if not args.json:
+            print(f"  ({done}/{total}) [{result.status.upper():5}] {result.test_id}: {result.notes}", file=sys.stderr)
+
+    results = run_parallel(tests, run_one, args.parallel, on_progress=on_progress)
+    results.sort(key=lambda r: r.test_id)
 
     print_report(results, args.suite, args.repeats, args.json)
     failed = sum(1 for r in results if r.status != "pass")
