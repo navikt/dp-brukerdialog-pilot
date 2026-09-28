@@ -9,19 +9,29 @@ miss the other scripts.
 """
 from __future__ import annotations
 
+import concurrent.futures
 import json
 import shutil
 import sqlite3
 import subprocess
 import sys
+import threading
 import uuid
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable, TypeVar
 
 SESSION_STORE_DB = Path.home() / ".copilot" / "session-store.db"
 SESSION_STATE_DIR = Path.home() / ".copilot" / "session-state"
+
+# sqlite3-tilkoblinger er ikke delt på tvers av tråder; ett globalt lock er nok
+# siden delete_eval_session bare gjør en kort transaksjon per kall og trygghet
+# er viktigere enn gjennomstrømning her.
+_SESSION_DB_LOCK = threading.Lock()
+
+T = TypeVar("T")
+R = TypeVar("R")
 
 # Child tables keyed by session_id that must be cleaned up alongside a
 # deleted session row, to avoid orphaned data in session-store.db.
@@ -45,14 +55,15 @@ def delete_eval_session(session_id: str) -> None:
     """
     try:
         if SESSION_STORE_DB.exists():
-            con = sqlite3.connect(SESSION_STORE_DB, timeout=5)
-            try:
-                with con:
-                    for table in _SESSION_CHILD_TABLES:
-                        con.execute(f"DELETE FROM {table} WHERE session_id = ?", (session_id,))
-                    con.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
-            finally:
-                con.close()
+            with _SESSION_DB_LOCK:
+                con = sqlite3.connect(SESSION_STORE_DB, timeout=5)
+                try:
+                    with con:
+                        for table in _SESSION_CHILD_TABLES:
+                            con.execute(f"DELETE FROM {table} WHERE session_id = ?", (session_id,))
+                        con.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
+                finally:
+                    con.close()
     except sqlite3.Error:
         pass
     session_dir = SESSION_STATE_DIR / session_id
@@ -102,6 +113,53 @@ def require_copilot_bin(copilot_bin: str) -> bool:
         print(f"error: {copilot_bin!r} not found in PATH", file=sys.stderr)
         return False
     return True
+
+
+def run_parallel(
+    items: list[T],
+    worker: Callable[[T], R],
+    max_workers: int,
+    on_progress: Callable[[int, int, T, R], None] | None = None,
+) -> list[R]:
+    """Run `worker(item)` for each item concurrently, up to `max_workers` at once.
+
+    Each eval test case is an independent `copilot` subprocess invocation with
+    its own scratch dir/session, so there's no shared state between them --
+    safe to parallelize. Returns results in the SAME ORDER as `items` (not
+    completion order), so callers can print a deterministic, ordered report.
+
+    `on_progress`, if given, is called as each item finishes (in completion
+    order, which may differ from input order) with
+    (completed_count, total_count, item, result) -- used to print a live
+    progress line instead of going silent until every item is done.
+
+    `max_workers=1` runs strictly sequentially (same behaviour/order as a
+    plain for-loop), which is the default so existing callers are unaffected
+    unless they opt in via --parallel.
+    """
+    if max_workers <= 1:
+        results: list[R] = []
+        for index, item in enumerate(items):
+            result = worker(item)
+            results.append(result)
+            if on_progress:
+                on_progress(index + 1, len(items), item, result)
+        return results
+
+    results = [None] * len(items)  # type: ignore[list-item]
+    completed = 0
+    completed_lock = threading.Lock()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_index = {executor.submit(worker, item): index for index, item in enumerate(items)}
+        for future in concurrent.futures.as_completed(future_to_index):
+            index = future_to_index[future]
+            results[index] = future.result()
+            if on_progress:
+                with completed_lock:
+                    completed += 1
+                    current = completed
+                on_progress(current, len(items), items[index], results[index])
+    return results
 
 
 def run_copilot(copilot_bin: str, agent: str, prompt: str, keep_session: bool = False) -> str:

@@ -79,6 +79,23 @@ Harnessen forventer at `planlegger` svarer med kort JSON i eval-modus, og sjekke
 om sti, planreview, koder, spørsmål og eventuell anbefalt delt plan matcher
 forventet resultat.
 
+### Parallell kjøring
+
+Både `eval_planlegger.py` og `eval_integration.py` støtter `--parallel N` for å
+kjøre flere testtilfeller samtidig i stedet for ett ekte `copilot`-kall om
+gangen. Hver test er uavhengig (egen prompt, egen session, egen scratch-repo
+for `eval_integration.py`), så parallellisering endrer ikke resultatet, bare
+hvor lang tid en full suite tar:
+
+```bash
+python3 scripts/eval_planlegger.py --run --suite policy --repeats 5 --parallel 6
+python3 scripts/eval_integration.py --run --parallel 4
+```
+
+Standard er `--parallel 1` (sekvensielt, som før). Fremdrift skrives fortløpende
+i fullføringsrekkefølge, mens sluttrapporten alltid sorteres på test-id for å
+holde den deterministisk uavhengig av `--parallel`-verdi.
+
 Testmatrisen (`eval/planlegger-tests.json`) dekker også operasjonsmoduser
 (f.eks. at en sikkerhetstrigger krever planreview selv i `hurtig`-modus via
 et `modus`-felt på testen) og domain-presets (`API+Kafka`, `DB+migrasjon`).
